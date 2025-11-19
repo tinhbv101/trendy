@@ -27,7 +27,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/trends", "/trends/**", "/register", 
-                               "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                               "/css/**", "/js/**", "/images/**", "/uploads/**", 
+                               "/logo.png", "/favicon.ico", "/*.png", "/*.jpg", "/*.ico").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")

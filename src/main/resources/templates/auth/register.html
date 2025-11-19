@@ -11,9 +11,12 @@
             <div class="col-md-6">
                 <div class="card shadow">
                     <div class="card-body p-5">
-                        <h2 class="text-center mb-4">
-                            <i class="bi bi-person-plus"></i> Create Account
-                        </h2>
+                        <div class="text-center mb-4">
+                            <img th:src="@{/logo.png}" alt="Trendy Logo" height="80" class="mb-3" style="border-radius: 16px;">
+                            <h2>
+                                <i class="bi bi-person-plus"></i> Create Account
+                            </h2>
+                        </div>
 
                         <form th:action="@{/register}" th:object="${registerForm}" method="post">
                             <div class="mb-3">
