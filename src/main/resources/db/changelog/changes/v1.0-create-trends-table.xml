@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2" author="trendai">
+        <comment>Create trends table</comment>
+        
+        <createTable tableName="trends">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="trend_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="prompt_template" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(50)"/>
+            <column name="max_input_images" type="INT" defaultValue="1"/>
+            <column name="output_width" type="INT" defaultValue="512"/>
+            <column name="output_height" type="INT" defaultValue="512"/>
+            <column name="ai_model" type="VARCHAR(50)" defaultValue="stable-diffusion"/>
+            <column name="ai_parameters" type="JSON"/>
+            <column name="status" type="VARCHAR(20)" defaultValue="TESTING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="TIMESTAMP"/>
+            <column name="usage_count" type="INT" defaultValue="0"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="fk_trends_created_by"
+                baseTableName="trends"
+                baseColumnNames="created_by"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <createIndex indexName="idx_status" tableName="trends">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_category" tableName="trends">
+            <column name="category"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="trends"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

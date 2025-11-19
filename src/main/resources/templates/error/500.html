@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Internal Server Error</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="text-center py-5">
+            <i class="bi bi-x-circle text-danger" style="font-size: 5rem;"></i>
+            <h1 class="display-1">500</h1>
+            <h2>Internal Server Error</h2>
+            <p class="lead">Oops! Something went wrong on our end.</p>
+            <p th:if="${error}" class="text-danger" th:text="${error}">Error message</p>
+            <a th:href="@{/}" class="btn btn-primary mt-3">
+                <i class="bi bi-house"></i> Go Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

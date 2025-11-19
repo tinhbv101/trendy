@@ -1,0 +1,68 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: trend-ai-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: trend_ai
+      MYSQL_USER: trendai
+      MYSQL_PASSWORD: trendai123
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trend-ai-network
+
+  # MinIO Object Storage
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: trend-ai-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - trend-ai-network
+
+  # Spring Boot Application
+  app:
+    image: devlord/trendy:latest
+    container_name: trend-ai-app
+    ports:
+      - "1125:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./app_logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - trend-ai-network
+    restart: unless-stopped
+
+networks:
+  trend-ai-network:
+    driver: bridge
+
+

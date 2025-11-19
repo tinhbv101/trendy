@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Test Trend</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Admin</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/trends}">Trends</a></li>
+                <li class="breadcrumb-item active">Test</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-4"><i class="bi bi-flask"></i> Test Trend</h1>
+        <p class="lead">Testing: <strong th:text="${trend.trendName}">Trend Name</strong></p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Upload Test Image</h5>
+                        <form method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="testImage" class="form-label">Test Image</label>
+                                <input class="form-control" type="file" id="testImage" name="file" 
+                                       required accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-circle"></i> Run Test
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Test Result</h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Upload an image to see the test result
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Trend Details</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Name:</strong> <span th:text="${trend.trendName}">Name</span></li>
+                            <li><strong>Category:</strong> <span th:text="${trend.category}">Category</span></li>
+                            <li><strong>Status:</strong> 
+                                <span class="badge" 
+                                      th:classappend="${trend.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-warning'"
+                                      th:text="${trend.status}">Status</span>
+                            </li>
+                            <li><strong>Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
+                        </ul>
+                        <hr>
+                        <h6>Prompt Template:</h6>
+                        <pre class="small bg-light p-2 rounded" th:text="${trend.promptTemplate}">Prompt</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

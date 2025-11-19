@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Access Denied</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="text-center py-5">
+            <i class="bi bi-shield-x text-danger" style="font-size: 5rem;"></i>
+            <h1 class="display-1">403</h1>
+            <h2>Access Denied</h2>
+            <p class="lead">You don't have permission to access this page.</p>
+            <a th:href="@{/}" class="btn btn-primary mt-3">
+                <i class="bi bi-house"></i> Go Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

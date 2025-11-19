@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>My Gallery</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1 class="mb-4"><i class="bi bi-images"></i> My Gallery</h1>
+
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${images != null and images.hasContent()}">
+            <div class="col" th:each="image : ${images.content}">
+                <div class="card h-100">
+                    <!-- Display generated image if completed -->
+                    <div th:if="${image.status.name() == 'COMPLETED' and image.outputImagePath != null}" 
+                         style="height: 200px; overflow: hidden;">
+                        <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}" 
+                             class="card-img-top" 
+                             alt="Generated image"
+                             style="width: 100%; height: 200px; object-fit: cover;">
+                    </div>
+                    <!-- Placeholder for pending/processing/failed -->
+                    <div th:if="${image.status.name() != 'COMPLETED' or image.outputImagePath == null}"
+                         class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <div class="text-center">
+                            <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
+                            <p class="text-white small mt-2" th:text="${image.status}">Status</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title" th:text="${image.trend.trendName}">Trend Name</h6>
+                        <p class="card-text small text-muted">
+                            Created: <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy')}">Date</span>
+                        </p>
+                        <span class="badge" 
+                              th:classappend="${image.status.name() == 'COMPLETED'} ? 'bg-success' : (${image.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
+                              th:text="${image.status}">Status</span>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a th:href="@{/generate/result/{id}(id=${image.id})}" class="btn btn-outline-primary btn-sm w-100">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info" th:if="${images == null or !images.hasContent()}">
+            <i class="bi bi-info-circle"></i> You haven't generated any images yet. 
+            <a th:href="@{/trends}" class="alert-link">Browse trends</a> to get started!
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4" th:if="${images != null and images.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${images.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/gallery(page=${images.number - 1})}">Previous</a>
+                </li>
+                <li class="page-item" 
+                    th:each="i : ${#numbers.sequence(0, images.totalPages - 1)}"
+                    th:classappend="${i == images.number} ? 'active'">
+                    <a class="page-link" th:href="@{/gallery(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${images.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/gallery(page=${images.number + 1})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
+

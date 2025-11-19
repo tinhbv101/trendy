@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Trend Detail</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/trends}">Trends</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${trend.trendName}">Trend</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-8">
+                <h1 th:text="${trend.trendName}">Trend Name</h1>
+                
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2" th:text="${trend.category}">Category</span>
+                    <span class="badge bg-success" th:text="${trend.status}">Status</span>
+                </div>
+
+                <p class="lead" th:text="${trend.description}">Description goes here...</p>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-info-circle"></i> Details</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Max Input Images:</strong> <span th:text="${trend.maxInputImages}">1</span></li>
+                            <li><strong>Output Size:</strong> <span th:text="${trend.outputWidth} + 'x' + ${trend.outputHeight}">512x512</span></li>
+                            <li><strong>AI Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
+                            <li><strong>Times Used:</strong> <span th:text="${trend.usageCount}">0</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a th:href="@{/generate/{id}(id=${trend.id})}" 
+                       class="btn btn-primary btn-lg" 
+                       sec:authorize="isAuthenticated()">
+                        <i class="bi bi-magic"></i> Create My Image
+                    </a>
+                    <a th:href="@{/login}" 
+                       class="btn btn-primary btn-lg" 
+                       sec:authorize="!isAuthenticated()">
+                        <i class="bi bi-box-arrow-in-right"></i> Login to Create
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Example Images</h5>
+                <div th:if="${examples != null and !examples.isEmpty()}">
+                    <div th:each="example : ${examples}" class="card mb-3">
+                        <img th:src="@{/images/{filename}(filename=${example.imagePath})}" 
+                             class="card-img-top" 
+                             alt="Example image"
+                             style="max-height: 300px; object-fit: cover;">
+                    </div>
+                </div>
+                <div th:if="${examples == null or examples.isEmpty()}" class="card">
+                    <div class="card-body text-center bg-light" style="min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                        <p class="mt-3 text-muted">No example images yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

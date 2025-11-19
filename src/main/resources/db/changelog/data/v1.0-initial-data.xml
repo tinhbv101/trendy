@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="6" author="trendai">
+        <comment>Insert initial admin user</comment>
+        
+        <!-- Admin User - Password: Password123@ (BCrypt encoded) -->
+        <insert tableName="users">
+            <column name="username" value="admin"/>
+            <column name="email" value="admin@trendai.com"/>
+            <column name="password" value="$2a$10$ZDF1nkZdEo4adjiUo6ZFFuFwm6mx.FulmhuapAZuAwJJBc034JaUu"/>
+            <column name="full_name" value="System Admin"/>
+            <column name="role" value="ADMIN"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <rollback>
+            <delete tableName="users">
+                <where>username IN ('admin', 'user')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

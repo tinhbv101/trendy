@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Schema Changes -->
+    <include file="db/changelog/changes/v1.0-create-users-table.xml"/>
+    <include file="db/changelog/changes/v1.0-create-trends-table.xml"/>
+    <include file="db/changelog/changes/v1.0-create-trend-examples-table.xml"/>
+    <include file="db/changelog/changes/v1.0-create-generated-images-table.xml"/>
+    <include file="db/changelog/changes/v1.0-create-ratings-table.xml"/>
+    
+    <!-- Schema Updates -->
+    <include file="db/changelog/changes/v1.1-add-thumbnail-to-trends.xml"/>
+    <include file="db/changelog/changes/v1.2-remove-ai-model-fields.xml"/>
+    
+    <!-- Initial Data -->
+    <include file="db/changelog/data/v1.0-initial-data.xml"/>
+
+</databaseChangeLog>
+

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Manage Trends</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-list-ul"></i> Manage Trends</h1>
+            <a th:href="@{/admin/trends/new}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Trend
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" th:if="${trends != null and trends.hasContent()}">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Usage Count</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="trend : ${trends.content}">
+                                <td th:text="${trend.id}">1</td>
+                                <td th:text="${trend.trendName}">Trend Name</td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${trend.category}">Category</span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${trend.status.name() == 'ACTIVE'} ? 'bg-success' : (${trend.status.name() == 'INACTIVE'} ? 'bg-danger' : 'bg-warning')"
+                                          th:text="${trend.status}">Status</span>
+                                </td>
+                                <td th:text="${trend.usageCount}">0</td>
+                                <td th:text="${#temporals.format(trend.createdAt, 'dd/MM/yyyy')}">Date</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/trends/{id}/edit(id=${trend.id})}" 
+                                           class="btn btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/admin/trends/{id}/test(id=${trend.id})}" 
+                                           class="btn btn-outline-info" title="Test">
+                                            <i class="bi bi-flask"></i>
+                                        </a>
+                                        <form th:action="@{/admin/trends/{id}/delete(id=${trend.id})}" 
+                                              method="post" style="display: inline;"
+                                              onsubmit="return confirm('Are you sure you want to delete this trend?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info" th:if="${trends == null or !trends.hasContent()}">
+                    <i class="bi bi-info-circle"></i> No trends found. Create your first trend!
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" th:if="${trends != null and trends.totalPages > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number - 1})}">Previous</a>
+                        </li>
+                        <li class="page-item" 
+                            th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
+                            th:classappend="${i == trends.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/trends(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number + 1})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

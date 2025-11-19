@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Generate Image</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/trends}">Trends</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/trends/{id}(id=${trend.id})}" th:text="${trend.trendName}">Trend</a></li>
+                <li class="breadcrumb-item active">Generate</li>
+            </ol>
+        </nav>
+
+        <h1>Generate Image</h1>
+        <p class="lead">Using trend: <strong th:text="${trend.trendName}">Trend Name</strong></p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="@{/generate/{id}(id=${trend.id})}" method="post" enctype="multipart/form-data" id="generateForm">
+                            <div class="mb-3">
+                                <label for="inputImages" class="form-label">
+                                    Upload Your Image(s) 
+                                    <span class="text-muted">
+                                        (Max: <span th:text="${trend.maxInputImages}">1</span>)
+                                    </span>
+                                </label>
+                                <input class="form-control" type="file" id="inputImages" name="inputImages" 
+                                       multiple required accept="image/jpeg,image/png,image/gif"
+                                       th:attr="multiple=${trend.maxInputImages > 1}">
+                                <div class="form-text">Accepted formats: JPG, PNG, GIF. Max size: 10MB per image</div>
+                            </div>
+
+                            <div id="imagePreview" class="mb-3"></div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-magic"></i> Generate Image
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-lightbulb"></i> Tips</h5>
+                        <ul class="small">
+                            <li>Use clear, high-quality images for best results</li>
+                            <li>Make sure faces are clearly visible</li>
+                            <li>Avoid blurry or low-light photos</li>
+                            <li>Generation may take 10-30 seconds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            document.getElementById('inputImages').addEventListener('change', function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = '';
+                
+                const files = e.target.files;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.className = 'img-thumbnail me-2 mb-2';
+                        img.style.maxWidth = '200px';
+                        img.style.maxHeight = '200px';
+                        preview.appendChild(img);
+                    }
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>
+

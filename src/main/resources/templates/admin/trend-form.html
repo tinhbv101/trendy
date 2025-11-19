@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Trend Form</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Admin</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/trends}">Trends</a></li>
+                <li class="breadcrumb-item active" th:text="${isEdit ? 'Edit' : 'Create'}">Form</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-4" th:text="${isEdit ? 'Edit Trend' : 'Create New Trend'}">Trend Form</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form th:action="${isEdit ? '/admin/trends/' + trend.id : '/admin/trends'}" 
+                      th:object="${trend}" method="post" enctype="multipart/form-data">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="trendName" class="form-label">Trend Name *</label>
+                                <input type="text" class="form-control" th:field="*{trendName}" 
+                                       id="trendName" required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('trendName')}" 
+                                     th:errors="*{trendName}">Error</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <input type="text" class="form-control" th:field="*{category}" 
+                                       id="category" placeholder="e.g., Art Style, 3D, Portrait">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" th:field="*{description}" 
+                                  id="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="thumbnailFile" class="form-label">Thumbnail Image</label>
+                        <input class="form-control" type="file" id="thumbnailFile" name="thumbnailFile" 
+                               accept="image/*">
+                        <div class="form-text">Upload a thumbnail image for this trend (recommended: 400x300px)</div>
+                        <div th:if="${isEdit and trend.thumbnailPath != null}" class="mt-2">
+                            <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
+                                 alt="Current thumbnail" 
+                                 style="max-width: 200px; max-height: 150px; object-fit: cover;"
+                                 class="border rounded">
+                            <p class="text-muted small mt-1">Current thumbnail (upload new file to replace)</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="promptTemplate" class="form-label">Prompt Template *</label>
+                        <textarea class="form-control" th:field="*{promptTemplate}" 
+                                  id="promptTemplate" rows="4" required></textarea>
+                        <div class="form-text">Enter the AI prompt template for this trend</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="maxInputImages" class="form-label">Max Input Images *</label>
+                                <input type="number" class="form-control" th:field="*{maxInputImages}" 
+                                       id="maxInputImages" min="1" max="5" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="outputWidth" class="form-label">Output Width *</label>
+                                <input type="number" class="form-control" th:field="*{outputWidth}" 
+                                       id="outputWidth" min="256" step="64" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="outputHeight" class="form-label">Output Height *</label>
+                                <input type="number" class="form-control" th:field="*{outputHeight}" 
+                                       id="outputHeight" min="256" step="64" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" th:field="*{status}" id="status" required>
+                            <option value="TESTING">Testing</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> Using Google Gemini 2.5 Flash Image for AI generation
+                        </div>
+                    </div>
+
+                    <div class="mb-3" th:if="!${isEdit}">
+                        <label for="exampleFiles" class="form-label">Example Images</label>
+                        <input class="form-control" type="file" id="exampleFiles" name="exampleFiles" 
+                               multiple accept="image/*">
+                        <div class="form-text">Upload example images to showcase this trend</div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a th:href="@{/admin/trends}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> <span th:text="${isEdit ? 'Update' : 'Create'}">Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

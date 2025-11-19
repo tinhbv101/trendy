@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Hero Section -->
+        <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+            <h1 class="display-4">Welcome to Trendy</h1>
+            <p class="lead">Transform your photos with AI-powered trends. Choose from various styles and create amazing images in seconds!</p>
+            <hr class="my-4 bg-white">
+            <p>Explore our collection of trending styles and start creating now.</p>
+            <a class="btn btn-light btn-lg" th:href="@{/trends}" role="button">
+                <i class="bi bi-stars"></i> Browse Trends
+            </a>
+        </div>
+
+        <!-- Featured Trends -->
+        <h2 class="mb-4">Featured Trends</h2>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4" th:if="${trends != null and !trends.isEmpty()}">
+            <div class="col" th:each="trend : ${trends}">
+                <div class="card h-100 shadow-sm">
+                    <!-- Thumbnail -->
+                    <div th:if="${trend.thumbnailPath != null}" style="height: 200px; overflow: hidden;">
+                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
+                             class="card-img-top" 
+                             alt="Trend thumbnail"
+                             style="width: 100%; height: 200px; object-fit: cover;">
+                    </div>
+                    <div th:if="${trend.thumbnailPath == null}" 
+                         class="card-img-top bg-secondary" 
+                         style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${trend.trendName}">Trend Name</h5>
+                        <p class="card-text" th:text="${trend.description}">Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary" th:text="${trend.category}">Category</span>
+                            <small class="text-muted">
+                                <i class="bi bi-fire"></i> <span th:text="${trend.usageCount}">0</span> uses
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right-circle"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4" th:if="${trends == null or trends.isEmpty()}">
+            <i class="bi bi-info-circle"></i> No trends available yet. Check back soon!
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-5">
+            <a th:href="@{/trends}" class="btn btn-primary btn-lg">
+                View All Trends <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

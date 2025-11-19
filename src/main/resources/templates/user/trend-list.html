@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Browse Trends</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1 class="mb-4">Browse Trends</h1>
+        
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form th:action="@{/trends}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Search trends..." th:value="${search}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select" onchange="filterByCategory(this.value)">
+                    <option value="">All Categories</option>
+                    <option th:each="cat : ${categories}" 
+                            th:value="${cat}" 
+                            th:text="${cat}"
+                            th:selected="${category == cat}"></option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Trends Grid -->
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${trends != null and trends.hasContent()}">
+            <div class="col" th:each="trend : ${trends.content}">
+                <div class="card h-100 shadow-sm">
+                    <!-- Thumbnail -->
+                    <div th:if="${trend.thumbnailPath != null}" style="height: 180px; overflow: hidden;">
+                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
+                             class="card-img-top" 
+                             alt="Trend thumbnail"
+                             style="width: 100%; height: 180px; object-fit: cover;">
+                    </div>
+                    <div th:if="${trend.thumbnailPath == null}" 
+                         class="card-img-top bg-secondary" 
+                         style="height: 180px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-image text-white" style="font-size: 2.5rem;"></i>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${trend.trendName}">Trend Name</h5>
+                        <p class="card-text small" th:text="${#strings.abbreviate(trend.description, 80)}">Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary" th:text="${trend.category}">Category</span>
+                            <small class="text-muted" th:text="${trend.usageCount} + ' uses'">0 uses</small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm w-100">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info" th:if="${trends == null or !trends.hasContent()}">
+            <i class="bi bi-info-circle"></i> No trends found. Try a different search or category.
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4" th:if="${trends != null and trends.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category})}">
+                        Previous
+                    </a>
+                </li>
+                <li class="page-item" 
+                    th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
+                    th:classappend="${i == trends.number} ? 'active'">
+                    <a class="page-link" th:href="@{/trends(page=${i}, search=${search}, category=${category})}" 
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category})}">
+                        Next
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            function filterByCategory(category) {
+                window.location.href = '/trends?category=' + encodeURIComponent(category);
+            }
+        </script>
+    </th:block>
+</body>
+</html>
+

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <h2 class="text-center mb-4">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </h2>
+
+                        <div th:if="${param.error}" class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Invalid username or password
+                        </div>
+
+                        <div th:if="${param.logout}" class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> You have been logged out successfully
+                        </div>
+
+                        <form th:action="@{/login}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       required autofocus placeholder="Enter your username">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       required placeholder="Enter your password">
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <p class="text-center mb-0">
+                            Don't have an account? <a th:href="@{/register}">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

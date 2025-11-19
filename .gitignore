@@ -1,0 +1,62 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.vscode/
+.settings/
+.classpath
+.project
+
+# Spring Boot
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Logs
+logs/
+*.log
+spring.log
+
+# Uploads & Generated Files
+uploads/
+generated-images/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets & Config
+application-local.properties
+application-secret.properties
+*.env
+
+# Temporary Files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# JVM Crash Logs
+hs_err_pid*
+replay_pid*
+
+
