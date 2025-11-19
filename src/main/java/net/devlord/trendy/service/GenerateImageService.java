@@ -133,5 +133,53 @@ public class GenerateImageService {
             .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
         return getUserImages(user.getId(), pageable);
     }
+    
+    @Transactional
+    public void deleteGeneratedImage(Long imageId, String username) {
+        GeneratedImage image = generatedImageRepository.findById(imageId)
+            .orElseThrow(() -> new ImageGenerationException("Generated image not found: " + imageId));
+        
+        // Verify that the image belongs to the user
+        if (!image.getUser().getUsername().equals(username)) {
+            throw new IllegalStateException("You don't have permission to delete this image");
+        }
+        
+        try {
+            // Delete input images from MinIO
+            if (image.getInputImages() != null && !image.getInputImages().isEmpty()) {
+                try {
+                    List<String> inputImagePaths = objectMapper.readValue(image.getInputImages(), 
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+                    for (String imagePath : inputImagePaths) {
+                        try {
+                            fileStorageService.deleteFile(imagePath);
+                        } catch (Exception e) {
+                            log.warn("Failed to delete input image: {}", imagePath, e);
+                        }
+                    }
+                } catch (JsonProcessingException e) {
+                    log.warn("Failed to parse input images JSON", e);
+                }
+            }
+            
+            // Delete output image from MinIO
+            if (image.getOutputImagePath() != null && !image.getOutputImagePath().isEmpty()) {
+                try {
+                    fileStorageService.deleteFile(image.getOutputImagePath());
+                } catch (Exception e) {
+                    log.warn("Failed to delete output image: {}", image.getOutputImagePath(), e);
+                }
+            }
+            
+            // Delete record from database
+            generatedImageRepository.delete(image);
+            
+            log.info("Successfully deleted generated image: {}", imageId);
+            
+        } catch (Exception e) {
+            log.error("Error deleting generated image: {}", imageId, e);
+            throw new ImageGenerationException("Failed to delete image", e);
+        }
+    }
 }
 
