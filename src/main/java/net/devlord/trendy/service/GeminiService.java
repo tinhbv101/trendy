@@ -165,30 +165,42 @@ public class GeminiService {
         textPart.put("text", prompt);
         parts.add(textPart);
         
-        // Add input image (use first image only for now)
-        String firstImagePath = imagePaths.get(0);
+        // Add all input images
+        int imageCount = 0;
+        for (String imagePath : imagePaths) {
+            // Get image from MinIO
+            if (minioService.fileExists(imagePath)) {
+                try {
+                    InputStream inputStream = minioService.getFile(imagePath);
+                    byte[] imageBytes = inputStream.readAllBytes();
+                    inputStream.close();
+                    
+                    String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                    
+                    // Determine MIME type
+                    String mimeType = determineMimeType(imagePath);
+                    
+                    Map<String, Object> imagePart = new HashMap<>();
+                    Map<String, Object> inlineData = new HashMap<>();
+                    inlineData.put("mimeType", mimeType);
+                    inlineData.put("data", base64Image);
+                    imagePart.put("inlineData", inlineData);
+                    parts.add(imagePart);
+                    
+                    imageCount++;
+                    log.info("Added input image {} to request from MinIO: {}", imageCount, imagePath);
+                } catch (Exception e) {
+                    log.warn("Failed to load input image from MinIO: {}", imagePath, e);
+                }
+            } else {
+                log.warn("Input image not found in MinIO: {}", imagePath);
+            }
+        }
         
-        // Get image from MinIO
-        if (minioService.fileExists(firstImagePath)) {
-            InputStream inputStream = minioService.getFile(firstImagePath);
-            byte[] imageBytes = inputStream.readAllBytes();
-            inputStream.close();
-            
-            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-            
-            // Determine MIME type
-            String mimeType = determineMimeType(firstImagePath);
-            
-            Map<String, Object> imagePart = new HashMap<>();
-            Map<String, Object> inlineData = new HashMap<>();
-            inlineData.put("mimeType", mimeType);
-            inlineData.put("data", base64Image);
-            imagePart.put("inlineData", inlineData);
-            parts.add(imagePart);
-            
-            log.info("Added input image to request from MinIO: {}", firstImagePath);
+        if (imageCount == 0) {
+            log.warn("No input images found, using text-only generation");
         } else {
-            log.warn("Input image not found in MinIO: {}, using text-only", firstImagePath);
+            log.info("Total {} input images added to Gemini request", imageCount);
         }
         
         content.put("parts", parts);
