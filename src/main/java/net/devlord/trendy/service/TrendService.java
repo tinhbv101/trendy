@@ -118,6 +118,11 @@ public class TrendService {
         return Page.empty(pageable);
     }
     
+    @Transactional(readOnly = true)
+    public List<Trend> getFeaturedTrends(int limit) {
+        return trendRepository.findTopTrendsByUsageLimit(TrendStatus.ACTIVE.name(), limit);
+    }
+    
     @Transactional
     public Trend createTrend(Trend trend) {
         log.info("Creating new trend: {}", trend.getTrendName());

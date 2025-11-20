@@ -11,24 +11,41 @@
         
         <!-- Search and Filter -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <form th:action="@{/trends}" method="get">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" 
                                placeholder="Search trends..." th:value="${search}">
+                        <input type="hidden" name="sort" th:value="${currentSort}">
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i> Search
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <select class="form-select" onchange="filterByCategory(this.value)">
                     <option value="">All Categories</option>
                     <option th:each="cat : ${categories}" 
                             th:value="${cat}" 
                             th:text="${cat}"
                             th:selected="${category == cat}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" onchange="sortTrends(this.value)">
+                    <option value="popular" th:selected="${currentSort == 'popular' or currentSort == null}">
+                        <i class="bi bi-fire"></i> Most Popular
+                    </option>
+                    <option value="least-used" th:selected="${currentSort == 'least-used'}">
+                        Least Used
+                    </option>
+                    <option value="newest" th:selected="${currentSort == 'newest'}">
+                        Newest First
+                    </option>
+                    <option value="oldest" th:selected="${currentSort == 'oldest'}">
+                        Oldest First
+                    </option>
                 </select>
             </div>
         </div>
@@ -75,18 +92,18 @@
         <nav aria-label="Page navigation" class="mt-4" th:if="${trends != null and trends.totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category})}">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category}, sort=${currentSort})}">
                         Previous
                     </a>
                 </li>
                 <li class="page-item" 
                     th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
                     th:classappend="${i == trends.number} ? 'active'">
-                    <a class="page-link" th:href="@{/trends(page=${i}, search=${search}, category=${category})}" 
+                    <a class="page-link" th:href="@{/trends(page=${i}, search=${search}, category=${category}, sort=${currentSort})}" 
                        th:text="${i + 1}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category})}">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category}, sort=${currentSort})}">
                         Next
                     </a>
                 </li>
@@ -95,10 +112,27 @@
     </div>
     
     <th:block layout:fragment="extra-scripts">
-        <script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const currentSearch = /*[[${search}]]*/ '';
+            const currentCategory = /*[[${category}]]*/ '';
+            const currentSort = /*[[${currentSort}]]*/ 'popular';
+            
             function filterByCategory(category) {
-                window.location.href = '/trends?category=' + encodeURIComponent(category);
+                let url = '/trends?';
+                if (category) url += 'category=' + encodeURIComponent(category) + '&';
+                if (currentSearch) url += 'search=' + encodeURIComponent(currentSearch) + '&';
+                if (currentSort) url += 'sort=' + encodeURIComponent(currentSort);
+                window.location.href = url;
             }
+            
+            function sortTrends(sortBy) {
+                let url = '/trends?sort=' + encodeURIComponent(sortBy);
+                if (currentSearch) url += '&search=' + encodeURIComponent(currentSearch);
+                if (currentCategory) url += '&category=' + encodeURIComponent(currentCategory);
+                window.location.href = url;
+            }
+            /*]]>*/
         </script>
     </th:block>
 </body>
