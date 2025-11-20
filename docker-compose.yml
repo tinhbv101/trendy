@@ -43,7 +43,7 @@ services:
     ports:
       - "1125:8080"
     env_file:
-      - .env
+      - ./.env
     volumes:
       - ./app_logs:/app/logs
     depends_on:

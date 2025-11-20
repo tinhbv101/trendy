@@ -2,31 +2,31 @@
 spring:
   application:
     name: Trendy
-    
+
   # Database Configuration
   datasource:
     url: ${DATABASE_URL:jdbc:mysql://localhost:3306/trend_ai}
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:admin}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    
+
   # JPA/Hibernate
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: ${SHOW_SQL:true}
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.MySQL8Dialect
-        
+
   # Liquibase
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
     drop-first: false
-    
+
   # Thymeleaf
   thymeleaf:
     cache: false
@@ -34,7 +34,7 @@ spring:
     suffix: .html
     mode: HTML
     encoding: UTF-8
-    
+
   # File Upload
   servlet:
     multipart:
