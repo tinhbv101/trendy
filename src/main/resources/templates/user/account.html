@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Account Settings</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <h1 class="mb-4"><i class="bi bi-person-circle"></i> Account Settings</h1>
+
+                <!-- Success Message -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- User Information Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-badge"></i> Profile Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Username:</div>
+                            <div class="col-sm-8" sec:authentication="name">username</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Role:</div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-info" sec:authentication="principal.authorities">ROLE_USER</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change Password Card -->
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Change Password</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/account/change-password}" th:object="${changePasswordRequest}" method="post">
+                            <!-- Current Password -->
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">
+                                    Current Password <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="currentPassword" 
+                                       th:field="*{currentPassword}"
+                                       th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"
+                                       placeholder="Enter current password"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" 
+                                     th:errors="*{currentPassword}">Error</div>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">
+                                    New Password <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="newPassword" 
+                                       th:field="*{newPassword}"
+                                       th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"
+                                       placeholder="Enter new password (min 6 characters)"
+                                       minlength="6"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" 
+                                     th:errors="*{newPassword}">Error</div>
+                                <small class="form-text text-muted">
+                                    Password must be at least 6 characters long
+                                </small>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    Confirm New Password <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirmPassword" 
+                                       th:field="*{confirmPassword}"
+                                       th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
+                                       placeholder="Confirm new password"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" 
+                                     th:errors="*{confirmPassword}">Error</div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-shield-check"></i> Change Password
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <strong>Security Tips:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Use a strong password with a mix of letters, numbers, and symbols</li>
+                        <li>Don't share your password with anyone</li>
+                        <li>Change your password regularly</li>
+                        <li>Use different passwords for different accounts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

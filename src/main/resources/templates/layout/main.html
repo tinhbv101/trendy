@@ -70,11 +70,12 @@
                             <i class="bi bi-person-circle"></i> <span sec:authentication="name">User</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" th:href="@{/gallery}">My Gallery</a></li>
+                            <li><a class="dropdown-item" th:href="@{/gallery}"><i class="bi bi-images"></i> My Gallery</a></li>
+                            <li><a class="dropdown-item" th:href="@{/account}"><i class="bi bi-gear"></i> Account Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/logout}" method="post">
-                                    <button type="submit" class="dropdown-item">Logout</button>
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Logout</button>
                                 </form>
                             </li>
                         </ul>
