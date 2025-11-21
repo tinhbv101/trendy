@@ -56,11 +56,27 @@ public class GenerateController {
     }
     
     @GetMapping("/result/{imageId}")
-    public String viewResult(@PathVariable Long imageId, Model model) {
-        GeneratedImage image = generateImageService.getGeneratedImage(imageId);
-        model.addAttribute("image", image);
-        model.addAttribute("pageTitle", "Generation Result");
-        return "user/result";
+    public String viewResult(
+            @PathVariable Long imageId, 
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            GeneratedImage image = generateImageService.getGeneratedImage(imageId);
+            
+            // Check if the image belongs to the current user
+            if (!image.getUser().getUsername().equals(userDetails.getUsername())) {
+                redirectAttributes.addFlashAttribute("error", "You don't have permission to view this image");
+                return "redirect:/gallery";
+            }
+            
+            model.addAttribute("image", image);
+            model.addAttribute("pageTitle", "Generation Result");
+            return "user/result";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Image not found");
+            return "redirect:/gallery";
+        }
     }
 }
 

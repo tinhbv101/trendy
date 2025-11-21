@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/generate/**", "/gallery/**").authenticated()
+                .requestMatchers("/generate/**", "/gallery/**", "/account/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
