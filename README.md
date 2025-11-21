@@ -9,10 +9,19 @@
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![AI Generated](https://img.shields.io/badge/🤖_AI-Generated-blueviolet.svg)](https://github.com/tinhbv101/trendy)
+  
+  <h3>
+    <a href="https://trendy.devlord.net">🌐 Live Demo</a> •
+    <a href="https://github.com/tinhbv101/trendy">📂 Repository</a> •
+    <a href="#-installation-guide">📖 Documentation</a>
+  </h3>
 </div>
 
 > [!NOTE]
 > 🤖 **100% AI-Generated Code**: This entire project was developed using AI assistance (Claude AI by Anthropic). From architecture design to implementation, testing, and documentation - everything was created through AI-powered development. This demonstrates the potential of AI in modern software development! 🚀
+
+> [!TIP]
+> 🌐 **Try it now**: Visit the [live demo](https://trendy.devlord.net) to see Trendy in action!
 
 ---
 
@@ -78,6 +87,8 @@
 - **Docker**: 20.10+
 - **Docker Compose**: 2.0+
 
+> **🌐 Want to try without installing?** Check out the [live demo](https://trendy.devlord.net)
+
 ---
 
 ## 🚀 Installation Guide
@@ -133,6 +144,7 @@ docker compose down -v
 #### 4. Access the application
 
 - **Web Application**: http://localhost:8080
+- **Live Demo**: https://trendy.devlord.net
 - **MinIO Console**: http://localhost:9001 (minioadmin/minioadmin)
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 
