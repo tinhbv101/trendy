@@ -264,13 +264,8 @@ After the first startup, the system creates default accounts:
 
 ### Admin Account
 - **Username**: `admin`
-- **Password**: `admin123`
+- **Password**: `Password123@`
 - **Role**: ADMIN
-
-### User Account
-- **Username**: `user`
-- **Password**: `user123`
-- **Role**: USER
 
 **⚠️ Important:** Change these passwords in production environment!
 
