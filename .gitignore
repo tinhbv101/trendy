@@ -1,7 +1,6 @@
 # Gradle
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -18,7 +17,6 @@ out/
 
 # Spring Boot
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -47,7 +45,6 @@ application-secret.properties
 *~
 
 # Package Files
-*.jar
 *.war
 *.nar
 *.ear
