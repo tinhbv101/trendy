@@ -14,7 +14,7 @@ COPY src ./src
 RUN ./gradlew bootJar -x test --no-daemon
 
 # Runtime stage
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:17-jre
 
 ENV TZ=Asia/Ho_Chi_Minh
 
