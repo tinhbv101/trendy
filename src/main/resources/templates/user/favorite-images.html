@@ -41,6 +41,10 @@
                         <img th:src="@{/images/{filename}(filename=${favoriteImage.generatedImage.outputImagePath})}" 
                              class="card-img-top" 
                              alt="Generated image"
+                             loading="lazy"
+                             decoding="async"
+                             width="400"
+                             height="200"
                              style="width: 100%; height: 200px; object-fit: cover;">
                     </div>
                     <!-- Placeholder for other statuses -->

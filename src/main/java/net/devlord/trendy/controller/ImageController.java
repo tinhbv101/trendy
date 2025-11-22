@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -62,7 +63,9 @@ public class ImageController {
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CACHE_CONTROL, "max-age=3600")
+                    .header(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000, immutable") // 1 year cache
+                    .header(HttpHeaders.EXPIRES, java.time.Instant.now().plusSeconds(31536000).toString())
+                    .header("X-Content-Type-Options", "nosniff")
                     .body(resource);
 
         } catch (Exception e) {

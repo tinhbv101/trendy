@@ -60,6 +60,8 @@
                         <img th:src="@{/images/{filename}(filename=${example.imagePath})}" 
                              class="card-img-top" 
                              alt="Example image"
+                             loading="lazy"
+                             decoding="async"
                              style="max-height: 300px; object-fit: cover;">
                     </div>
                 </div>

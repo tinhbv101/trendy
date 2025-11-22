@@ -22,6 +22,10 @@
                         <img th:src="@{/images/{filename}(filename=${favorite.trend.thumbnailPath})}" 
                              class="card-img-top" 
                              alt="Trend thumbnail"
+                             loading="lazy"
+                             decoding="async"
+                             width="400"
+                             height="180"
                              style="width: 100%; height: 180px; object-fit: cover;">
                     </div>
                     <div th:if="${favorite.trend.thumbnailPath == null}" 

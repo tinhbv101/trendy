@@ -1,45 +1,42 @@
-# Multi-stage build for Spring Boot application
-# Stage 1: Build
 FROM gradle:8.5-jdk17 AS build
+
+ENV TZ=Asia/Ho_Chi_Minh
 
 WORKDIR /app
 
-# Copy gradle files
-COPY build.gradle settings.gradle gradle.properties ./
+# Copy Gradle files first for better caching
+COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
-
-# Download dependencies (cached layer)
-RUN gradle dependencies --no-daemon || true
-
-# Copy source code
+COPY gradlew ./
 COPY src ./src
 
-# Build application
-RUN gradle clean build -x test --no-daemon
+# Build the application
+RUN ./gradlew bootJar -x test --no-daemon
 
-# Stage 2: Runtime
-FROM eclipse-temurin:17-jre
+# Runtime stage
+FROM eclipse-temurin:11-jre
+
+ENV TZ=Asia/Ho_Chi_Minh
 
 WORKDIR /app
 
 # Create non-root user
-RUN groupadd -r spring && useradd -r -g spring spring
-USER spring:spring
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Copy built jar from build stage
+# Copy the built JAR from build stage
 COPY --from=build /app/build/libs/*.jar app.jar
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+USER appuser
 
 # Expose port
 EXPOSE 8080
 
-# Health check (curl is available in eclipse-temurin base image)
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run application
-ENTRYPOINT ["java", \
-    "-XX:+UseContainerSupport", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-jar", \
-    "app.jar"]
+# Run the application
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Ho_Chi_Minh", "-jar", "app.jar"]
