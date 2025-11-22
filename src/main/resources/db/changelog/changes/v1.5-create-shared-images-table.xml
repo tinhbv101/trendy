@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="1.5-create-shared-images-table" author="ai-assistant">
+        <!-- Create shared_images table -->
+        <createTable tableName="shared_images">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="generated_image_id" type="BIGINT">
+                <constraints nullable="false" 
+                           foreignKeyName="fk_shared_generated_image" 
+                           references="generated_images(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" 
+                           foreignKeyName="fk_shared_user" 
+                           references="users(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="share_token" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMP"/>
+            <column name="view_count" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Add indexes for better query performance -->
+        <createIndex indexName="idx_shared_token" tableName="shared_images">
+            <column name="share_token"/>
+        </createIndex>
+
+        <createIndex indexName="idx_shared_expires_at" tableName="shared_images">
+            <column name="expires_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_shared_user_id" tableName="shared_images">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_shared_generated_image_id" tableName="shared_images">
+            <column name="generated_image_id"/>
+        </createIndex>
+
+        <!-- Rollback -->
+        <rollback>
+            <dropTable tableName="shared_images"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

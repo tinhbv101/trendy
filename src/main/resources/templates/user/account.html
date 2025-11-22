@@ -31,15 +31,97 @@
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold">Username:</div>
-                            <div class="col-sm-8" sec:authentication="name">username</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-person"></i> Username:</div>
+                            <div class="col-sm-8" th:text="${user.username}">username</div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold">Role:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-envelope"></i> Email:</div>
+                            <div class="col-sm-8" th:text="${user.email}">email@example.com</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-person-lines-fill"></i> Full Name:</div>
+                            <div class="col-sm-8" th:text="${user.fullName != null ? user.fullName : 'Not set'}">Full Name</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-shield-check"></i> Role:</div>
                             <div class="col-sm-8">
-                                <span class="badge bg-info" sec:authentication="principal.authorities">ROLE_USER</span>
+                                <span class="badge bg-info" th:text="${user.role}">ROLE_USER</span>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-calendar-plus"></i> Member Since:</div>
+                            <div class="col-sm-8" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-images"></i> Images Generated:</div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-success" th:text="${totalImages}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Profile Error Message -->
+                        <div th:if="${profileError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${profileError}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <form th:action="@{/account/update-profile}" th:object="${updateProfileRequest}" method="post">
+                            <!-- Full Name -->
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">
+                                    <i class="bi bi-person-lines-fill"></i> Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="fullName" 
+                                       th:field="*{fullName}"
+                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                       placeholder="Enter your full name"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" 
+                                     th:errors="*{fullName}">Error</div>
+                                <small class="form-text text-muted">
+                                    This name will be displayed on your profile
+                                </small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="bi bi-envelope"></i> Email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       th:field="*{email}"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       placeholder="Enter your email address"
+                                       required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
+                                     th:errors="*{email}">Error</div>
+                                <small class="form-text text-muted">
+                                    We'll never share your email with anyone else
+                                </small>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Update Profile
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 

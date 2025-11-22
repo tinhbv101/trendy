@@ -81,5 +81,37 @@ public class UserService {
         userRepository.save(user);
         log.info("Password changed successfully for user: {}", username);
     }
+    
+    @Transactional
+    public User updateProfile(String username, String fullName, String email) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // Check if email is being changed and if it's already taken by another user
+        if (!user.getEmail().equals(email)) {
+            if (existsByEmail(email)) {
+                throw new IllegalArgumentException("Email is already in use by another account");
+            }
+            user.setEmail(email);
+            log.info("Email updated for user: {} to {}", username, email);
+        }
+        
+        // Update full name
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            user.setFullName(fullName.trim());
+            log.info("Full name updated for user: {}", username);
+        }
+        
+        User savedUser = userRepository.save(user);
+        log.info("Profile updated successfully for user: {}", username);
+        return savedUser;
+    }
+    
+    @Transactional(readOnly = true)
+    public long countGeneratedImagesByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return user.getGeneratedImages() != null ? user.getGeneratedImages().size() : 0;
+    }
 }
 

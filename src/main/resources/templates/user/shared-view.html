@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${sharedImage.generatedImage.trend.trendName} + ' - Shared Image'">Shared Image</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${shareUrl}">
+    <meta property="og:title" th:content="${sharedImage.generatedImage.trend.trendName} + ' - AI Generated Image'">
+    <meta property="og:description" th:content="'Check out this amazing AI-generated image created with Trendy! Style: ' + ${sharedImage.generatedImage.trend.trendName}">
+    <meta property="og:image" th:content="${imageUrl}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Trendy - AI Image Generator">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${sharedImage.generatedImage.trend.trendName} + ' - AI Generated Image'">
+    <meta name="twitter:description" th:content="'Check out this amazing AI-generated image created with Trendy! Style: ' + ${sharedImage.generatedImage.trend.trendName}">
+    <meta name="twitter:image" th:content="${imageUrl}">
+    
+    <style>
+        /* Fix dropdown being cut off */
+        .card {
+            overflow: visible !important;
+        }
+        .card-body {
+            overflow: visible !important;
+        }
+        .card-footer {
+            overflow: visible !important;
+        }
+        .btn-group {
+            position: relative !important;
+        }
+        .dropdown-menu {
+            position: absolute !important;
+            z-index: 1050 !important;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Define functions at the TOP of content fragment -->
+        <script>
+            window.copyCurrentUrl = function() {
+                const url = window.location.href;
+                
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        const btn = event.target.closest('button');
+                        const originalHtml = btn.innerHTML;
+                        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-success');
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalHtml;
+                            btn.classList.remove('btn-success');
+                            btn.classList.add('btn-outline-primary');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Clipboard API failed:', err);
+                        window.fallbackCopyUrl(url);
+                    });
+                } else {
+                    window.fallbackCopyUrl(url);
+                }
+            };
+            
+            window.fallbackCopyUrl = function(url) {
+                const input = document.createElement('input');
+                input.value = url;
+                input.style.position = 'fixed';
+                input.style.left = '-9999px';
+                document.body.appendChild(input);
+                input.select();
+                try {
+                    document.execCommand('copy');
+                    alert('Link copied to clipboard!');
+                } catch (err) {
+                    alert('Failed to copy link');
+                }
+                document.body.removeChild(input);
+            };
+            
+            console.log('Shared view functions loaded');
+        </script>
+        
+        <div class="container py-4">
+            <!-- Header with share info -->
+            <div class="text-center mb-4">
+                <h1><i class="bi bi-share-fill text-success"></i> Shared Image</h1>
+                <p class="text-muted">
+                    Created by <strong th:text="${sharedImage.user.fullName ?: sharedImage.user.username}">User</strong>
+                    • <i class="bi bi-eye"></i> <span th:text="${sharedImage.viewCount}">0</span> views
+                </p>
+            </div>
+
+            <div class="row">
+                <!-- Main Image -->
+                <div class="col-md-8 mx-auto">
+                    <div class="card shadow-sm">
+                        <img th:src="@{/images/{filename}(filename=${sharedImage.generatedImage.outputImagePath})}" 
+                             class="card-img-top" 
+                             alt="Shared generated image"
+                             style="max-height: 600px; object-fit: contain; background-color: #f8f9fa;">
+                        
+                        <div class="card-body">
+                            <h4 class="card-title" th:text="${sharedImage.generatedImage.trend.trendName}">Trend Name</h4>
+                            <p class="card-text text-muted" th:text="${sharedImage.generatedImage.trend.description}">
+                                Trend description
+                            </p>
+                            
+                            <div class="d-flex gap-2 align-items-center text-muted small">
+                                <span><i class="bi bi-calendar"></i> 
+                                    <span th:text="${#temporals.format(sharedImage.createdAt, 'MMM dd, yyyy')}">Date</span>
+                                </span>
+                                <span th:if="${sharedImage.expiresAt != null}">
+                                    • <i class="bi bi-clock"></i> Expires 
+                                    <span th:text="${#temporals.format(sharedImage.expiresAt, 'MMM dd, yyyy')}">Date</span>
+                                </span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- Actions -->
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a th:href="@{/images/download/{filename}(
+                                        filename=${sharedImage.generatedImage.outputImagePath},
+                                        name=${sharedImage.generatedImage.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-shared.jpg'}
+                                    )}" 
+                                   class="btn btn-primary">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                                
+                                <button type="button" class="btn btn-outline-primary" onclick="copyCurrentUrl()">
+                                    <i class="bi bi-link-45deg"></i> Copy Link
+                                </button>
+                                
+                                <div class="btn-group dropup">
+                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true">
+                                        <i class="bi bi-share"></i> Share
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" 
+                                               th:href="@{https://www.facebook.com/sharer/sharer.php(u=${shareUrl})}"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                <i class="bi bi-facebook"></i> Facebook
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" 
+                                               th:href="@{https://twitter.com/intent/tweet(url=${shareUrl},text='Check out this AI-generated image from Trendy!')}"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                <i class="bi bi-twitter"></i> Twitter
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" 
+                                               th:href="@{https://pinterest.com/pin/create/button/(url=${shareUrl},description='AI-generated image from Trendy')}"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                <i class="bi bi-pinterest"></i> Pinterest
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inline script to ensure function is available immediately -->
+    <script>
+        // Define share function globally - MUST be defined before onclick
+        window.shareToSocial = function(platform) {
+            console.log('shareToSocial called with:', platform);
+            
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent('Check out this AI-generated image from Trendy!');
+            
+            let shareUrl = '';
+            switch(platform) {
+                case 'facebook':
+                    shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
+                    break;
+                case 'twitter':
+                    shareUrl = 'https://twitter.com/intent/tweet?url=' + url + '&text=' + text;
+                    break;
+                case 'pinterest':
+                    shareUrl = 'https://pinterest.com/pin/create/button/?url=' + url + '&description=' + text;
+                    break;
+                default:
+                    console.error('Unknown platform:', platform);
+                    alert('Unknown platform: ' + platform);
+                    return;
+            }
+            
+            console.log('Opening URL:', shareUrl);
+            
+            // Try to open in new window
+            const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
+            
+            if (!popup) {
+                console.warn('Popup blocked, trying new tab');
+                window.open(shareUrl, '_blank');
+            }
+        };
+    </script>
+
+    <th:block layout:fragment="scripts">
+        <!-- Functions already defined in content fragment -->
+    </th:block>
+</body>
+</html>
+

@@ -123,6 +123,11 @@ public class TrendService {
         return trendRepository.findTopTrendsByUsageLimit(TrendStatus.ACTIVE.name(), limit);
     }
     
+    @Transactional(readOnly = true)
+    public List<Trend> getAllActivePublicTrends() {
+        return trendRepository.findByStatusAndDeletedAtIsNull(TrendStatus.ACTIVE);
+    }
+    
     @Transactional
     public Trend createTrend(Trend trend) {
         log.info("Creating new trend: {}", trend.getTrendName());

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="3" author="trendai">
+        <comment>Create favorite_trends table for bookmarking trends</comment>
+        
+        <createTable tableName="favorite_trends">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Foreign Keys -->
+        <addForeignKeyConstraint
+                baseTableName="favorite_trends"
+                baseColumnNames="user_id"
+                constraintName="fk_favorite_trends_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="favorite_trends"
+                baseColumnNames="trend_id"
+                constraintName="fk_favorite_trends_trend"
+                referencedTableName="trends"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Unique Constraint: One user can favorite a trend only once -->
+        <addUniqueConstraint
+                tableName="favorite_trends"
+                columnNames="user_id, trend_id"
+                constraintName="uk_favorite_trends_user_trend"/>
+
+        <!-- Indexes for performance -->
+        <createIndex indexName="idx_favorite_trends_user" tableName="favorite_trends">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_favorite_trends_trend" tableName="favorite_trends">
+            <column name="trend_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="favorite_trends"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

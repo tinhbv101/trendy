@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="1.4-create-favorite-images-table" author="ai-assistant">
+        <!-- Create favorite_images table -->
+        <createTable tableName="favorite_images">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" 
+                           foreignKeyName="fk_favorite_image_user" 
+                           references="users(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="generated_image_id" type="BIGINT">
+                <constraints nullable="false" 
+                           foreignKeyName="fk_favorite_image_generated" 
+                           references="generated_images(id)"
+                           deleteCascade="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Add unique constraint to prevent duplicate favorites -->
+        <addUniqueConstraint 
+            tableName="favorite_images" 
+            columnNames="user_id, generated_image_id" 
+            constraintName="uc_user_generated_image_favorite"/>
+
+        <!-- Add index for better query performance -->
+        <createIndex indexName="idx_favorite_image_user_id" tableName="favorite_images">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_favorite_image_generated_image_id" tableName="favorite_images">
+            <column name="generated_image_id"/>
+        </createIndex>
+
+        <!-- Rollback -->
+        <rollback>
+            <dropTable tableName="favorite_images"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

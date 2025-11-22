@@ -18,6 +18,107 @@
     <div layout:fragment="content">
         <h1 class="mb-4"><i class="bi bi-images"></i> My Gallery</h1>
 
+        <!-- Filters Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-funnel"></i> Filters & Search</h5>
+            </div>
+            <div class="card-body">
+                <form id="filterForm" method="get" action="/gallery">
+                    <div class="row g-3">
+                        <!-- Search -->
+                        <div class="col-md-6 col-lg-4">
+                            <label for="search" class="form-label"><i class="bi bi-search"></i> Search by Trend</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="search" 
+                                   name="search" 
+                                   th:value="${selectedSearch}"
+                                   placeholder="Type trend name...">
+                        </div>
+                        
+                        <!-- Trend Filter -->
+                        <div class="col-md-6 col-lg-4">
+                            <label for="trendId" class="form-label"><i class="bi bi-palette"></i> Filter by Trend</label>
+                            <select class="form-select" id="trendId" name="trendId">
+                                <option value="">All Trends</option>
+                                <option th:each="trend : ${allTrends}" 
+                                        th:value="${trend.id}" 
+                                        th:text="${trend.trendName}"
+                                        th:selected="${selectedTrendId != null and selectedTrendId == trend.id}">
+                                    Trend Name
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Status Filter -->
+                        <div class="col-md-6 col-lg-4">
+                            <label for="status" class="form-label"><i class="bi bi-flag"></i> Filter by Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Status</option>
+                                <option th:each="statusOption : ${allStatuses}" 
+                                        th:value="${statusOption.name()}" 
+                                        th:text="${statusOption.name()}"
+                                        th:selected="${selectedStatus != null and selectedStatus.equalsIgnoreCase(statusOption.name())}">
+                                    Status
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Date Range -->
+                        <div class="col-md-6 col-lg-4">
+                            <label for="startDate" class="form-label"><i class="bi bi-calendar-range"></i> From Date</label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="startDate" 
+                                   name="startDate"
+                                   th:value="${selectedStartDate}">
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                            <label for="endDate" class="form-label"><i class="bi bi-calendar-check"></i> To Date</label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="endDate" 
+                                   name="endDate"
+                                   th:value="${selectedEndDate}">
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="col-md-6 col-lg-4">
+                            <label for="sort" class="form-label"><i class="bi bi-sort-down"></i> Sort By</label>
+                            <select class="form-select" id="sort" name="sort">
+                                <option value="createdAt:desc" th:selected="${selectedSort == 'createdAt:desc' or selectedSort == null}">Newest First</option>
+                                <option value="createdAt:asc" th:selected="${selectedSort == 'createdAt:asc'}">Oldest First</option>
+                                <option value="trend.trendName:asc" th:selected="${selectedSort == 'trend.trendName:asc'}">Trend Name (A-Z)</option>
+                                <option value="trend.trendName:desc" th:selected="${selectedSort == 'trend.trendName:desc'}">Trend Name (Z-A)</option>
+                                <option value="status:asc" th:selected="${selectedSort == 'status:asc'}">Status (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel-fill"></i> Apply Filters
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="bi bi-x-circle"></i> Clear All
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div th:if="${images != null and images.hasContent()}" class="alert alert-info mb-3">
+            <i class="bi bi-info-circle"></i> 
+            Showing <strong th:text="${images.numberOfElements}">0</strong> of 
+            <strong th:text="${images.totalElements}">0</strong> images
+            <span th:if="${selectedSearch != null and !selectedSearch.isEmpty()}">
+                matching "<strong th:text="${selectedSearch}">search</strong>"
+            </span>
+        </div>
+
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${images != null and images.hasContent()}">
             <div class="col" th:each="image : ${images.content}">
                 <div class="card h-100">
@@ -48,11 +149,44 @@
                               th:text="${image.status}">Status</span>
                     </div>
                     <div class="card-footer bg-transparent">
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-1">
                             <a th:href="@{/generate/result/{id}(id=${image.id})}" 
-                               class="btn btn-outline-primary btn-sm flex-grow-1">
-                                <i class="bi bi-eye"></i> View
+                               class="btn btn-outline-primary btn-sm flex-grow-1"
+                               title="View details">
+                                <i class="bi bi-eye"></i>
                             </a>
+                            <!-- Favorite button -->
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm favorite-btn" 
+                                    th:attr="data-image-id=${image.id}"
+                                    onclick="toggleFavoriteImage(this)"
+                                    title="Add to favorites">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            <!-- Desktop: Download button -->
+                            <a th:if="${image.status.name() == 'COMPLETED' and image.outputImagePath != null}"
+                               th:href="@{/images/download/{filename}(
+                                    filename=${image.outputImagePath},
+                                    name=${image.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-' + 
+                                          #temporals.format(image.createdAt, 'yyyyMMdd') + 
+                                          (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}
+                                )}" 
+                               class="btn btn-outline-success btn-sm d-none d-md-inline-block"
+                               title="Download image">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            <!-- Mobile: Share button -->
+                            <button th:if="${image.status.name() == 'COMPLETED' and image.outputImagePath != null}"
+                                    type="button"
+                                    class="btn btn-outline-success btn-sm d-md-none"
+                                    th:attr="data-image-url=@{/images/{filename}(filename=${image.outputImagePath})},
+                                             data-image-name=${image.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-' + 
+                                               #temporals.format(image.createdAt, 'yyyyMMdd') + 
+                                               (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}"
+                                    onclick="shareImageFromGallery(this)"
+                                    title="Save/Share image">
+                                <i class="bi bi-share"></i>
+                            </button>
                             <button type="button" 
                                     class="btn btn-outline-danger btn-sm" 
                                     data-bs-toggle="modal" 
@@ -117,6 +251,175 @@
             </ul>
         </nav>
     </div>
+    
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            function clearFilters() {
+                window.location.href = '/gallery';
+            }
+            
+            // Auto-submit on filter change (optional)
+            document.addEventListener('DOMContentLoaded', function() {
+                const filterForm = document.getElementById('filterForm');
+                const selects = filterForm.querySelectorAll('select');
+                
+                // Optional: Auto-submit when select changes
+                /*
+                selects.forEach(select => {
+                    select.addEventListener('change', function() {
+                        filterForm.submit();
+                    });
+                });
+                */
+            });
+            
+            async function shareImageFromGallery(button) {
+                const imageUrl = button.getAttribute('data-image-url');
+                const imageName = button.getAttribute('data-image-name');
+                const fullUrl = window.location.origin + imageUrl;
+                
+                // Check if Web Share API is supported
+                if (navigator.share) {
+                    try {
+                        // Show loading state
+                        const originalHtml = button.innerHTML;
+                        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                        button.disabled = true;
+                        
+                        // Fetch the image as blob
+                        const response = await fetch(fullUrl);
+                        const blob = await response.blob();
+                        const file = new File([blob], imageName, { type: blob.type });
+                        
+                        // Restore button
+                        button.innerHTML = originalHtml;
+                        button.disabled = false;
+                        
+                        // Try to share with the file
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Generated Image',
+                                text: 'AI-generated image from Trendy'
+                            });
+                        } else {
+                            // Fallback: share URL
+                            await navigator.share({
+                                title: 'Generated Image',
+                                text: 'AI-generated image from Trendy',
+                                url: fullUrl
+                            });
+                        }
+                    } catch (error) {
+                        button.innerHTML = '<i class="bi bi-share"></i>';
+                        button.disabled = false;
+                        
+                        if (error.name !== 'AbortError') {
+                            console.error('Error sharing:', error);
+                            // Fallback to download
+                            const link = document.createElement('a');
+                            link.href = fullUrl.replace('/images/', '/images/download/');
+                            link.download = imageName;
+                            link.click();
+                        }
+                    }
+                } else {
+                    // Fallback to download
+                    const link = document.createElement('a');
+                    link.href = fullUrl.replace('/images/', '/images/download/');
+                    link.download = imageName;
+                    link.click();
+                }
+            }
+            
+            // Favorite functionality for images
+            let favoriteImageIds = [];
+            
+            // Load favorite image IDs on page load
+            async function loadFavoriteImageIds() {
+                try {
+                    const response = await fetch('/api/favorites/images/ids');
+                    if (response.ok) {
+                        favoriteImageIds = await response.json();
+                        updateFavoriteButtons();
+                    }
+                } catch (error) {
+                    console.error('Error loading favorite image IDs:', error);
+                }
+            }
+            
+            function updateFavoriteButtons() {
+                document.querySelectorAll('.favorite-btn').forEach(btn => {
+                    const imageId = parseInt(btn.getAttribute('data-image-id'));
+                    const icon = btn.querySelector('i');
+                    
+                    if (favoriteImageIds.includes(imageId)) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-danger');
+                        btn.setAttribute('title', 'Remove from favorites');
+                    } else {
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-danger');
+                        btn.setAttribute('title', 'Add to favorites');
+                    }
+                });
+            }
+            
+            async function toggleFavoriteImage(button) {
+                const imageId = button.getAttribute('data-image-id');
+                const icon = button.querySelector('i');
+                
+                try {
+                    // Show loading
+                    button.disabled = true;
+                    
+                    const response = await fetch(`/api/favorites/image/${imageId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update local cache
+                        if (data.favorited) {
+                            if (!favoriteImageIds.includes(parseInt(imageId))) {
+                                favoriteImageIds.push(parseInt(imageId));
+                            }
+                            icon.classList.remove('bi-heart');
+                            icon.classList.add('bi-heart-fill');
+                            button.classList.remove('btn-outline-danger');
+                            button.classList.add('btn-danger');
+                            button.setAttribute('title', 'Remove from favorites');
+                        } else {
+                            favoriteImageIds = favoriteImageIds.filter(id => id !== parseInt(imageId));
+                            icon.classList.remove('bi-heart-fill');
+                            icon.classList.add('bi-heart');
+                            button.classList.remove('btn-danger');
+                            button.classList.add('btn-outline-danger');
+                            button.setAttribute('title', 'Add to favorites');
+                        }
+                    } else {
+                        alert(data.message || 'Failed to update favorite');
+                    }
+                } catch (error) {
+                    console.error('Error toggling favorite:', error);
+                    alert('Failed to update favorite. Please try again.');
+                } finally {
+                    button.disabled = false;
+                }
+            }
+            
+            // Load favorites on page load
+            loadFavoriteImageIds();
+        </script>
+    </th:block>
 </body>
 </html>
 
