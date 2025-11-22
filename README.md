@@ -30,17 +30,43 @@
 
 **Trendy** is a web platform that allows users to transform their photos using popular AI trends. The application integrates with Google Gemini AI to create unique and creative images.
 
+### 🆕 What's New in v1.1.0
+
+**Major Features Added:**
+- 👤 **User Profile Management** - View and edit your profile, see statistics
+- 📥 **Enhanced Downloads** - Custom filenames and ZIP download for input images
+- 📱 **iOS Share Integration** - Native "Save to Photos" for mobile devices
+- 🔍 **Advanced Gallery** - Filter by trend, status, date range, and search
+- ⭐ **Favorites System** - Save favorite trends and generated images
+- 🔗 **Social Sharing** - Create public share links with rich previews
+
+**Improvements:**
+- 🐛 Fixed multiple bugs including LazyInitializationException issues
+- ⚡ Performance optimizations with @EntityGraph
+- 🎨 UI/UX improvements across the platform
+- 🔒 Enhanced security with proper CSRF handling
+
+See [CHANGELOG.md](CHANGELOG.md) for complete details.
+
 ### ✨ Key Features
 
+**Core Features:**
 - 🎯 **Browse Trends**: Discover and explore diverse AI trends
 - 🖼️ **Image Generation**: Upload multiple images and create new ones with AI
-- 📁 **My Gallery**: Manage and review generated images
+- 📁 **My Gallery**: Manage and review generated images with advanced filters
 - 🔒 **User Authentication**: Secure registration and login
 - 👑 **Admin Panel**: Manage trends, users, and system
-- 💾 **MinIO Storage**: Secure and scalable image storage
-- 🔍 **Search & Filter**: Search and filter trends by category
+
+**v1.1.0 New Features:**
+- 👤 **User Profile Management**: View and edit profile, display statistics
+- 📥 **Enhanced Downloads**: Custom filenames and ZIP download for input images
+- 📱 **iOS Share Integration**: Native share functionality for mobile devices
+- 🔍 **Advanced Gallery Filters**: Filter by trend, status, date range, and search
+- ⭐ **Favorites System**: Save favorite trends and generated images
+- 🔗 **Social Sharing**: Create public share links with Open Graph support
 - 📊 **Sort Options**: Sort by popularity, newest, oldest, least used
 - 🗑️ **Delete Images**: Remove old images and manage storage
+- 💾 **MinIO Storage**: Secure and scalable image storage
 
 ### 🛠️ Tech Stack
 
@@ -213,7 +239,7 @@ gemini:
 ./gradlew bootRun
 
 # Or run JAR file
-java -jar build/libs/Trendy-0.0.1-SNAPSHOT.jar
+java -jar build/libs/Trendy-1.1.0.jar
 ```
 
 ---
@@ -306,8 +332,33 @@ trendy/
 #### 4. My Gallery
 - Go to http://localhost:8080/gallery
 - View all generated images
+- **Filter & Search**: Use filters to find images by trend, status, or date range
+- **Search**: Search by trend name in the search box
+- **Sort**: Sort by newest, oldest, or trend name
 - Click "View" for details
 - Click "Delete" to remove unwanted images
+- **Favorite**: Click heart icon to save favorite images
+
+#### 5. User Profile & Account Settings
+- Go to http://localhost:8080/account
+- View your profile information and statistics
+- Edit full name and email address
+- Change password securely
+- View total images generated count
+
+#### 6. Favorites
+- **Favorite Trends**: Click heart icon on any trend card to save it
+- **Favorite Images**: Click heart icon on generated images in gallery
+- View favorites: Go to "My Favorites" from user menu
+- Manage favorite trends and images from dedicated pages
+
+#### 7. Social Sharing
+- After generating an image, click "Share Image" button
+- Create a public share link with customizable expiry
+- Copy link to share with others
+- Share directly to Facebook, Twitter, or Pinterest
+- Manage all shared links from "My Shares" page
+- View share statistics (view count, expiry date)
 
 ### For Admins
 
@@ -423,9 +474,20 @@ GET  /api/trends/search?q=... - Search trends
 
 #### User API (Authenticated)
 ```
-POST /generate/{trendId}      - Generate image
-GET  /gallery                 - View user gallery
-POST /gallery/delete/{id}     - Delete generated image
+POST /generate/{trendId}           - Generate image
+GET  /gallery                      - View user gallery (with filters)
+POST /gallery/delete/{id}          - Delete generated image
+GET  /account                      - View account settings
+POST /account/change-password      - Change password
+POST /account/update-profile        - Update profile info
+GET  /favorites                    - View favorite trends
+GET  /favorites/images             - View favorite images
+POST /api/favorites/toggle/{id}    - Toggle trend favorite
+POST /api/favorites/image/{id}     - Toggle image favorite
+POST /api/share/create             - Create share link
+POST /api/share/revoke/{token}     - Revoke share link
+GET  /my-shares                    - View my shared links
+GET  /share/{token}                - View public shared image
 ```
 
 #### Admin API (Admin only)
@@ -592,19 +654,29 @@ If you encounter any issues or have questions:
 
 ## 🗺️ Roadmap
 
-### Version 1.1 (Coming Soon)
+### Version 1.1.0 ✅ (Released)
+- [x] User Profile Management
+- [x] Enhanced Image Downloads (custom names + ZIP)
+- [x] iOS Native Share Integration
+- [x] Advanced Gallery Filters & Search
+- [x] Favorites System (Trends & Images)
+- [x] Social Sharing with Public Links
+
+### Version 1.2 (Planned)
 - [ ] Bulk image generation
 - [ ] Image editing tools
-- [ ] Social sharing features
-- [ ] User profiles
-- [ ] Comments & ratings
+- [ ] Comments & ratings on shared images
+- [ ] Email notifications
+- [ ] Export gallery as PDF/ZIP
+- [ ] Advanced image analytics
 
 ### Version 2.0 (Future)
 - [ ] Mobile app (iOS/Android)
 - [ ] Video generation
-- [ ] Advanced AI models
+- [ ] Advanced AI models integration
 - [ ] Marketplace for trends
-- [ ] API for third-party integration
+- [ ] Public API for third-party integration
+- [ ] Real-time collaboration features
 
 ---
 
