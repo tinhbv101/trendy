@@ -1,0 +1,26 @@
+# robots.txt for Trendy
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /generate/
+Disallow: /gallery/
+Disallow: /account/
+Disallow: /favorite/
+Disallow: /favorites
+Disallow: /my-shares
+
+# Allow public pages
+Allow: /
+Allow: /trends
+Allow: /trends/*
+Allow: /share/*
+Allow: /images/*
+Allow: /css/*
+Allow: /js/*
+
+# Sitemap location (update with your actual domain)
+# Sitemap: https://trendy.devlord.net/sitemap.xml
+

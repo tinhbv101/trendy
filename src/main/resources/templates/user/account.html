@@ -27,7 +27,7 @@
                 <!-- User Information Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-badge"></i> Profile Information</h5>
+                        <h2 class="mb-0 h5"><i class="bi bi-person-badge"></i> Profile Information</h2>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
@@ -64,7 +64,7 @@
                 <!-- Edit Profile Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Profile</h5>
+                        <h2 class="mb-0 h5"><i class="bi bi-pencil-square"></i> Edit Profile</h2>
                     </div>
                     <div class="card-body">
                         <!-- Profile Error Message -->
@@ -128,7 +128,7 @@
                 <!-- Change Password Card -->
                 <div class="card">
                     <div class="card-header bg-warning">
-                        <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Change Password</h5>
+                        <h2 class="mb-0 h5"><i class="bi bi-shield-lock"></i> Change Password</h2>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/account/change-password}" th:object="${changePasswordRequest}" method="post">

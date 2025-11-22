@@ -49,6 +49,10 @@ server:
   servlet:
     session:
       timeout: 30m
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,image/svg+xml
+    min-response-size: 1024
   error:
     whitelabel:
       enabled: false

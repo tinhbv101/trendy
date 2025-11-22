@@ -149,22 +149,23 @@
         <!-- Shares List -->
         <div th:if="${shares != null and shares.hasContent()}">
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                <div class="col" th:each="share : ${shares.content}">
+                <div class="col" th:each="share, iterStat : ${shares.content}">
                     <div class="card h-100">
                         <!-- Image Preview -->
                         <div style="height: 200px; overflow: hidden;">
                             <img th:src="@{/images/{filename}(filename=${share.generatedImage.outputImagePath})}" 
                                  class="card-img-top" 
                                  alt="Shared image"
-                                 loading="lazy"
+                                 th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                                  decoding="async"
                                  width="400"
                                  height="200"
+                                 sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
                                  style="width: 100%; height: 200px; object-fit: cover;">
                         </div>
                         
                         <div class="card-body">
-                            <h6 class="card-title" th:text="${share.generatedImage.trend.trendName}">Trend Name</h6>
+                            <h3 class="card-title h6" th:text="${share.generatedImage.trend.trendName}">Trend Name</h3>
                             
                             <div class="small text-muted mb-2">
                                 <div><i class="bi bi-calendar"></i> Shared: 

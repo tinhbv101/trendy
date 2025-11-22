@@ -113,7 +113,7 @@
 
                         <div th:if="${image.status.name() == 'FAILED'}">
                             <div class="alert alert-danger">
-                                <h5><i class="bi bi-exclamation-triangle"></i> Generation Failed</h5>
+                                <h3 class="h5"><i class="bi bi-exclamation-triangle"></i> Generation Failed</h3>
                                 <p th:text="${image.errorMessage}">An error occurred during generation.</p>
                             </div>
                             <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-primary">
@@ -127,7 +127,7 @@
             <div class="col-md-4">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-info-circle"></i> Generation Info</h5>
+                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> Generation Info</h2>
                         <ul class="list-unstyled mb-0">
                             <li class="mb-2"><strong><i class="bi bi-palette"></i> Trend:</strong> 
                                 <span th:text="${image.trend.trendName}">Trend</span>
@@ -151,7 +151,7 @@
                 <!-- Input Images Preview -->
                 <div th:if="${image.inputImages != null and !image.inputImages.isEmpty()}" class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-images"></i> Input Images</h5>
+                        <h2 class="card-title h5"><i class="bi bi-images"></i> Input Images</h2>
                         <p class="text-muted small mb-2">
                             Click to download all as ZIP
                         </p>

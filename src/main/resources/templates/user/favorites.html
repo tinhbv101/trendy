@@ -15,17 +15,18 @@
 
         <!-- Favorites Grid -->
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${favorites != null and favorites.hasContent()}">
-            <div class="col" th:each="favorite : ${favorites.content}">
+            <div class="col" th:each="favorite, iterStat : ${favorites.content}">
                 <div class="card h-100 shadow-sm">
                     <!-- Thumbnail -->
                     <div th:if="${favorite.trend.thumbnailPath != null}" style="height: 180px; overflow: hidden;">
                         <img th:src="@{/images/{filename}(filename=${favorite.trend.thumbnailPath})}" 
                              class="card-img-top" 
                              alt="Trend thumbnail"
-                             loading="lazy"
+                             th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                              decoding="async"
                              width="400"
                              height="180"
+                             sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
                              style="width: 100%; height: 180px; object-fit: cover;">
                     </div>
                     <div th:if="${favorite.trend.thumbnailPath == null}" 
@@ -35,7 +36,7 @@
                     </div>
                     
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${favorite.trend.trendName}">Trend Name</h5>
+                        <h3 class="card-title h5" th:text="${favorite.trend.trendName}">Trend Name</h3>
                         <p class="card-text small" th:text="${#strings.abbreviate(favorite.trend.description, 80)}">Description</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${favorite.trend.category}">Category</span>

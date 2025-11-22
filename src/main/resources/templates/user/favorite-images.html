@@ -33,7 +33,7 @@
 
         <!-- Images Grid -->
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${favoriteImages != null and favoriteImages.hasContent()}">
-            <div class="col" th:each="favoriteImage : ${favoriteImages.content}">
+            <div class="col" th:each="favoriteImage, iterStat : ${favoriteImages.content}">
                 <div class="card h-100">
                     <!-- Display generated image -->
                     <div th:if="${favoriteImage.generatedImage.status.name() == 'COMPLETED' and favoriteImage.generatedImage.outputImagePath != null}" 
@@ -41,10 +41,11 @@
                         <img th:src="@{/images/{filename}(filename=${favoriteImage.generatedImage.outputImagePath})}" 
                              class="card-img-top" 
                              alt="Generated image"
-                             loading="lazy"
+                             th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                              decoding="async"
                              width="400"
                              height="200"
+                             sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
                              style="width: 100%; height: 200px; object-fit: cover;">
                     </div>
                     <!-- Placeholder for other statuses -->
@@ -57,7 +58,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <h6 class="card-title" th:text="${favoriteImage.generatedImage.trend.trendName}">Trend Name</h6>
+                        <h3 class="card-title h6" th:text="${favoriteImage.generatedImage.trend.trendName}">Trend Name</h3>
                         <p class="card-text small text-muted">
                             <i class="bi bi-calendar"></i> Created: <span th:text="${#temporals.format(favoriteImage.generatedImage.createdAt, 'dd/MM/yyyy')}">Date</span><br>
                             <i class="bi bi-heart-fill text-danger"></i> Favorited: <span th:text="${#temporals.format(favoriteImage.createdAt, 'dd/MM/yyyy')}">Date</span>

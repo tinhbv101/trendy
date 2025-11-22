@@ -22,7 +22,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Upload Test Image</h5>
+                        <h2 class="card-title h5">Upload Test Image</h2>
                         <form method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="testImage" class="form-label">Test Image</label>
@@ -38,7 +38,7 @@
 
                 <div class="card mt-3">
                     <div class="card-body">
-                        <h5 class="card-title">Test Result</h5>
+                        <h2 class="card-title h5">Test Result</h2>
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> Upload an image to see the test result
                         </div>
@@ -49,7 +49,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Trend Details</h5>
+                        <h2 class="card-title h5">Trend Details</h2>
                         <ul class="list-unstyled">
                             <li><strong>Name:</strong> <span th:text="${trend.trendName}">Name</span></li>
                             <li><strong>Category:</strong> <span th:text="${trend.category}">Category</span></li>
@@ -61,7 +61,7 @@
                             <li><strong>Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
                         </ul>
                         <hr>
-                        <h6>Prompt Template:</h6>
+                        <h3 class="h6">Prompt Template:</h3>
                         <pre class="small bg-light p-2 rounded" th:text="${trend.promptTemplate}">Prompt</pre>
                     </div>
                 </div>

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -61,11 +62,16 @@ public class ImageController {
             // Determine content type
             String contentType = determineContentType(filename);
 
+            // Set cache control headers for 1 year (images are immutable)
+            CacheControl cacheControl = CacheControl.maxAge(365, TimeUnit.DAYS)
+                    .cachePublic()
+                    .immutable();
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000, immutable") // 1 year cache
-                    .header(HttpHeaders.EXPIRES, java.time.Instant.now().plusSeconds(31536000).toString())
+                    .cacheControl(cacheControl)
                     .header("X-Content-Type-Options", "nosniff")
+                    .header("ETag", "\"" + objectName.hashCode() + "\"") // Add ETag for better caching
                     .body(resource);
 
         } catch (Exception e) {

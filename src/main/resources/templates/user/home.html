@@ -3,7 +3,10 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Home</title>
+    <title>Home - Trendy</title>
+    <th:block th:fragment="extra-head">
+        <meta name="description" content="Transform your photos with AI-powered trends. Explore featured styles and create amazing images in seconds with Trendy - AI Image Generator.">
+    </th:block>
 </head>
 <body>
     <div layout:fragment="content">
@@ -22,17 +25,18 @@
         <h2 class="mb-4">Featured Trends</h2>
         
         <div class="row row-cols-1 row-cols-md-3 g-4" th:if="${trends != null and !trends.isEmpty()}">
-            <div class="col" th:each="trend : ${trends}">
+            <div class="col" th:each="trend, iterStat : ${trends}">
                 <div class="card h-100 shadow-sm">
                     <!-- Thumbnail -->
                     <div th:if="${trend.thumbnailPath != null}" style="height: 200px; overflow: hidden;">
                         <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
                              class="card-img-top" 
                              alt="Trend thumbnail"
-                             loading="lazy"
+                             th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                              decoding="async"
                              width="400"
                              height="200"
+                             sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
                              style="width: 100%; height: 200px; object-fit: cover;">
                     </div>
                     <div th:if="${trend.thumbnailPath == null}" 
@@ -41,7 +45,7 @@
                         <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${trend.trendName}">Trend Name</h5>
+                        <h3 class="card-title h5" th:text="${trend.trendName}">Trend Name</h3>
                         <p class="card-text" th:text="${trend.description}">Description</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${trend.category}">Category</span>
