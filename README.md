@@ -1,7 +1,7 @@
 # 🎨 Trendy - AI-Powered Image Transformation Platform
 
 <div align="center">
-  <img src="src/main/resources/static/logo.png" alt="Trendy Logo" width="200" height="200">
+  <img src="src/main/resources/static/l_logo.png" alt="Trendy Logo" width="200" height="200">
   
   <p><strong>Transform your photos with AI-powered trends</strong></p>
 
