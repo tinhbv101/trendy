@@ -29,10 +29,11 @@ public class SecurityConfig {
                 .requestMatchers("/", "/trends", "/trends/**", "/register", 
                                "/css/**", "/js/**", "/images/**", "/uploads/**", 
                                "/logo.png", "/favicon.ico", "/*.png", "/*.jpg", "/*.ico").permitAll()
+                .requestMatchers("/share/**").permitAll() // Public shared links
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/generate/**", "/gallery/**", "/account/**").authenticated()
+                .requestMatchers("/generate/**", "/gallery/**", "/account/**", "/favorite/**", "/favorites", "/my-shares").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>My Shared Links</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Define functions at the TOP of content fragment -->
+        <script>
+            window.copyShareLinkFromList = function(button) {
+                console.log('copyShareLinkFromList called', button);
+                const shareUrl = button.getAttribute('data-share-url');
+                const fullUrl = window.location.origin + shareUrl;
+                console.log('Full URL to copy:', fullUrl);
+                
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(fullUrl).then(() => {
+                        window.updateCopyButton(button);
+                    }).catch(err => {
+                        console.error('Clipboard API failed:', err);
+                        window.fallbackCopyInList(fullUrl, button);
+                    });
+                } else {
+                    // Fallback for older browsers or insecure contexts
+                    window.fallbackCopyInList(fullUrl, button);
+                }
+            };
+            
+            window.updateCopyButton = function(button) {
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i>';
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+                }, 2000);
+            };
+            
+            window.fallbackCopyInList = function(text, button) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        window.updateCopyButton(button);
+                    } else {
+                        alert('Failed to copy. Please copy manually.');
+                    }
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    alert('Failed to copy. Please copy manually.');
+                }
+                
+                document.body.removeChild(textArea);
+            };
+            
+            window.revokeShare = async function(button) {
+                const token = button.getAttribute('data-token');
+                const card = button.closest('.col');
+                
+                if (!confirm('Revoke this share link? It will no longer be accessible.')) {
+                    return;
+                }
+                
+                try {
+                    button.disabled = true;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    
+                    const response = await fetch(`/api/share/revoke/${token}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update badge to show revoked status
+                        const badge = card.querySelector('.badge');
+                        badge.classList.remove('bg-success');
+                        badge.classList.add('bg-secondary');
+                        badge.textContent = 'Revoked';
+                        
+                        // Remove revoke button
+                        button.remove();
+                        
+                        // Show success message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                        alertDiv.innerHTML = `
+                            <i class="bi bi-check-circle"></i> Share link revoked successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        card.querySelector('.card-body').appendChild(alertDiv);
+                        
+                        setTimeout(() => alertDiv.remove(), 3000);
+                    } else {
+                        alert(data.message || 'Failed to revoke share link');
+                        button.disabled = false;
+                        button.innerHTML = '<i class="bi bi-x-circle"></i>';
+                    }
+                } catch (error) {
+                    console.error('Error revoking share:', error);
+                    alert('Failed to revoke share link. Please try again.');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-x-circle"></i>';
+                }
+            };
+            
+            console.log('Share functions loaded:', typeof window.copyShareLinkFromList);
+        </script>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-share-fill text-success"></i> My Shared Links</h1>
+            <a href="/gallery" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Gallery
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> 
+            You have <strong th:text="${activeShares}">0</strong> active shared link(s).
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${shares == null or !shares.hasContent()}" class="text-center py-5">
+            <i class="bi bi-share" style="font-size: 4rem; color: #ccc;"></i>
+            <h3 class="mt-3">No Shared Links Yet</h3>
+            <p class="text-muted">Share your generated images with others!</p>
+            <a href="/gallery" class="btn btn-primary mt-3">
+                <i class="bi bi-images"></i> Go to Gallery
+            </a>
+        </div>
+
+        <!-- Shares List -->
+        <div th:if="${shares != null and shares.hasContent()}">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <div class="col" th:each="share : ${shares.content}">
+                    <div class="card h-100">
+                        <!-- Image Preview -->
+                        <div style="height: 200px; overflow: hidden;">
+                            <img th:src="@{/images/{filename}(filename=${share.generatedImage.outputImagePath})}" 
+                                 class="card-img-top" 
+                                 alt="Shared image"
+                                 style="width: 100%; height: 200px; object-fit: cover;">
+                        </div>
+                        
+                        <div class="card-body">
+                            <h6 class="card-title" th:text="${share.generatedImage.trend.trendName}">Trend Name</h6>
+                            
+                            <div class="small text-muted mb-2">
+                                <div><i class="bi bi-calendar"></i> Shared: 
+                                    <span th:text="${#temporals.format(share.createdAt, 'dd/MM/yyyy')}">Date</span>
+                                </div>
+                                <div th:if="${share.expiresAt != null}">
+                                    <i class="bi bi-clock"></i> Expires: 
+                                    <span th:text="${#temporals.format(share.expiresAt, 'dd/MM/yyyy')}">Date</span>
+                                </div>
+                                <div><i class="bi bi-eye"></i> Views: <span th:text="${share.viewCount}">0</span></div>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <span class="badge" 
+                                  th:classappend="${share.isActive and !share.isExpired()} ? 'bg-success' : 'bg-secondary'"
+                                  th:text="${share.isActive ? (share.isExpired() ? 'Expired' : 'Active') : 'Revoked'}">
+                                Status
+                            </span>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex gap-1">
+                                <!-- View Button -->
+                                <a th:href="@{/share/{token}(token=${share.shareToken})}" 
+                                   class="btn btn-outline-primary btn-sm flex-grow-1"
+                                   target="_blank"
+                                   title="View shared page">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                
+                                <!-- Copy Link Button -->
+                                <button type="button" 
+                                        class="btn btn-outline-success btn-sm"
+                                        th:attr="data-share-url=@{/share/{token}(token=${share.shareToken})}"
+                                        onclick="copyShareLinkFromList(this)"
+                                        title="Copy link">
+                                    <i class="bi bi-link-45deg"></i>
+                                </button>
+                                
+                                <!-- Revoke Button -->
+                                <button type="button" 
+                                        class="btn btn-outline-danger btn-sm"
+                                        th:if="${share.isActive}"
+                                        th:attr="data-token=${share.shareToken}"
+                                        onclick="revokeShare(this)"
+                                        title="Revoke access">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${shares.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${shares.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/my-shares(page=${shares.number - 1})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, shares.totalPages - 1)}"
+                        th:classappend="${i == shares.number} ? 'active'">
+                        <a class="page-link" th:href="@{/my-shares(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${shares.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/my-shares(page=${shares.number + 1})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <!-- Functions already defined in body -->
+    </th:block>
+</body>
+</html>
+

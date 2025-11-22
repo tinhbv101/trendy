@@ -76,9 +76,18 @@
                         </div>
                     </div>
                     <div class="card-footer bg-transparent">
-                        <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm w-100">
-                            View Details
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                View Details
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm favorite-btn" 
+                                    th:attr="data-trend-id=${trend.id}"
+                                    onclick="toggleFavorite(this)"
+                                    title="Add to favorites">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,6 +141,83 @@
                 if (currentCategory) url += '&category=' + encodeURIComponent(currentCategory);
                 window.location.href = url;
             }
+            
+            // Get CSRF token from meta tag or cookie
+            function getCsrfToken() {
+                const token = document.querySelector('meta[name="_csrf"]');
+                return token ? token.getAttribute('content') : '';
+            }
+            
+            function getCsrfHeader() {
+                const header = document.querySelector('meta[name="_csrf_header"]');
+                return header ? header.getAttribute('content') : 'X-CSRF-TOKEN';
+            }
+            
+            // Toggle favorite
+            async function toggleFavorite(button) {
+                const trendId = button.getAttribute('data-trend-id');
+                const icon = button.querySelector('i');
+                
+                try {
+                    const csrfToken = getCsrfToken();
+                    const csrfHeader = getCsrfHeader();
+                    
+                    const headers = {
+                        'Content-Type': 'application/json',
+                    };
+                    
+                    if (csrfToken) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+                    
+                    const response = await fetch(`/favorite/${trendId}`, {
+                        method: 'POST',
+                        headers: headers
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (data.favorited) {
+                            icon.classList.remove('bi-heart');
+                            icon.classList.add('bi-heart-fill');
+                            button.classList.remove('btn-outline-danger');
+                            button.classList.add('btn-danger');
+                            button.title = 'Remove from favorites';
+                        } else {
+                            icon.classList.remove('bi-heart-fill');
+                            icon.classList.add('bi-heart');
+                            button.classList.remove('btn-danger');
+                            button.classList.add('btn-outline-danger');
+                            button.title = 'Add to favorites';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error toggling favorite:', error);
+                }
+            }
+            
+            // Load favorite states on page load
+            document.addEventListener('DOMContentLoaded', async function() {
+                try {
+                    const response = await fetch('/api/favorites/ids');
+                    const favoriteTrendIds = await response.json();
+                    
+                    document.querySelectorAll('.favorite-btn').forEach(button => {
+                        const trendId = parseInt(button.getAttribute('data-trend-id'));
+                        if (favoriteTrendIds.includes(trendId)) {
+                            const icon = button.querySelector('i');
+                            icon.classList.remove('bi-heart');
+                            icon.classList.add('bi-heart-fill');
+                            button.classList.remove('btn-outline-danger');
+                            button.classList.add('btn-danger');
+                            button.title = 'Remove from favorites';
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading favorites:', error);
+                }
+            });
             /*]]>*/
         </script>
     </th:block>

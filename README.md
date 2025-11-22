@@ -5,7 +5,7 @@
   
   <p><strong>Transform your photos with AI-powered trends</strong></p>
 
-  [![Version](https://img.shields.io/badge/Version-v1.0.1-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.0.1)
+  [![Version](https://img.shields.io/badge/Version-v1.1.0-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.0)
   [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

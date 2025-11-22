@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>My Favorites</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1 class="mb-4"><i class="bi bi-heart-fill text-danger"></i> My Favorites</h1>
+
+        <p class="lead" th:if="${totalFavorites > 0}">
+            You have <strong th:text="${totalFavorites}">0</strong> favorite trend<span th:if="${totalFavorites != 1}">s</span>
+        </p>
+
+        <!-- Favorites Grid -->
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${favorites != null and favorites.hasContent()}">
+            <div class="col" th:each="favorite : ${favorites.content}">
+                <div class="card h-100 shadow-sm">
+                    <!-- Thumbnail -->
+                    <div th:if="${favorite.trend.thumbnailPath != null}" style="height: 180px; overflow: hidden;">
+                        <img th:src="@{/images/{filename}(filename=${favorite.trend.thumbnailPath})}" 
+                             class="card-img-top" 
+                             alt="Trend thumbnail"
+                             style="width: 100%; height: 180px; object-fit: cover;">
+                    </div>
+                    <div th:if="${favorite.trend.thumbnailPath == null}" 
+                         class="card-img-top bg-secondary" 
+                         style="height: 180px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-image text-white" style="font-size: 2.5rem;"></i>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${favorite.trend.trendName}">Trend Name</h5>
+                        <p class="card-text small" th:text="${#strings.abbreviate(favorite.trend.description, 80)}">Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary" th:text="${favorite.trend.category}">Category</span>
+                            <small class="text-muted" th:text="${favorite.trend.usageCount} + ' uses'">0 uses</small>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-clock"></i> Added 
+                            <span th:text="${#temporals.format(favorite.createdAt, 'dd/MM/yyyy')}">date</span>
+                        </small>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/trends/{id}(id=${favorite.trend.id})}" 
+                               class="btn btn-outline-primary btn-sm flex-grow-1">
+                                View Details
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-danger btn-sm favorite-btn" 
+                                    th:attr="data-trend-id=${favorite.trend.id}"
+                                    onclick="removeFavorite(this)"
+                                    title="Remove from favorites">
+                                <i class="bi bi-heart-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="alert alert-info text-center py-5" th:if="${favorites == null or !favorites.hasContent()}">
+            <i class="bi bi-heart" style="font-size: 4rem; opacity: 0.3;"></i>
+            <h3 class="mt-3">No Favorites Yet</h3>
+            <p class="mb-4">Start adding trends to your favorites to see them here!</p>
+            <a th:href="@{/trends}" class="btn btn-primary">
+                <i class="bi bi-palette"></i> Browse Trends
+            </a>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4" th:if="${favorites != null and favorites.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${favorites.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/favorites(page=${favorites.number - 1})}">Previous</a>
+                </li>
+                <li class="page-item" 
+                    th:each="i : ${#numbers.sequence(0, favorites.totalPages - 1)}"
+                    th:classappend="${i == favorites.number} ? 'active'">
+                    <a class="page-link" th:href="@{/favorites(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${favorites.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/favorites(page=${favorites.number + 1})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            // Get CSRF token
+            function getCsrfToken() {
+                const token = document.querySelector('meta[name="_csrf"]');
+                return token ? token.getAttribute('content') : '';
+            }
+            
+            function getCsrfHeader() {
+                const header = document.querySelector('meta[name="_csrf_header"]');
+                return header ? header.getAttribute('content') : 'X-CSRF-TOKEN';
+            }
+            
+            // Remove from favorites
+            async function removeFavorite(button) {
+                const trendId = button.getAttribute('data-trend-id');
+                const card = button.closest('.col');
+                
+                if (!confirm('Remove this trend from your favorites?')) {
+                    return;
+                }
+                
+                try {
+                    const csrfToken = getCsrfToken();
+                    const csrfHeader = getCsrfHeader();
+                    
+                    const headers = {
+                        'Content-Type': 'application/json',
+                    };
+                    
+                    if (csrfToken) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+                    
+                    const response = await fetch(`/favorite/${trendId}`, {
+                        method: 'POST',
+                        headers: headers
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && !data.favorited) {
+                        // Fade out and remove card
+                        card.style.opacity = '0';
+                        card.style.transition = 'opacity 0.3s';
+                        setTimeout(() => {
+                            card.remove();
+                            
+                            // Reload if no more items on page
+                            if (document.querySelectorAll('.col').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }
+                } catch (error) {
+                    console.error('Error removing favorite:', error);
+                    alert('Failed to remove favorite. Please try again.');
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>
+

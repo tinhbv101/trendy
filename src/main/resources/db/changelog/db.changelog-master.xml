@@ -15,6 +15,9 @@
     <!-- Schema Updates -->
     <include file="db/changelog/changes/v1.1-add-thumbnail-to-trends.xml"/>
     <include file="db/changelog/changes/v1.2-remove-ai-model-fields.xml"/>
+    <include file="db/changelog/changes/v1.3-create-favorite-trends-table.xml"/>
+    <include file="db/changelog/changes/v1.4-create-favorite-images-table.xml"/>
+    <include file="db/changelog/changes/v1.5-create-shared-images-table.xml"/>
     
     <!-- Initial Data -->
     <include file="db/changelog/data/v1.0-initial-data.xml"/>

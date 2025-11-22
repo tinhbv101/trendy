@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -132,6 +133,34 @@ public class GenerateImageService {
         User user = userService.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
         return getUserImages(user.getId(), pageable);
+    }
+    
+    @Transactional(readOnly = true)
+    public Page<GeneratedImage> getUserImagesWithFilters(
+            String username,
+            Long trendId,
+            GenerationStatus status,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable) {
+        
+        User user = userService.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+        
+        return generatedImageRepository.findByUserIdWithFilters(
+            user.getId(), trendId, status, startDate, endDate, pageable);
+    }
+    
+    @Transactional(readOnly = true)
+    public Page<GeneratedImage> searchUserImages(String username, String search, Pageable pageable) {
+        User user = userService.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+        
+        if (search == null || search.trim().isEmpty()) {
+            return getUserImages(user.getId(), pageable);
+        }
+        
+        return generatedImageRepository.searchByUserIdAndTrendName(user.getId(), search.trim(), pageable);
     }
     
     @Transactional
