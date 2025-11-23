@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
@@ -9,25 +9,27 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     
     <!-- SEO Meta Tags -->
-    <title th:text="${pageTitle != null ? pageTitle + ' - Trendy' : 'Trendy'}">Trendy</title>
-    <meta name="description" th:content="${pageDescription != null ? pageDescription : 'Transform your photos with AI-powered trends. Choose from various styles and create amazing images in seconds with Trendy - AI Image Generator.'}">
-    <meta name="keywords" content="AI image generator, photo transformation, trendy styles, AI art, image editing, photo effects">
-    <meta name="author" content="Trendy">
-    <meta name="robots" content="index, follow">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Trendy - AI Image Generator">
-    <meta property="og:title" th:content="${pageTitle != null ? pageTitle + ' - Trendy' : 'Trendy - AI Image Generator'}">
-    <meta property="og:description" th:content="${pageDescription != null ? pageDescription : 'Transform your photos with AI-powered trends. Create amazing images in seconds.'}">
-    <meta property="og:image" th:content="@{/logo.png}">
-    <!-- og:url will be set dynamically by pages that need it -->
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" th:content="${pageTitle != null ? pageTitle + ' - Trendy' : 'Trendy - AI Image Generator'}">
-    <meta name="twitter:description" th:content="${pageDescription != null ? pageDescription : 'Transform your photos with AI-powered trends. Create amazing images in seconds.'}">
-    <meta name="twitter:image" th:content="@{/logo.png}">
+    <th:block th:with="defaultTitle=#{app.default_title}, titleSuffix=#{app.title_suffix}, defaultDescription=#{app.default_description}, defaultDescriptionShort=#{app.default_description_short}">
+        <title th:text="${pageTitle != null ? (pageTitle + ' ' + titleSuffix) : defaultTitle}">Trendy</title>
+        <meta name="description" th:content="${pageDescription != null ? pageDescription : defaultDescription}">
+        <meta name="keywords" th:content="#{app.keywords}">
+        <meta name="author" th:content="#{app.name}">
+        <meta name="robots" content="index, follow">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" th:content="${defaultTitle}">
+        <meta property="og:title" th:content="${pageTitle != null ? (pageTitle + ' ' + titleSuffix) : defaultTitle}">
+        <meta property="og:description" th:content="${pageDescription != null ? pageDescription : defaultDescriptionShort}">
+        <meta property="og:image" th:content="@{/logo.png}">
+        <!-- og:url will be set dynamically by pages that need it -->
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" th:content="${pageTitle != null ? (pageTitle + ' ' + titleSuffix) : defaultTitle}">
+        <meta name="twitter:description" th:content="${pageDescription != null ? pageDescription : defaultDescriptionShort}">
+        <meta name="twitter:image" th:content="@{/logo.png}">
+    </th:block>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" th:href="@{/logo.png}">
@@ -115,17 +117,70 @@
     <!-- Custom CSS -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
     
+    <!-- Language Switcher Script (early load) -->
+    <script>
+        function changeLanguage(lang) {
+            try {
+                // Get current URL
+                const currentUrl = window.location.href;
+                const url = new URL(currentUrl);
+                
+                // Remove existing lang parameter if any
+                url.searchParams.delete('lang');
+                
+                // Add new lang parameter
+                url.searchParams.set('lang', lang);
+                
+                // Preserve all other query parameters (error, logout, etc.)
+                const newUrl = url.toString();
+                
+                console.log('Changing language to:', lang);
+                console.log('Current URL:', currentUrl);
+                console.log('New URL:', newUrl);
+                
+                // Force page reload with new language
+                window.location.href = newUrl;
+            } catch (e) {
+                // Fallback for older browsers or if URL constructor fails
+                console.error('Error changing language:', e);
+                const currentUrl = window.location.href;
+                const baseUrl = currentUrl.split('?')[0];
+                const params = new URLSearchParams(window.location.search);
+                params.set('lang', lang);
+                const newUrl = baseUrl + '?' + params.toString();
+                console.log('Fallback URL:', newUrl);
+                window.location.href = newUrl;
+            }
+        }
+        
+        // Make function available globally
+        window.changeLanguage = changeLanguage;
+        
+        // Global i18n strings for JavaScript (will be populated by Thymeleaf)
+        window.i18n = window.i18n || {};
+    </script>
+    
+    <!-- Populate i18n object with translated strings -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.i18n.deleteConfirm = /*[[#{common.delete_confirm}]]*/ 'Are you sure you want to delete this item?';
+        window.i18n.processing = /*[[#{common.processing}]]*/ 'Processing...';
+        window.i18n.copiedToClipboard = /*[[#{common.copied_to_clipboard}]]*/ 'Copied to clipboard!';
+        window.i18n.failedToCopy = /*[[#{common.failed_to_copy}]]*/ 'Failed to copy';
+        /*]]>*/
+    </script>
+    
     <!-- Additional head content -->
     <th:block layout:fragment="extra-head"></th:block>
 </head>
 <body>
     <!-- Header with Navigation -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" aria-label="Main navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark" role="navigation" th:attr="aria-label=#{nav.main_navigation}">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
-                <img th:src="@{/logo.png}" alt="Trendy Logo" class="me-2" loading="eager">
-                <span>Trendy</span>
+                <img th:src="@{/logo.png}" th:alt="#{app.logo_alt}" class="me-2" loading="eager">
+                <span th:text="#{app.name}">Trendy</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -133,40 +188,82 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/}">Home</a>
+                        <a class="nav-link" th:href="@{/}" th:text="#{nav.home}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/trends}">Trends</a>
+                        <a class="nav-link" th:href="@{/trends}" th:text="#{nav.trends}">Trends</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/gallery}">My Gallery</a>
+                        <a class="nav-link" th:href="@{/gallery}" th:text="#{nav.gallery}">My Gallery</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link" th:href="@{/admin/dashboard}">Admin</a>
+                        <a class="nav-link" th:href="@{/admin/dashboard}" th:text="#{nav.admin}">Admin</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <!-- Language Selector -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-translate"></i> 
+                            <span th:switch="${#locale.language}">
+                                <span th:case="'en'" th:text="#{lang.en}">English</span>
+                                <span th:case="'es'" th:text="#{lang.es}">Español</span>
+                                <span th:case="'zh'" th:text="#{lang.zh}">中文</span>
+                                <span th:case="'ar'" th:text="#{lang.ar}">العربية</span>
+                                <span th:case="'hi'" th:text="#{lang.hi}">हिन्दी</span>
+                                <span th:case="'de'" th:text="#{lang.de}">Deutsch</span>
+                                <span th:case="'fr'" th:text="#{lang.fr}">Français</span>
+                                <span th:case="'it'" th:text="#{lang.it}">Italiano</span>
+                                <span th:case="'pt'" th:text="#{lang.pt}">Português</span>
+                                <span th:case="'ru'" th:text="#{lang.ru}">Русский</span>
+                                <span th:case="'ja'" th:text="#{lang.ja}">日本語</span>
+                                <span th:case="'ko'" th:text="#{lang.ko}">한국어</span>
+                                <span th:case="'id'" th:text="#{lang.id}">Bahasa Indonesia</span>
+                                <span th:case="'th'" th:text="#{lang.th}">ไทย</span>
+                                <span th:case="'vi'" th:text="#{lang.vi}">Tiếng Việt</span>
+                                <span th:case="*" th:text="#{lang.en}">English</span>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu" style="max-height: 400px; overflow-y: auto;">
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('en'); return false;" th:text="#{lang.en}">English</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('es'); return false;" th:text="#{lang.es}">Español</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('zh'); return false;" th:text="#{lang.zh}">中文</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('ar'); return false;" th:text="#{lang.ar}">العربية</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('hi'); return false;" th:text="#{lang.hi}">हिन्दी</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('de'); return false;" th:text="#{lang.de}">Deutsch</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('fr'); return false;" th:text="#{lang.fr}">Français</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('it'); return false;" th:text="#{lang.it}">Italiano</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('pt'); return false;" th:text="#{lang.pt}">Português</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('ru'); return false;" th:text="#{lang.ru}">Русский</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('ja'); return false;" th:text="#{lang.ja}">日本語</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('ko'); return false;" th:text="#{lang.ko}">한국어</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('id'); return false;" th:text="#{lang.id}">Bahasa Indonesia</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('th'); return false;" th:text="#{lang.th}">ไทย</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changeLanguage('vi'); return false;" th:text="#{lang.vi}">Tiếng Việt</a></li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" th:href="@{/login}">Login</a>
+                        <a class="nav-link" th:href="@{/login}" th:text="#{nav.login}">Login</a>
                     </li>
                     <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" th:href="@{/register}">Register</a>
+                        <a class="nav-link" th:href="@{/register}" th:text="#{nav.register}">Register</a>
                     </li>
                     <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> <span sec:authentication="name">User</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" th:href="@{/gallery}"><i class="bi bi-images"></i> My Gallery</a></li>
-                            <li><a class="dropdown-item" th:href="@{/favorites}"><i class="bi bi-heart-fill text-danger"></i> Favorite Trends</a></li>
-                            <li><a class="dropdown-item" th:href="@{/favorites/images}"><i class="bi bi-image-fill text-danger"></i> Favorite Images</a></li>
-                            <li><a class="dropdown-item" th:href="@{/my-shares}"><i class="bi bi-share-fill text-success"></i> My Shares</a></li>
+                            <li><a class="dropdown-item" th:href="@{/gallery}"><i class="bi bi-images"></i> <span th:text="#{nav.gallery}">My Gallery</span></a></li>
+                            <li><a class="dropdown-item" th:href="@{/favorites}"><i class="bi bi-heart-fill text-danger"></i> <span th:text="#{nav.favorites}">Favorite Trends</span></a></li>
+                            <li><a class="dropdown-item" th:href="@{/favorites/images}"><i class="bi bi-image-fill text-danger"></i> <span th:text="#{nav.favorite_images}">Favorite Images</span></a></li>
+                            <li><a class="dropdown-item" th:href="@{/my-shares}"><i class="bi bi-share-fill text-success"></i> <span th:text="#{nav.my_shares}">My Shares</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" th:href="@{/account}"><i class="bi bi-gear"></i> Account Settings</a></li>
+                            <li><a class="dropdown-item" th:href="@{/account}"><i class="bi bi-gear"></i> <span th:text="#{nav.account}">Account Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form th:action="@{/logout}" method="post">
-                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> <span th:text="#{nav.logout}">Logout</span></button>
                                 </form>
                             </li>
                         </ul>
@@ -197,15 +294,15 @@
     <!-- Footer -->
     <footer class="bg-dark text-white mt-5 py-4" role="contentinfo">
         <div class="container text-center">
-            <img th:src="@{/logo.png}" alt="Trendy Logo" class="mb-3" style="border-radius: 12px;" loading="lazy">
-            <p class="mb-2">&copy; 2025 Trendy. All rights reserved.</p>
-            <p class="small mb-2">Transform your photos with AI-powered trends</p>
+            <img th:src="@{/logo.png}" th:alt="#{app.logo_alt}" class="mb-3" style="border-radius: 12px;" loading="lazy">
+            <p class="mb-2" th:text="#{footer.copyright}">&copy; 2025 Trendy. All rights reserved.</p>
+            <p class="small mb-2" th:text="#{footer.description}">Transform your photos with AI-powered trends</p>
             <p class="small mb-0">
                 <a href="https://github.com/tinhbv101/trendy" target="_blank" class="text-white-50 text-decoration-none">
-                    <i class="bi bi-github"></i> View on GitHub
+                    <i class="bi bi-github"></i> <span th:text="#{footer.view_on_github}">View on GitHub</span>
                 </a>
                 <span class="text-white-50 mx-2">•</span>
-                <span class="text-white-50">🤖 Built with AI</span>
+                <span class="text-white-50">🤖 <span th:text="#{footer.built_with_ai}">Built with AI</span></span>
             </p>
         </div>
     </footer>

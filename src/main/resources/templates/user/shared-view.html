@@ -82,7 +82,8 @@
                     navigator.clipboard.writeText(url).then(() => {
                         const btn = event.target.closest('button');
                         const originalHtml = btn.innerHTML;
-                        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        const copiedText = /*[[#{shared_view.copied}]]*/ 'Copied!';
+                        btn.innerHTML = '<i class="bi bi-check"></i> ' + copiedText;
                         btn.classList.remove('btn-outline-primary');
                         btn.classList.add('btn-success');
                         
@@ -107,11 +108,13 @@
                 input.style.left = '-9999px';
                 document.body.appendChild(input);
                 input.select();
+                const linkCopiedText = /*[[#{shared_view.link_copied}]]*/ 'Link copied to clipboard!';
+                const failedCopyText = /*[[#{shared_view.failed_to_copy_link}]]*/ 'Failed to copy link';
                 try {
                     document.execCommand('copy');
-                    alert('Link copied to clipboard!');
+                    alert(linkCopiedText);
                 } catch (err) {
-                    alert('Failed to copy link');
+                    alert(failedCopyText);
                 }
                 document.body.removeChild(input);
             };
@@ -209,10 +212,10 @@
         <div class="container py-4">
             <!-- Header with share info -->
             <div class="text-center mb-4">
-                <h1><i class="bi bi-share-fill text-success"></i> Shared Image</h1>
+                <h1><i class="bi bi-share-fill text-success"></i> <span th:text="#{shared_view.title}">Shared Image</span></h1>
                 <p class="text-muted">
-                    Created by <strong th:text="${sharedImage.user.fullName ?: sharedImage.user.username}">User</strong>
-                    • <i class="bi bi-eye"></i> <span th:text="${sharedImage.viewCount}">0</span> views
+                    <span th:text="#{shared_view.created_by}">Created by</span> <strong th:text="${sharedImage.user.fullName ?: sharedImage.user.username}">User</strong>
+                    • <i class="bi bi-eye"></i> <span th:text="${sharedImage.viewCount}">0</span> <span th:text="#{shared_view.views}">views</span>
                 </p>
             </div>
 
@@ -236,7 +239,7 @@
                                     <span th:text="${#temporals.format(sharedImage.createdAt, 'MMM dd, yyyy')}">Date</span>
                                 </span>
                                 <span th:if="${sharedImage.expiresAt != null}">
-                                    • <i class="bi bi-clock"></i> Expires 
+                                    • <i class="bi bi-clock"></i> <span th:text="#{shared_view.expires}">Expires</span>
                                     <span th:text="${#temporals.format(sharedImage.expiresAt, 'MMM dd, yyyy')}">Date</span>
                                 </span>
                             </div>
@@ -250,16 +253,16 @@
                                         name=${sharedImage.generatedImage.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-shared.jpg'}
                                     )}" 
                                    class="btn btn-primary">
-                                    <i class="bi bi-download"></i> Download
+                                    <i class="bi bi-download"></i> <span th:text="#{shared_view.download}">Download</span>
                                 </a>
                                 
                                 <button type="button" class="btn btn-outline-primary" onclick="copyCurrentUrl()">
-                                    <i class="bi bi-link-45deg"></i> Copy Link
+                                    <i class="bi bi-link-45deg"></i> <span th:text="#{shared_view.copy_link}">Copy Link</span>
                                 </button>
                                 
                                 <div class="btn-group dropup">
                                     <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true">
-                                        <i class="bi bi-share"></i> Share
+                                        <i class="bi bi-share"></i> <span th:text="#{shared_view.share}">Share</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
@@ -267,7 +270,7 @@
                                                href="#"
                                                onclick="event.preventDefault(); shareToSocial('facebook'); return false;"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-facebook"></i> Facebook
+                                                <i class="bi bi-facebook"></i> <span th:text="#{shared_view.facebook}">Facebook</span>
                                             </a>
                                         </li>
                                         <li>
@@ -275,7 +278,7 @@
                                                th:href="@{https://twitter.com/intent/tweet(url=${shareUrl},text='Check out this AI-generated image from Trendy!')}"
                                                target="_blank"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-twitter"></i> Twitter
+                                                <i class="bi bi-twitter"></i> <span th:text="#{shared_view.twitter}">Twitter</span>
                                             </a>
                                         </li>
                                         <li>
@@ -283,7 +286,7 @@
                                                th:href="@{https://pinterest.com/pin/create/button/(url=${shareUrl},description='AI-generated image from Trendy')}"
                                                target="_blank"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-pinterest"></i> Pinterest
+                                                <i class="bi bi-pinterest"></i> <span th:text="#{shared_view.pinterest}">Pinterest</span>
                                             </a>
                                         </li>
                                     </ul>

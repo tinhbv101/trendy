@@ -3,19 +3,20 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Trend Form</title>
+    <title th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}" 
+           th:text="${isEdit ? editTitle : createTitle}">Trend Form</title>
 </head>
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="content" th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}, editBreadcrumb=#{admin.trend.form.breadcrumb_edit}, createBreadcrumb=#{admin.trend.form.breadcrumb_create}, updateText=#{admin.trend.form.update}, createText=#{admin.trend.form.create}">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Admin</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/admin/trends}">Trends</a></li>
-                <li class="breadcrumb-item active" th:text="${isEdit ? 'Edit' : 'Create'}">Form</li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" th:text="#{admin.trend.form.breadcrumb_admin}">Admin</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/trends}" th:text="#{admin.trend.form.breadcrumb_trends}">Trends</a></li>
+                <li class="breadcrumb-item active" th:text="${isEdit ? editBreadcrumb : createBreadcrumb}">Form</li>
             </ol>
         </nav>
 
-        <h1 class="mb-4" th:text="${isEdit ? 'Edit Trend' : 'Create New Trend'}">Trend Form</h1>
+        <h1 class="mb-4" th:text="${isEdit ? editTitle : createTitle}">Trend Form</h1>
 
         <div class="card">
             <div class="card-body">
@@ -25,7 +26,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="trendName" class="form-label">Trend Name *</label>
+                                <label for="trendName" class="form-label" th:text="|#{admin.trend.form.trend_name}#{admin.trend.form.required_asterisk}|">Trend Name *</label>
                                 <input type="text" class="form-control" th:field="*{trendName}" 
                                        id="trendName" required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('trendName')}" 
@@ -35,44 +36,44 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="category" class="form-label">Category</label>
+                                <label for="category" class="form-label" th:text="#{admin.trend.form.category}">Category</label>
                                 <input type="text" class="form-control" th:field="*{category}" 
-                                       id="category" placeholder="e.g., Art Style, 3D, Portrait">
+                                       id="category" th:placeholder="#{admin.trend.form.category_placeholder}">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
+                        <label for="description" class="form-label" th:text="#{admin.trend.form.description}">Description</label>
                         <textarea class="form-control" th:field="*{description}" 
                                   id="description" rows="3"></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="thumbnailFile" class="form-label">Thumbnail Image</label>
+                        <label for="thumbnailFile" class="form-label" th:text="#{admin.trend.form.thumbnail}">Thumbnail Image</label>
                         <input class="form-control" type="file" id="thumbnailFile" name="thumbnailFile" 
                                accept="image/*">
-                        <div class="form-text">Upload a thumbnail image for this trend (recommended: 400x300px)</div>
+                        <div class="form-text" th:text="#{admin.trend.form.thumbnail_help}">Upload a thumbnail image for this trend (recommended: 400x300px)</div>
                         <div th:if="${isEdit and trend.thumbnailPath != null}" class="mt-2">
                             <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
-                                 alt="Current thumbnail" 
+                                 th:alt="#{admin.trend.form.current_thumbnail_alt}"
                                  style="max-width: 200px; max-height: 150px; object-fit: cover;"
                                  class="border rounded">
-                            <p class="text-muted small mt-1">Current thumbnail (upload new file to replace)</p>
+                            <p class="text-muted small mt-1" th:text="#{admin.trend.form.current_thumbnail}">Current thumbnail (upload new file to replace)</p>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="promptTemplate" class="form-label">Prompt Template *</label>
+                        <label for="promptTemplate" class="form-label" th:text="|#{admin.trend.form.prompt_template}#{admin.trend.form.required_asterisk}|">Prompt Template *</label>
                         <textarea class="form-control" th:field="*{promptTemplate}" 
                                   id="promptTemplate" rows="4" required></textarea>
-                        <div class="form-text">Enter the AI prompt template for this trend</div>
+                        <div class="form-text" th:text="#{admin.trend.form.prompt_template_help}">Enter the AI prompt template for this trend</div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="maxInputImages" class="form-label">Max Input Images *</label>
+                                <label for="maxInputImages" class="form-label" th:text="|#{admin.trend.form.max_input_images}#{admin.trend.form.required_asterisk}|">Max Input Images *</label>
                                 <input type="number" class="form-control" th:field="*{maxInputImages}" 
                                        id="maxInputImages" min="1" max="5" required>
                             </div>
@@ -80,7 +81,7 @@
 
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="outputWidth" class="form-label">Output Width *</label>
+                                <label for="outputWidth" class="form-label" th:text="|#{admin.trend.form.output_width}#{admin.trend.form.required_asterisk}|">Output Width *</label>
                                 <input type="number" class="form-control" th:field="*{outputWidth}" 
                                        id="outputWidth" min="256" step="64" required>
                             </div>
@@ -88,7 +89,7 @@
 
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="outputHeight" class="form-label">Output Height *</label>
+                                <label for="outputHeight" class="form-label" th:text="|#{admin.trend.form.output_height}#{admin.trend.form.required_asterisk}|">Output Height *</label>
                                 <input type="number" class="form-control" th:field="*{outputHeight}" 
                                        id="outputHeight" min="256" step="64" required>
                             </div>
@@ -96,28 +97,28 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="status" class="form-label">Status *</label>
+                        <label for="status" class="form-label" th:text="|#{admin.trend.form.status}#{admin.trend.form.required_asterisk}|">Status *</label>
                         <select class="form-select" th:field="*{status}" id="status" required>
-                            <option value="TESTING">Testing</option>
-                            <option value="ACTIVE">Active</option>
-                            <option value="INACTIVE">Inactive</option>
+                            <option value="TESTING" th:text="#{admin.trend.form.status_testing}">Testing</option>
+                            <option value="ACTIVE" th:text="#{admin.trend.form.status_active}">Active</option>
+                            <option value="INACTIVE" th:text="#{admin.trend.form.status_inactive}">Inactive</option>
                         </select>
                         <div class="form-text">
-                            <i class="bi bi-info-circle"></i> Using Google Gemini 2.5 Flash Image for AI generation
+                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.trend.form.model_info}">Using Google Gemini 2.5 Flash Image for AI generation</span>
                         </div>
                     </div>
 
                     <div class="mb-3" th:if="!${isEdit}">
-                        <label for="exampleFiles" class="form-label">Example Images</label>
+                        <label for="exampleFiles" class="form-label" th:text="#{admin.trend.form.example_images}">Example Images</label>
                         <input class="form-control" type="file" id="exampleFiles" name="exampleFiles" 
                                multiple accept="image/*">
-                        <div class="form-text">Upload example images to showcase this trend</div>
+                        <div class="form-text" th:text="#{admin.trend.form.example_images_help}">Upload example images to showcase this trend</div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a th:href="@{/admin/trends}" class="btn btn-secondary">Cancel</a>
+                        <a th:href="@{/admin/trends}" class="btn btn-secondary" th:text="#{admin.trend.form.cancel}">Cancel</a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i> <span th:text="${isEdit ? 'Update' : 'Create'}">Save</span>
+                            <i class="bi bi-save"></i> <span th:text="${isEdit ? updateText : createText}">Save</span>
                         </button>
                     </div>
                 </form>

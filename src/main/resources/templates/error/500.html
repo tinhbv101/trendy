@@ -3,18 +3,18 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Internal Server Error</title>
+    <title th:text="#{error.500.title}">Internal Server Error</title>
 </head>
 <body>
     <div layout:fragment="content">
         <div class="text-center py-5">
             <i class="bi bi-x-circle text-danger" style="font-size: 5rem;"></i>
             <h1 class="display-1">500</h1>
-            <h2>Internal Server Error</h2>
-            <p class="lead">Oops! Something went wrong on our end.</p>
+            <h2 th:text="#{error.500.heading}">Internal Server Error</h2>
+            <p class="lead" th:text="#{error.500.message}">Oops! Something went wrong on our end.</p>
             <p th:if="${error}" class="text-danger" th:text="${error}">Error message</p>
             <a th:href="@{/}" class="btn btn-primary mt-3">
-                <i class="bi bi-house"></i> Go Home
+                <i class="bi bi-house"></i> <span th:text="#{common.go_home}">Go Home</span>
             </a>
         </div>
     </div>

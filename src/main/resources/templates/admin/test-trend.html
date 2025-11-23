@@ -3,34 +3,34 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Test Trend</title>
+    <title th:text="#{admin.test.title}">Test Trend</title>
 </head>
 <body>
     <div layout:fragment="content">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Admin</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/admin/trends}">Trends</a></li>
-                <li class="breadcrumb-item active">Test</li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" th:text="#{admin.test.breadcrumb_admin}">Admin</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/trends}" th:text="#{admin.test.breadcrumb_trends}">Trends</a></li>
+                <li class="breadcrumb-item active" th:text="#{admin.test.breadcrumb_test}">Test</li>
             </ol>
         </nav>
 
-        <h1 class="mb-4"><i class="bi bi-flask"></i> Test Trend</h1>
-        <p class="lead">Testing: <strong th:text="${trend.trendName}">Trend Name</strong></p>
+        <h1 class="mb-4"><i class="bi bi-flask"></i> <span th:text="#{admin.test.title}">Test Trend</span></h1>
+        <p class="lead"><span th:text="#{admin.test.testing}">Testing</span>: <strong th:text="${trend.trendName}">Trend Name</strong></p>
 
         <div class="row">
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title h5">Upload Test Image</h2>
+                        <h2 class="card-title h5" th:text="#{admin.test.upload_test_image}">Upload Test Image</h2>
                         <form method="post" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="testImage" class="form-label">Test Image</label>
+                                <label for="testImage" class="form-label" th:text="#{admin.test.test_image}">Test Image</label>
                                 <input class="form-control" type="file" id="testImage" name="file" 
                                        required accept="image/*">
                             </div>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-play-circle"></i> Run Test
+                                <i class="bi bi-play-circle"></i> <span th:text="#{admin.test.run_test}">Run Test</span>
                             </button>
                         </form>
                     </div>
@@ -38,9 +38,9 @@
 
                 <div class="card mt-3">
                     <div class="card-body">
-                        <h2 class="card-title h5">Test Result</h2>
+                        <h2 class="card-title h5" th:text="#{admin.test.test_result}">Test Result</h2>
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Upload an image to see the test result
+                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.test.upload_info}">Upload an image to see the test result</span>
                         </div>
                     </div>
                 </div>
@@ -49,19 +49,19 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title h5">Trend Details</h2>
+                        <h2 class="card-title h5" th:text="#{admin.test.trend_details}">Trend Details</h2>
                         <ul class="list-unstyled">
-                            <li><strong>Name:</strong> <span th:text="${trend.trendName}">Name</span></li>
-                            <li><strong>Category:</strong> <span th:text="${trend.category}">Category</span></li>
-                            <li><strong>Status:</strong> 
+                            <li><strong th:text="|#{admin.test.name_label}#{admin.trend.form.colon}|">Name:</strong> <span th:text="${trend.trendName}">Name</span></li>
+                            <li><strong th:text="|#{admin.test.category_label}#{admin.trend.form.colon}|">Category:</strong> <span th:text="${trend.category}">Category</span></li>
+                            <li><strong th:text="|#{admin.test.status_label}#{admin.trend.form.colon}|">Status:</strong> 
                                 <span class="badge" 
                                       th:classappend="${trend.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-warning'"
                                       th:text="${trend.status}">Status</span>
                             </li>
-                            <li><strong>Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
+                            <li><strong th:text="|#{admin.test.model_label}#{admin.trend.form.colon}|">Model:</strong> <span class="text-muted" th:text="#{admin.test.model_name}">Google Gemini 2.5 Flash Image</span></li>
                         </ul>
                         <hr>
-                        <h3 class="h6">Prompt Template:</h3>
+                        <h3 class="h6" th:text="|#{admin.test.prompt_template_label}#{admin.trend.form.colon}|">Prompt Template:</h3>
                         <pre class="small bg-light p-2 rounded" th:text="${trend.promptTemplate}">Prompt</pre>
                     </div>
                 </div>

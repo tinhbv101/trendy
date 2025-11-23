@@ -17,8 +17,8 @@
     <div layout:fragment="content">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/trends}">Trends</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/}" th:text="#{trend_detail.breadcrumb_home}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/trends}" th:text="#{trend_detail.breadcrumb_trends}">Trends</a></li>
                 <li class="breadcrumb-item active" aria-current="page" th:text="${trend.trendName}">Trend</li>
             </ol>
         </nav>
@@ -36,12 +36,12 @@
 
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> Details</h2>
+                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> <span th:text="#{trend_detail.details}">Details</span></h2>
                         <ul class="list-unstyled">
-                            <li><strong>Max Input Images:</strong> <span th:text="${trend.maxInputImages}">1</span></li>
-                            <li><strong>Output Size:</strong> <span th:text="${trend.outputWidth} + 'x' + ${trend.outputHeight}">512x512</span></li>
-                            <li><strong>AI Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
-                            <li><strong>Times Used:</strong> <span th:text="${trend.usageCount}">0</span></li>
+                            <li><strong th:text="#{trend_detail.max_input_images} + ':'">Max Input Images:</strong> <span th:text="${trend.maxInputImages}">1</span></li>
+                            <li><strong th:text="#{trend_detail.output_size} + ':'">Output Size:</strong> <span th:text="${trend.outputWidth} + 'x' + ${trend.outputHeight}">512x512</span></li>
+                            <li><strong th:text="#{trend_detail.ai_model} + ':'">AI Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
+                            <li><strong th:text="#{trend_detail.times_used} + ':'">Times Used:</strong> <span th:text="${trend.usageCount}">0</span></li>
                         </ul>
                     </div>
                 </div>
@@ -50,18 +50,18 @@
                     <a th:href="@{/generate/{id}(id=${trend.id})}" 
                        class="btn btn-primary btn-lg" 
                        sec:authorize="isAuthenticated()">
-                        <i class="bi bi-magic"></i> Create My Image
+                        <i class="bi bi-magic"></i> <span th:text="#{trend_detail.create_my_image}">Create My Image</span>
                     </a>
                     <a th:href="@{/login}" 
                        class="btn btn-primary btn-lg" 
                        sec:authorize="!isAuthenticated()">
-                        <i class="bi bi-box-arrow-in-right"></i> Login to Create
+                        <i class="bi bi-box-arrow-in-right"></i> <span th:text="#{trend_detail.login_to_create}">Login to Create</span>
                     </a>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <h2 class="h5">Example Images</h2>
+                <h2 class="h5" th:text="#{trend_detail.example_images}">Example Images</h2>
                 <div th:if="${examples != null and !examples.isEmpty()}">
                     <div th:each="example, iterStat : ${examples}" class="card mb-3">
                         <img th:src="@{/images/{filename}(filename=${example.imagePath})}" 
@@ -75,7 +75,7 @@
                 <div th:if="${examples == null or examples.isEmpty()}" class="card">
                     <div class="card-body text-center bg-light" style="min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                         <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                        <p class="mt-3 text-muted">No example images yet</p>
+                        <p class="mt-3 text-muted" th:text="#{trend_detail.no_examples}">No example images yet</p>
                     </div>
                 </div>
             </div>

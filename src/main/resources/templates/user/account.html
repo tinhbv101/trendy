@@ -4,56 +4,56 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Account Settings</title>
+    <title th:text="#{account.title}">Account Settings</title>
 </head>
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="content" th:with="notSetText=#{account.not_set}, colonText=#{common.colon}, asteriskText=#{admin.trend.form.required_asterisk}, closeText=#{common.close}">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <h1 class="mb-4"><i class="bi bi-person-circle"></i> Account Settings</h1>
+                <h1 class="mb-4"><i class="bi bi-person-circle"></i> <span th:text="#{account.title}">Account Settings</span></h1>
 
                 <!-- Success Message -->
                 <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" th:attr="aria-label=${closeText}"></button>
                 </div>
 
                 <!-- Error Message -->
                 <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" th:attr="aria-label=${closeText}"></button>
                 </div>
 
                 <!-- User Information Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h2 class="mb-0 h5"><i class="bi bi-person-badge"></i> Profile Information</h2>
+                        <h2 class="mb-0 h5"><i class="bi bi-person-badge"></i> <span th:text="#{account.profile_information}">Profile Information</span></h2>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-person"></i> Username:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-person"></i> <span th:text="|#{account.username}${colonText}|">Username:</span></div>
                             <div class="col-sm-8" th:text="${user.username}">username</div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-envelope"></i> Email:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-envelope"></i> <span th:text="|#{account.email}${colonText}|">Email:</span></div>
                             <div class="col-sm-8" th:text="${user.email}">email@example.com</div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-person-lines-fill"></i> Full Name:</div>
-                            <div class="col-sm-8" th:text="${user.fullName != null ? user.fullName : 'Not set'}">Full Name</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-person-lines-fill"></i> <span th:text="|#{account.full_name}${colonText}|">Full Name:</span></div>
+                            <div class="col-sm-8" th:text="${user.fullName != null ? user.fullName : notSetText}">Full Name</div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-shield-check"></i> Role:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-shield-check"></i> <span th:text="|#{account.role}${colonText}|">Role:</span></div>
                             <div class="col-sm-8">
                                 <span class="badge bg-info" th:text="${user.role}">ROLE_USER</span>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-calendar-plus"></i> Member Since:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-calendar-plus"></i> <span th:text="|#{account.member_since}${colonText}|">Member Since:</span></div>
                             <div class="col-sm-8" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-4 fw-bold"><i class="bi bi-images"></i> Images Generated:</div>
+                            <div class="col-sm-4 fw-bold"><i class="bi bi-images"></i> <span th:text="|#{account.images_generated}${colonText}|">Images Generated:</span></div>
                             <div class="col-sm-8">
                                 <span class="badge bg-success" th:text="${totalImages}">0</span>
                             </div>
@@ -64,31 +64,31 @@
                 <!-- Edit Profile Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
-                        <h2 class="mb-0 h5"><i class="bi bi-pencil-square"></i> Edit Profile</h2>
+                        <h2 class="mb-0 h5"><i class="bi bi-pencil-square"></i> <span th:text="#{account.edit_profile}">Edit Profile</span></h2>
                     </div>
                     <div class="card-body">
                         <!-- Profile Error Message -->
                         <div th:if="${profileError}" class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${profileError}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" th:attr="aria-label=${closeText}"></button>
                         </div>
 
                         <form th:action="@{/account/update-profile}" th:object="${updateProfileRequest}" method="post">
                             <!-- Full Name -->
                             <div class="mb-3">
                                 <label for="fullName" class="form-label">
-                                    <i class="bi bi-person-lines-fill"></i> Full Name <span class="text-danger">*</span>
+                                    <i class="bi bi-person-lines-fill"></i> <span th:text="|#{account.full_name_label}${asteriskText}|">Full Name *</span>
                                 </label>
                                 <input type="text" 
                                        class="form-control" 
                                        id="fullName" 
                                        th:field="*{fullName}"
                                        th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
-                                       placeholder="Enter your full name"
+                                       th:placeholder="#{account.full_name_placeholder}"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" 
                                      th:errors="*{fullName}">Error</div>
-                                <small class="form-text text-muted">
+                                <small class="form-text text-muted" th:text="#{account.full_name_help}">
                                     This name will be displayed on your profile
                                 </small>
                             </div>
@@ -96,18 +96,18 @@
                             <!-- Email -->
                             <div class="mb-3">
                                 <label for="email" class="form-label">
-                                    <i class="bi bi-envelope"></i> Email <span class="text-danger">*</span>
+                                    <i class="bi bi-envelope"></i> <span th:text="|#{account.email_label}${asteriskText}|">Email *</span>
                                 </label>
                                 <input type="email" 
                                        class="form-control" 
                                        id="email" 
                                        th:field="*{email}"
                                        th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
-                                       placeholder="Enter your email address"
+                                       th:placeholder="#{account.email_placeholder}"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
                                      th:errors="*{email}">Error</div>
-                                <small class="form-text text-muted">
+                                <small class="form-text text-muted" th:text="#{account.email_help}">
                                     We'll never share your email with anyone else
                                 </small>
                             </div>
@@ -115,10 +115,10 @@
                             <!-- Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i> Update Profile
+                                    <i class="bi bi-check-circle"></i> <span th:text="#{account.update_profile}">Update Profile</span>
                                 </button>
                                 <button type="reset" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                    <i class="bi bi-arrow-counterclockwise"></i> <span th:text="#{common.cancel}">Reset</span>
                                 </button>
                             </div>
                         </form>
@@ -128,21 +128,21 @@
                 <!-- Change Password Card -->
                 <div class="card">
                     <div class="card-header bg-warning">
-                        <h2 class="mb-0 h5"><i class="bi bi-shield-lock"></i> Change Password</h2>
+                        <h2 class="mb-0 h5"><i class="bi bi-shield-lock"></i> <span th:text="#{account.change_password}">Change Password</span></h2>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/account/change-password}" th:object="${changePasswordRequest}" method="post">
                             <!-- Current Password -->
                             <div class="mb-3">
                                 <label for="currentPassword" class="form-label">
-                                    Current Password <span class="text-danger">*</span>
+                                    <span th:text="|#{account.current_password}${asteriskText}|">Current Password *</span>
                                 </label>
                                 <input type="password" 
                                        class="form-control" 
                                        id="currentPassword" 
                                        th:field="*{currentPassword}"
                                        th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"
-                                       placeholder="Enter current password"
+                                       th:placeholder="#{account.current_password_placeholder}"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" 
                                      th:errors="*{currentPassword}">Error</div>
@@ -151,19 +151,19 @@
                             <!-- New Password -->
                             <div class="mb-3">
                                 <label for="newPassword" class="form-label">
-                                    New Password <span class="text-danger">*</span>
+                                    <span th:text="|#{account.new_password}${asteriskText}|">New Password *</span>
                                 </label>
                                 <input type="password" 
                                        class="form-control" 
                                        id="newPassword" 
                                        th:field="*{newPassword}"
                                        th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"
-                                       placeholder="Enter new password (min 6 characters)"
+                                       th:placeholder="#{account.new_password_placeholder}"
                                        minlength="6"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" 
                                      th:errors="*{newPassword}">Error</div>
-                                <small class="form-text text-muted">
+                                <small class="form-text text-muted" th:text="#{account.password_help}">
                                     Password must be at least 6 characters long
                                 </small>
                             </div>
@@ -171,14 +171,14 @@
                             <!-- Confirm Password -->
                             <div class="mb-3">
                                 <label for="confirmPassword" class="form-label">
-                                    Confirm New Password <span class="text-danger">*</span>
+                                    <span th:text="|#{account.confirm_new_password}${asteriskText}|">Confirm New Password *</span>
                                 </label>
                                 <input type="password" 
                                        class="form-control" 
                                        id="confirmPassword" 
                                        th:field="*{confirmPassword}"
                                        th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
-                                       placeholder="Confirm new password"
+                                       th:placeholder="#{account.confirm_new_password_placeholder}"
                                        required>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" 
                                      th:errors="*{confirmPassword}">Error</div>
@@ -187,10 +187,10 @@
                             <!-- Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-shield-check"></i> Change Password
+                                    <i class="bi bi-shield-check"></i> <span th:text="#{account.update_password}">Change Password</span>
                                 </button>
                                 <button type="reset" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                    <i class="bi bi-arrow-counterclockwise"></i> <span th:text="#{common.cancel}">Reset</span>
                                 </button>
                             </div>
                         </form>
@@ -200,12 +200,12 @@
                 <!-- Additional Information -->
                 <div class="alert alert-info mt-4" role="alert">
                     <i class="bi bi-info-circle-fill"></i>
-                    <strong>Security Tips:</strong>
+                    <strong th:text="#{account.security_tips}">Security Tips:</strong>
                     <ul class="mb-0 mt-2">
-                        <li>Use a strong password with a mix of letters, numbers, and symbols</li>
-                        <li>Don't share your password with anyone</li>
-                        <li>Change your password regularly</li>
-                        <li>Use different passwords for different accounts</li>
+                        <li th:text="#{account.security_tip1}">Use a strong password with a mix of letters, numbers, and symbols</li>
+                        <li th:text="#{account.security_tip2}">Don't share your password with anyone</li>
+                        <li th:text="#{account.security_tip3}">Change your password regularly</li>
+                        <li th:text="#{account.security_tip4}">Use different passwords for different accounts</li>
                     </ul>
                 </div>
             </div>

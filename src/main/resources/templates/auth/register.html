@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Register</title>
+    <title th:text="#{auth.register.title}">Register</title>
 </head>
 <body>
     <div layout:fragment="content">
@@ -12,63 +12,63 @@
                 <div class="card shadow">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
-                            <img th:src="@{/logo.png}" alt="Trendy Logo" height="80" class="mb-3" style="border-radius: 16px;">
+                            <img th:src="@{/logo.png}" th:alt="#{app.logo_alt}" height="80" class="mb-3" style="border-radius: 16px;">
                             <h2>
-                                <i class="bi bi-person-plus"></i> Create Account
+                                <i class="bi bi-person-plus"></i> <span th:text="#{auth.register.create_account}">Create Account</span>
                             </h2>
                         </div>
 
                         <form th:action="@{/register}" th:object="${registerForm}" method="post">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
+                                <label for="username" class="form-label" th:text="#{auth.register.username}">Username</label>
                                 <input type="text" class="form-control" th:field="*{username}" 
-                                       id="username" required autofocus placeholder="Choose a username">
+                                       id="username" required autofocus th:placeholder="#{auth.register.username_placeholder}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" 
                                      th:errors="*{username}">Username error</div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
+                                <label for="email" class="form-label" th:text="#{auth.register.email}">Email</label>
                                 <input type="email" class="form-control" th:field="*{email}" 
-                                       id="email" required placeholder="Enter your email">
+                                       id="email" required th:placeholder="#{auth.register.email_placeholder}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
                                      th:errors="*{email}">Email error</div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="fullName" class="form-label">Full Name</label>
+                                <label for="fullName" class="form-label" th:text="#{auth.register.full_name}">Full Name</label>
                                 <input type="text" class="form-control" th:field="*{fullName}" 
-                                       id="fullName" required placeholder="Enter your full name">
+                                       id="fullName" required th:placeholder="#{auth.register.full_name_placeholder}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" 
                                      th:errors="*{fullName}">Full name error</div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
+                                <label for="password" class="form-label" th:text="#{auth.register.password}">Password</label>
                                 <input type="password" class="form-control" th:field="*{password}" 
-                                       id="password" required placeholder="Choose a password">
+                                       id="password" required th:placeholder="#{auth.register.password_placeholder}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" 
                                      th:errors="*{password}">Password error</div>
-                                <div class="form-text">Password must be at least 6 characters</div>
+                                <div class="form-text" th:text="#{auth.register.password_help}">Password must be at least 6 characters</div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <label for="confirmPassword" class="form-label" th:text="#{auth.register.confirm_password}">Confirm Password</label>
                                 <input type="password" class="form-control" th:field="*{confirmPassword}" 
-                                       id="confirmPassword" required placeholder="Confirm your password">
+                                       id="confirmPassword" required th:placeholder="#{auth.register.confirm_password_placeholder}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" 
                                      th:errors="*{confirmPassword}">Confirm password error</div>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                                <button type="submit" class="btn btn-primary btn-lg" th:text="#{auth.register.button}">Register</button>
                             </div>
                         </form>
 
                         <hr class="my-4">
 
                         <p class="text-center mb-0">
-                            Already have an account? <a th:href="@{/login}">Login here</a>
+                            <span th:text="#{auth.register.have_account}">Already have an account?</span> <a th:href="@{/login}" th:text="#{auth.register.login_here}">Login here</a>
                         </p>
                     </div>
                 </div>

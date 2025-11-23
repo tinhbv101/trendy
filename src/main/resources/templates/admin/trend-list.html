@@ -3,14 +3,14 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Manage Trends</title>
+    <title th:text="#{admin.trends.manage}">Manage Trends</title>
 </head>
 <body>
     <div layout:fragment="content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="bi bi-list-ul"></i> Manage Trends</h1>
+            <h1><i class="bi bi-list-ul"></i> <span th:text="#{admin.trends.manage}">Manage Trends</span></h1>
             <a th:href="@{/admin/trends/new}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Create New Trend
+                <i class="bi bi-plus-circle"></i> <span th:text="#{admin.trends.create_new}">Create New Trend</span>
             </a>
         </div>
 
@@ -20,13 +20,13 @@
                     <table class="table table-hover" th:if="${trends != null and trends.hasContent()}">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Status</th>
-                                <th>Usage Count</th>
-                                <th>Created</th>
-                                <th>Actions</th>
+                                <th th:text="#{admin.trends.id}">ID</th>
+                                <th th:text="#{admin.trends.name}">Name</th>
+                                <th th:text="#{admin.trends.category}">Category</th>
+                                <th th:text="#{admin.trends.status}">Status</th>
+                                <th th:text="#{admin.trends.usage_count}">Usage Count</th>
+                                <th th:text="#{admin.trends.created}">Created</th>
+                                <th th:text="#{admin.trends.actions}">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,17 +46,17 @@
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <a th:href="@{/admin/trends/{id}/edit(id=${trend.id})}" 
-                                           class="btn btn-outline-primary" title="Edit">
+                                           class="btn btn-outline-primary" th:title="#{admin.trends.edit_button}">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <a th:href="@{/admin/trends/{id}/test(id=${trend.id})}" 
-                                           class="btn btn-outline-info" title="Test">
+                                           class="btn btn-outline-info" th:title="#{admin.trends.test_button}">
                                             <i class="bi bi-flask"></i>
                                         </a>
                                         <form th:action="@{/admin/trends/{id}/delete(id=${trend.id})}" 
                                               method="post" style="display: inline;"
-                                              onsubmit="return confirm('Are you sure you want to delete this trend?');">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                              th:onsubmit="return confirm('#{admin.trends.delete_confirm}');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" th:title="#{admin.trends.delete_button}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -68,14 +68,14 @@
                 </div>
 
                 <div class="alert alert-info" th:if="${trends == null or !trends.hasContent()}">
-                    <i class="bi bi-info-circle"></i> No trends found. Create your first trend!
+                    <i class="bi bi-info-circle"></i> <span th:text="#{admin.trends.no_trends}">No trends found. Create your first trend!</span>
                 </div>
 
                 <!-- Pagination -->
                 <nav aria-label="Page navigation" th:if="${trends != null and trends.totalPages > 1}">
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number - 1})}">Previous</a>
+                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number - 1})}" th:text="#{admin.trends.previous}">Previous</a>
                         </li>
                         <li class="page-item" 
                             th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
@@ -83,7 +83,7 @@
                             <a class="page-link" th:href="@{/admin/trends(page=${i})}" th:text="${i + 1}">1</a>
                         </li>
                         <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
-                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number + 1})}">Next</a>
+                            <a class="page-link" th:href="@{/admin/trends(page=${trends.number + 1})}" th:text="#{admin.trends.next}">Next</a>
                         </li>
                     </ul>
                 </nav>
