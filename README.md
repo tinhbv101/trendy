@@ -39,11 +39,18 @@
 - 🎨 **RTL Support**: Right-to-left language support for Arabic
 - 🔧 **Advanced i18n Implementation**: Thymeleaf inline JavaScript and global i18n objects for dynamic translations
 
+**🎨 Enhanced Image Generation:**
+- 📐 **Custom Aspect Ratio Selection**: Choose from 1:1, 9:16, 16:9, 4:3, 3:4 when generating images
+- 🤖 **AI Model Selection**: Select between Gemini 2.5 Flash Image or Gemini 3 Pro Image models
+- ⚙️ **Flexible Configuration**: Override trend defaults or use trend settings per generation
+- 🎯 **User Control**: Full control over image generation parameters for each request
+
 **Technical Improvements:**
 - 🐛 Fixed language switching issues on login/register pages
 - ⚡ Enhanced locale detection and cookie management
 - 🔒 Improved Spring i18n configuration with proper interceptor ordering
-- 📝 Complete message properties for all supported languages (477 keys each)
+- 📝 Complete message properties for all supported languages (477+ keys each)
+- 🔧 Dynamic AI model endpoint selection based on user choice
 
 ### 🆕 What's New in v1.1.0
 
@@ -68,6 +75,8 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 **Core Features:**
 - 🎯 **Browse Trends**: Discover and explore diverse AI trends
 - 🖼️ **Image Generation**: Upload multiple images and create new ones with AI
+  - 📐 **Custom Aspect Ratios**: Choose from 5 aspect ratio options (1:1, 9:16, 16:9, 4:3, 3:4)
+  - 🤖 **AI Model Selection**: Choose between Gemini 2.5 Flash or Gemini 3 Pro models
 - 📁 **My Gallery**: Manage and review generated images with advanced filters
 - 🔒 **User Authentication**: Secure registration and login
 - 👑 **Admin Panel**: Manage trends, users, and system
@@ -107,6 +116,8 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 
 **AI Integration:**
 - Google Gemini 2.5 Flash Image API
+- Google Gemini 3 Pro Image API
+- Dynamic model selection per generation request
 
 **DevOps:**
 - Docker & Docker Compose
@@ -335,6 +346,8 @@ trendy/
 #### 3. Generate Image
 - Click on the trend you want to use
 - Upload 1 or more images (depends on trend)
+- **Choose Aspect Ratio**: Select from 1:1, 9:16, 16:9, 4:3, or 3:4 (or use trend default)
+- **Choose AI Model**: Select Gemini 2.5 Flash or Gemini 3 Pro (or use trend default)
 - Click "Generate"
 - Wait for AI processing (2-30 seconds)
 - View the result
@@ -670,6 +683,9 @@ If you encounter any issues or have questions:
 - [x] 🌐 **Language Selector** - Seamless language switching with URL persistence
 - [x] 🎯 **RTL Support** - Right-to-left language support for Arabic
 - [x] 🔧 **Advanced i18n Configuration** - Spring i18n with proper locale detection
+- [x] 📐 **Custom Aspect Ratio Selection** - Choose aspect ratio (1:1, 9:16, 16:9, 4:3, 3:4) when generating images
+- [x] 🤖 **AI Model Selection** - Choose between Gemini 2.5 Flash or Gemini 3 Pro models per generation
+- [x] ⚙️ **Flexible Generation Options** - Override trend defaults or use trend settings
 
 ### Version 1.1.0 ✅ (Released)
 - [x] User Profile Management
