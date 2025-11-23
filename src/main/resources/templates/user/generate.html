@@ -3,21 +3,21 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Generate Image</title>
+    <title th:text="#{generate.title}">Generate Image</title>
 </head>
 <body>
     <div layout:fragment="content">
-        <nav aria-label="breadcrumb">
+        <nav th:attr="aria-label=#{generate.breadcrumb}">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/trends}">Trends</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/}" th:text="#{generate.breadcrumb_home}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/trends}" th:text="#{generate.breadcrumb_trends}">Trends</a></li>
                 <li class="breadcrumb-item"><a th:href="@{/trends/{id}(id=${trend.id})}" th:text="${trend.trendName}">Trend</a></li>
-                <li class="breadcrumb-item active">Generate</li>
+                <li class="breadcrumb-item active" th:text="#{generate.breadcrumb_generate}">Generate</li>
             </ol>
         </nav>
 
-        <h1>Generate Image</h1>
-        <p class="lead">Using trend: <strong th:text="${trend.trendName}">Trend Name</strong></p>
+        <h1 th:text="#{generate.title}">Generate Image</h1>
+        <p class="lead"><span th:text="#{generate.using_trend}">Using trend</span>: <strong th:text="${trend.trendName}">Trend Name</strong></p>
 
         <div class="row">
             <div class="col-md-8">
@@ -26,22 +26,22 @@
                         <form th:action="@{/generate/{id}(id=${trend.id})}" method="post" enctype="multipart/form-data" id="generateForm">
                             <div class="mb-3">
                                 <label for="inputImages" class="form-label">
-                                    Upload Your Image(s) 
+                                    <span th:text="#{generate.upload_your_images}">Upload Your Image(s)</span>
                                     <span class="text-muted">
-                                        (Max: <span th:text="${trend.maxInputImages}">1</span>)
+                                        (<span th:text="#{generate.max_images}">Max</span>: <span th:text="${trend.maxInputImages}">1</span>)
                                     </span>
                                 </label>
                                 <input class="form-control" type="file" id="inputImages" name="inputImages" 
                                        multiple required accept="image/jpeg,image/png,image/gif"
                                        th:attr="multiple=${trend.maxInputImages > 1}">
-                                <div class="form-text">Accepted formats: JPG, PNG, GIF. Max size: 10MB per image</div>
+                                <div class="form-text" th:text="#{generate.accepted_formats}">Accepted formats: JPG, PNG, GIF. Max size: 10MB per image</div>
                             </div>
 
                             <div id="imagePreview" class="mb-3"></div>
 
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-magic"></i> Generate Image
+                                    <i class="bi bi-magic"></i> <span th:text="#{generate.generate_button}">Generate Image</span>
                                 </button>
                             </div>
                         </form>
@@ -52,12 +52,12 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-lightbulb"></i> Tips</h2>
+                        <h2 class="card-title h5"><i class="bi bi-lightbulb"></i> <span th:text="#{generate.tips}">Tips</span></h2>
                         <ul class="small">
-                            <li>Use clear, high-quality images for best results</li>
-                            <li>Make sure faces are clearly visible</li>
-                            <li>Avoid blurry or low-light photos</li>
-                            <li>Generation may take 10-30 seconds</li>
+                            <li th:text="#{generate.tip1}">Use clear, high-quality images for best results</li>
+                            <li th:text="#{generate.tip2}">Make sure faces are clearly visible</li>
+                            <li th:text="#{generate.tip3}">Avoid blurry or low-light photos</li>
+                            <li th:text="#{generate.tip4}">Generation may take 10-30 seconds</li>
                         </ul>
                     </div>
                 </div>

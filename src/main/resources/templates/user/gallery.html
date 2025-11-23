@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>My Gallery</title>
+    <title th:text="#{gallery.title}">My Gallery</title>
     <style>
         /* Fix modal backdrop and z-index issues */
         .modal {
@@ -16,32 +16,32 @@
 </head>
 <body>
     <div layout:fragment="content">
-        <h1 class="mb-4"><i class="bi bi-images"></i> My Gallery</h1>
+        <h1 class="mb-4"><i class="bi bi-images"></i> <span th:text="#{gallery.title}">My Gallery</span></h1>
 
         <!-- Filters Section -->
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h2 class="mb-0 h5"><i class="bi bi-funnel"></i> Filters & Search</h2>
+                <h2 class="mb-0 h5"><i class="bi bi-funnel"></i> <span th:text="#{gallery.filters_search}">Filters & Search</span></h2>
             </div>
             <div class="card-body">
                 <form id="filterForm" method="get" action="/gallery">
                     <div class="row g-3">
                         <!-- Search -->
                         <div class="col-md-6 col-lg-4">
-                            <label for="search" class="form-label"><i class="bi bi-search"></i> Search by Trend</label>
+                            <label for="search" class="form-label"><i class="bi bi-search"></i> <span th:text="#{gallery.search_by_trend}">Search by Trend</span></label>
                             <input type="text" 
                                    class="form-control" 
                                    id="search" 
                                    name="search" 
                                    th:value="${selectedSearch}"
-                                   placeholder="Type trend name...">
+                                   th:placeholder="#{gallery.search_placeholder}">
                         </div>
                         
                         <!-- Trend Filter -->
                         <div class="col-md-6 col-lg-4">
-                            <label for="trendId" class="form-label"><i class="bi bi-palette"></i> Filter by Trend</label>
+                            <label for="trendId" class="form-label"><i class="bi bi-palette"></i> <span th:text="#{gallery.filter_by_trend}">Filter by Trend</span></label>
                             <select class="form-select" id="trendId" name="trendId">
-                                <option value="">All Trends</option>
+                                <option value="" th:text="#{gallery.all_trends}">All Trends</option>
                                 <option th:each="trend : ${allTrends}" 
                                         th:value="${trend.id}" 
                                         th:text="${trend.trendName}"
@@ -53,9 +53,9 @@
                         
                         <!-- Status Filter -->
                         <div class="col-md-6 col-lg-4">
-                            <label for="status" class="form-label"><i class="bi bi-flag"></i> Filter by Status</label>
+                            <label for="status" class="form-label"><i class="bi bi-flag"></i> <span th:text="#{gallery.filter_by_status}">Filter by Status</span></label>
                             <select class="form-select" id="status" name="status">
-                                <option value="">All Status</option>
+                                <option value="" th:text="#{gallery.all_status}">All Status</option>
                                 <option th:each="statusOption : ${allStatuses}" 
                                         th:value="${statusOption.name()}" 
                                         th:text="${statusOption.name()}"
@@ -67,7 +67,7 @@
                         
                         <!-- Date Range -->
                         <div class="col-md-6 col-lg-4">
-                            <label for="startDate" class="form-label"><i class="bi bi-calendar-range"></i> From Date</label>
+                            <label for="startDate" class="form-label"><i class="bi bi-calendar-range"></i> <span th:text="#{gallery.from_date}">From Date</span></label>
                             <input type="date" 
                                    class="form-control" 
                                    id="startDate" 
@@ -76,7 +76,7 @@
                         </div>
                         
                         <div class="col-md-6 col-lg-4">
-                            <label for="endDate" class="form-label"><i class="bi bi-calendar-check"></i> To Date</label>
+                            <label for="endDate" class="form-label"><i class="bi bi-calendar-check"></i> <span th:text="#{gallery.to_date}">To Date</span></label>
                             <input type="date" 
                                    class="form-control" 
                                    id="endDate" 
@@ -86,23 +86,23 @@
                         
                         <!-- Sort -->
                         <div class="col-md-6 col-lg-4">
-                            <label for="sort" class="form-label"><i class="bi bi-sort-down"></i> Sort By</label>
+                            <label for="sort" class="form-label"><i class="bi bi-sort-down"></i> <span th:text="#{gallery.sort_by}">Sort By</span></label>
                             <select class="form-select" id="sort" name="sort">
-                                <option value="createdAt:desc" th:selected="${selectedSort == 'createdAt:desc' or selectedSort == null}">Newest First</option>
-                                <option value="createdAt:asc" th:selected="${selectedSort == 'createdAt:asc'}">Oldest First</option>
-                                <option value="trend.trendName:asc" th:selected="${selectedSort == 'trend.trendName:asc'}">Trend Name (A-Z)</option>
-                                <option value="trend.trendName:desc" th:selected="${selectedSort == 'trend.trendName:desc'}">Trend Name (Z-A)</option>
-                                <option value="status:asc" th:selected="${selectedSort == 'status:asc'}">Status (A-Z)</option>
+                                <option value="createdAt:desc" th:selected="${selectedSort == 'createdAt:desc' or selectedSort == null}" th:text="#{gallery.sort_newest}">Newest First</option>
+                                <option value="createdAt:asc" th:selected="${selectedSort == 'createdAt:asc'}" th:text="#{gallery.sort_oldest}">Oldest First</option>
+                                <option value="trend.trendName:asc" th:selected="${selectedSort == 'trend.trendName:asc'}" th:text="#{gallery.sort_trend_az}">Trend Name (A-Z)</option>
+                                <option value="trend.trendName:desc" th:selected="${selectedSort == 'trend.trendName:desc'}" th:text="#{gallery.sort_trend_za}">Trend Name (Z-A)</option>
+                                <option value="status:asc" th:selected="${selectedSort == 'status:asc'}" th:text="#{gallery.sort_status_az}">Status (A-Z)</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="mt-3 d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-funnel-fill"></i> Apply Filters
+                            <i class="bi bi-funnel-fill"></i> <span th:text="#{gallery.apply_filters}">Apply Filters</span>
                         </button>
                         <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
-                            <i class="bi bi-x-circle"></i> Clear All
+                            <i class="bi bi-x-circle"></i> <span th:text="#{gallery.clear_filters}">Clear Filters</span>
                         </button>
                     </div>
                 </form>
@@ -112,10 +112,10 @@
         <!-- Results Summary -->
         <div th:if="${images != null and images.hasContent()}" class="alert alert-info mb-3">
             <i class="bi bi-info-circle"></i> 
-            Showing <strong th:text="${images.numberOfElements}">0</strong> of 
-            <strong th:text="${images.totalElements}">0</strong> images
+            <span th:text="#{gallery.showing}">Showing</span> <strong th:text="${images.numberOfElements}">0</strong> <span th:text="#{gallery.of}">of</span> 
+            <strong th:text="${images.totalElements}">0</strong> <span th:text="#{gallery.images}">images</span>
             <span th:if="${selectedSearch != null and !selectedSearch.isEmpty()}">
-                matching "<strong th:text="${selectedSearch}">search</strong>"
+                <span th:text="#{gallery.matching}">matching</span> "<strong th:text="${selectedSearch}">search</strong>"
             </span>
         </div>
 
@@ -127,7 +127,7 @@
                          style="height: 200px; overflow: hidden;">
                         <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}" 
                              class="card-img-top" 
-                             alt="Generated image"
+                             th:alt="#{gallery.generated_image_alt}"
                              th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                              decoding="async"
                              width="400"
@@ -147,7 +147,7 @@
                     <div class="card-body">
                         <h4 class="card-title h6" th:text="${image.trend.trendName}">Trend Name</h4>
                         <p class="card-text small text-muted">
-                            Created: <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy')}">Date</span>
+                            <span th:text="#{gallery.created}">Created</span>: <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy')}">Date</span>
                         </p>
                         <span class="badge" 
                               th:classappend="${image.status.name() == 'COMPLETED'} ? 'bg-success' : (${image.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
@@ -157,7 +157,7 @@
                         <div class="d-flex gap-1">
                             <a th:href="@{/generate/result/{id}(id=${image.id})}" 
                                class="btn btn-outline-primary btn-sm flex-grow-1"
-                               title="View details">
+                               th:title="#{gallery.view_details_title}">
                                 <i class="bi bi-eye"></i>
                             </a>
                             <!-- Favorite button -->
@@ -165,7 +165,7 @@
                                     class="btn btn-outline-danger btn-sm favorite-btn" 
                                     th:attr="data-image-id=${image.id}"
                                     onclick="toggleFavoriteImage(this)"
-                                    title="Add to favorites">
+                                    th:title="#{gallery.add_to_favorites_title}">
                                 <i class="bi bi-heart"></i>
                             </button>
                             <!-- Desktop: Download button -->
@@ -177,7 +177,7 @@
                                           (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}
                                 )}" 
                                class="btn btn-outline-success btn-sm d-none d-md-inline-block"
-                               title="Download image">
+                               th:title="#{gallery.download_image_title}">
                                 <i class="bi bi-download"></i>
                             </a>
                             <!-- Mobile: Share button -->
@@ -189,14 +189,14 @@
                                                #temporals.format(image.createdAt, 'yyyyMMdd') + 
                                                (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}"
                                     onclick="shareImageFromGallery(this)"
-                                    title="Save/Share image">
+                                    th:title="#{gallery.save_share_title}">
                                 <i class="bi bi-share"></i>
                             </button>
                             <button type="button" 
                                     class="btn btn-outline-danger btn-sm" 
                                     data-bs-toggle="modal" 
                                     th:data-bs-target="'#deleteModal' + ${image.id}"
-                                    title="Delete image">
+                                    th:title="#{gallery.delete_image_title}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -211,21 +211,21 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Confirm Delete</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title" th:text="#{common.delete}">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" th:attr="aria-label=#{common.close}"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Are you sure you want to delete this generated image?</p>
+                            <p th:text="#{gallery.delete_confirm}">Are you sure you want to delete this generated image?</p>
                             <p class="text-muted small mb-0">
                                 <i class="bi bi-exclamation-triangle text-warning"></i> 
-                                This action cannot be undone. Both the generated image and input images will be permanently deleted.
+                                <span th:text="#{gallery.delete_warning}">This action cannot be undone. Both the generated image and input images will be permanently deleted.</span>
                             </p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{common.cancel}">Cancel</button>
                             <form th:action="@{/gallery/delete/{id}(id=${image.id})}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i> Delete
+                                    <i class="bi bi-trash"></i> <span th:text="#{common.delete}">Delete</span>
                                 </button>
                             </form>
                         </div>
@@ -235,15 +235,14 @@
         </div>
 
         <div class="alert alert-info" th:if="${images == null or !images.hasContent()}">
-            <i class="bi bi-info-circle"></i> You haven't generated any images yet. 
-            <a th:href="@{/trends}" class="alert-link">Browse trends</a> to get started!
+            <i class="bi bi-info-circle"></i> <span th:text="#{gallery.no_images_found}">No images found matching your criteria</span>
         </div>
 
         <!-- Pagination -->
-        <nav aria-label="Page navigation" class="mt-4" th:if="${images != null and images.totalPages > 1}">
+        <nav th:attr="aria-label=#{common.page_navigation}" class="mt-4" th:if="${images != null and images.totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${images.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/gallery(page=${images.number - 1})}">Previous</a>
+                    <a class="page-link" th:href="@{/gallery(page=${images.number - 1})}" th:text="#{common.previous}">Previous</a>
                 </li>
                 <li class="page-item" 
                     th:each="i : ${#numbers.sequence(0, images.totalPages - 1)}"
@@ -251,7 +250,7 @@
                     <a class="page-link" th:href="@{/gallery(page=${i})}" th:text="${i + 1}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${images.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/gallery(page=${images.number + 1})}">Next</a>
+                    <a class="page-link" th:href="@{/gallery(page=${images.number + 1})}" th:text="#{common.next}">Next</a>
                 </li>
             </ul>
         </nav>
@@ -304,14 +303,14 @@
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
-                                title: 'Generated Image',
-                                text: 'AI-generated image from Trendy'
+                                title: /*[[#{gallery.share_title}]]*/ 'Generated Image',
+                                text: /*[[#{gallery.share_text}]]*/ 'AI-generated image from Trendy'
                             });
                         } else {
                             // Fallback: share URL
                             await navigator.share({
-                                title: 'Generated Image',
-                                text: 'AI-generated image from Trendy',
+                                title: /*[[#{gallery.share_title}]]*/ 'Generated Image',
+                                text: /*[[#{gallery.share_text}]]*/ 'AI-generated image from Trendy',
                                 url: fullUrl
                             });
                         }
@@ -363,13 +362,13 @@
                         icon.classList.add('bi-heart-fill');
                         btn.classList.remove('btn-outline-danger');
                         btn.classList.add('btn-danger');
-                        btn.setAttribute('title', 'Remove from favorites');
+                        btn.setAttribute('title', /*[[#{gallery.remove_from_favorites_title}]]*/ 'Remove from favorites');
                     } else {
                         icon.classList.remove('bi-heart-fill');
                         icon.classList.add('bi-heart');
                         btn.classList.remove('btn-danger');
                         btn.classList.add('btn-outline-danger');
-                        btn.setAttribute('title', 'Add to favorites');
+                        btn.setAttribute('title', /*[[#{gallery.add_to_favorites_title}]]*/ 'Add to favorites');
                     }
                 });
             }
@@ -401,21 +400,21 @@
                             icon.classList.add('bi-heart-fill');
                             button.classList.remove('btn-outline-danger');
                             button.classList.add('btn-danger');
-                            button.setAttribute('title', 'Remove from favorites');
+                            button.setAttribute('title', /*[[#{gallery.remove_from_favorites_title}]]*/ 'Remove from favorites');
                         } else {
                             favoriteImageIds = favoriteImageIds.filter(id => id !== parseInt(imageId));
                             icon.classList.remove('bi-heart-fill');
                             icon.classList.add('bi-heart');
                             button.classList.remove('btn-danger');
                             button.classList.add('btn-outline-danger');
-                            button.setAttribute('title', 'Add to favorites');
+                            button.setAttribute('title', /*[[#{gallery.add_to_favorites_title}]]*/ 'Add to favorites');
                         }
                     } else {
-                        alert(data.message || 'Failed to update favorite');
+                        alert(data.message || /*[[#{gallery.failed_to_update_favorite}]]*/ 'Failed to update favorite');
                     }
                 } catch (error) {
                     console.error('Error toggling favorite:', error);
-                    alert('Failed to update favorite. Please try again.');
+                    alert(/*[[#{gallery.failed_to_update_favorite}]]*/ 'Failed to update favorite. Please try again.');
                 } finally {
                     button.disabled = false;
                 }

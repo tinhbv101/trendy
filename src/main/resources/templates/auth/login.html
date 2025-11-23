@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Login</title>
+    <title th:text="#{auth.login.title}">Login</title>
 </head>
 <body>
     <div layout:fragment="content">
@@ -12,47 +12,47 @@
                 <div class="card shadow">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
-                            <img th:src="@{/logo.png}" alt="Trendy Logo" height="80" class="mb-3" style="border-radius: 16px;">
+                            <img th:src="@{/logo.png}" th:alt="#{app.logo_alt}" height="80" class="mb-3" style="border-radius: 16px;">
                             <h2>
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                                <i class="bi bi-box-arrow-in-right"></i> <span th:text="#{auth.login.title}">Login</span>
                             </h2>
                         </div>
 
                         <div th:if="${param.error}" class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle"></i> Invalid username or password
+                            <i class="bi bi-exclamation-triangle"></i> <span th:text="#{auth.login.invalid_credentials}">Invalid username or password</span>
                         </div>
 
                         <div th:if="${param.logout}" class="alert alert-success">
-                            <i class="bi bi-check-circle"></i> You have been logged out successfully
+                            <i class="bi bi-check-circle"></i> <span th:text="#{auth.login.logout_success}">You have been logged out successfully</span>
                         </div>
 
                         <form th:action="@{/login}" method="post">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
+                                <label for="username" class="form-label" th:text="#{auth.login.username}">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" 
-                                       required autofocus placeholder="Enter your username">
+                                       required autofocus th:placeholder="#{auth.login.username_placeholder}">
                             </div>
 
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
+                                <label for="password" class="form-label" th:text="#{auth.login.password}">Password</label>
                                 <input type="password" class="form-control" id="password" name="password" 
-                                       required placeholder="Enter your password">
+                                       required th:placeholder="#{auth.login.password_placeholder}">
                             </div>
 
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
-                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                                <label class="form-check-label" for="rememberMe" th:text="#{auth.login.remember_me}">Remember me</label>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                                <button type="submit" class="btn btn-primary btn-lg" th:text="#{auth.login.button}">Login</button>
                             </div>
                         </form>
 
                         <hr class="my-4">
 
                         <p class="text-center mb-0">
-                            Don't have an account? <a th:href="@{/register}">Register here</a>
+                            <span th:text="#{auth.login.no_account}">Don't have an account?</span> <a th:href="@{/register}" th:text="#{auth.login.register_here}">Register here</a>
                         </p>
                     </div>
                 </div>

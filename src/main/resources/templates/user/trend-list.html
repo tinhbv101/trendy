@@ -3,14 +3,14 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Browse Trends - Trendy</title>
+    <title th:text="#{trend_list.title} + ' - Trendy'">Browse Trends - Trendy</title>
     <th:block th:fragment="extra-head">
-        <meta name="description" content="Browse all available AI image transformation trends. Choose from various styles including Polaroid, portrait drawing, and more. Create stunning images with Trendy.">
+        <meta name="description" th:content="#{app.default_description}">
     </th:block>
 </head>
 <body>
     <div layout:fragment="content">
-        <h1 class="mb-4">Browse Trends</h1>
+        <h1 class="mb-4" th:text="#{trend_list.title}">Browse Trends</h1>
         
         <!-- Search and Filter -->
         <div class="row mb-4">
@@ -18,17 +18,17 @@
                 <form th:action="@{/trends}" method="get">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" 
-                               placeholder="Search trends..." th:value="${search}">
+                               th:placeholder="#{trend_list.search_placeholder}" th:value="${search}">
                         <input type="hidden" name="sort" th:value="${currentSort}">
                         <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-search"></i> Search
+                            <i class="bi bi-search"></i> <span th:text="#{trend_list.search_button}">Search</span>
                         </button>
                     </div>
                 </form>
             </div>
             <div class="col-md-4">
                 <select class="form-select" onchange="filterByCategory(this.value)">
-                    <option value="">All Categories</option>
+                    <option value="" th:text="#{trend_list.all_categories}">All Categories</option>
                     <option th:each="cat : ${categories}" 
                             th:value="${cat}" 
                             th:text="${cat}"
@@ -38,16 +38,16 @@
             <div class="col-md-4">
                 <select class="form-select" onchange="sortTrends(this.value)">
                     <option value="popular" th:selected="${currentSort == 'popular' or currentSort == null}">
-                        <i class="bi bi-fire"></i> Most Popular
+                        <i class="bi bi-fire"></i> <span th:text="#{trend_list.sort_most_popular}">Most Popular</span>
                     </option>
                     <option value="least-used" th:selected="${currentSort == 'least-used'}">
-                        Least Used
+                        <span th:text="#{trend_list.sort_least_used}">Least Used</span>
                     </option>
                     <option value="newest" th:selected="${currentSort == 'newest'}">
-                        Newest First
+                        <span th:text="#{trend_list.sort_newest}">Newest First</span>
                     </option>
                     <option value="oldest" th:selected="${currentSort == 'oldest'}">
-                        Oldest First
+                        <span th:text="#{trend_list.sort_oldest}">Oldest First</span>
                     </option>
                 </select>
             </div>
@@ -80,19 +80,19 @@
                         <p class="card-text small" th:text="${#strings.abbreviate(trend.description, 80)}">Description</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${trend.category}">Category</span>
-                            <small class="text-muted" th:text="${trend.usageCount} + ' uses'">0 uses</small>
+                            <small class="text-muted" th:text="|${trend.usageCount} #{trend_list.uses}|">0 uses</small>
                         </div>
                     </div>
                     <div class="card-footer bg-transparent">
                         <div class="d-flex gap-2">
-                            <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                            <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm flex-grow-1" th:text="#{trend_list.view_details}">
                                 View Details
                             </a>
                             <button type="button" 
                                     class="btn btn-outline-danger btn-sm favorite-btn" 
                                     th:attr="data-trend-id=${trend.id}"
                                     onclick="toggleFavorite(this)"
-                                    title="Add to favorites">
+                                    th:title="#{trend_list.add_to_favorites}">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
@@ -102,14 +102,14 @@
         </div>
         
         <div class="alert alert-info" th:if="${trends == null or !trends.hasContent()}">
-            <i class="bi bi-info-circle"></i> No trends found. Try a different search or category.
+            <i class="bi bi-info-circle"></i> <span th:text="#{trend_list.no_trends_found}">No trends found. Try a different search or category.</span>
         </div>
         
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4" th:if="${trends != null and trends.totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category}, sort=${currentSort})}">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category}, sort=${currentSort})}" th:text="#{common.previous}">
                         Previous
                     </a>
                 </li>
@@ -120,7 +120,7 @@
                        th:text="${i + 1}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category}, sort=${currentSort})}">
+                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category}, sort=${currentSort})}" th:text="#{common.next}">
                         Next
                     </a>
                 </li>

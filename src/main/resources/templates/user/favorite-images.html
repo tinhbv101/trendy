@@ -3,31 +3,31 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>My Favorite Images</title>
+    <title th:text="#{favorite_images.title}">My Favorite Images</title>
 </head>
 <body>
     <div layout:fragment="content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="bi bi-heart-fill text-danger"></i> My Favorite Images</h1>
-            <a href="/gallery" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Gallery
+            <h1><i class="bi bi-heart-fill text-danger"></i> <span th:text="#{favorite_images.title}">My Favorite Images</span></h1>
+            <a th:href="@{/gallery}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> <span th:text="#{favorite_images.back_to_gallery}">Back to Gallery</span>
             </a>
         </div>
 
         <!-- Results Summary -->
         <div th:if="${favoriteImages != null and favoriteImages.hasContent()}" class="alert alert-info">
             <i class="bi bi-info-circle"></i> 
-            Showing <strong th:text="${favoriteImages.numberOfElements}">0</strong> of 
-            <strong th:text="${totalFavoriteImages}">0</strong> favorite images
+            <span th:text="#{favorite_images.showing}">Showing</span> <strong th:text="${favoriteImages.numberOfElements}">0</strong> <span th:text="#{favorite_images.of}">of</span>
+            <strong th:text="${totalFavoriteImages}">0</strong> <span th:text="#{favorite_images.favorite_images}">favorite images</span>
         </div>
 
         <!-- Empty State -->
         <div th:if="${favoriteImages == null or !favoriteImages.hasContent()}" class="text-center py-5">
             <i class="bi bi-heart" style="font-size: 4rem; color: #ccc;"></i>
-            <h3 class="mt-3">No Favorite Images Yet</h3>
-            <p class="text-muted">Start adding images to your favorites from the gallery!</p>
-            <a href="/gallery" class="btn btn-primary mt-3">
-                <i class="bi bi-images"></i> Go to Gallery
+            <h3 class="mt-3" th:text="#{favorite_images.no_favorites}">No Favorite Images Yet</h3>
+            <p class="text-muted" th:text="#{favorite_images.no_favorites_message}">Start adding images to your favorites from the gallery!</p>
+            <a th:href="@{/gallery}" class="btn btn-primary mt-3">
+                <i class="bi bi-images"></i> <span th:text="#{favorite_images.go_to_gallery}">Go to Gallery</span>
             </a>
         </div>
 
@@ -60,8 +60,8 @@
                     <div class="card-body">
                         <h3 class="card-title h6" th:text="${favoriteImage.generatedImage.trend.trendName}">Trend Name</h3>
                         <p class="card-text small text-muted">
-                            <i class="bi bi-calendar"></i> Created: <span th:text="${#temporals.format(favoriteImage.generatedImage.createdAt, 'dd/MM/yyyy')}">Date</span><br>
-                            <i class="bi bi-heart-fill text-danger"></i> Favorited: <span th:text="${#temporals.format(favoriteImage.createdAt, 'dd/MM/yyyy')}">Date</span>
+                            <i class="bi bi-calendar"></i> <span th:text="#{favorite_images.created} + ':'">Created:</span> <span th:text="${#temporals.format(favoriteImage.generatedImage.createdAt, 'dd/MM/yyyy')}">Date</span><br>
+                            <i class="bi bi-heart-fill text-danger"></i> <span th:text="#{favorite_images.favorited} + ':'">Favorited:</span> <span th:text="${#temporals.format(favoriteImage.createdAt, 'dd/MM/yyyy')}">Date</span>
                         </p>
                         <span class="badge" 
                               th:classappend="${favoriteImage.generatedImage.status.name() == 'COMPLETED'} ? 'bg-success' : (${favoriteImage.generatedImage.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
@@ -71,15 +71,15 @@
                         <div class="d-flex gap-1">
                             <a th:href="@{/generate/result/{id}(id=${favoriteImage.generatedImage.id})}" 
                                class="btn btn-outline-primary btn-sm flex-grow-1"
-                               title="View details">
-                                <i class="bi bi-eye"></i> View
+                               th:title="#{favorite_images.view}">
+                                <i class="bi bi-eye"></i> <span th:text="#{favorite_images.view}">View</span>
                             </a>
                             <!-- Remove from favorites button -->
                             <button type="button" 
                                     class="btn btn-danger btn-sm favorite-btn" 
                                     th:attr="data-image-id=${favoriteImage.generatedImage.id}"
                                     onclick="removeFavoriteImage(this)"
-                                    title="Remove from favorites">
+                                    th:title="#{favorite_images.remove_from_favorites}">
                                 <i class="bi bi-heart-fill"></i>
                             </button>
                             <!-- Desktop: Download button -->
@@ -91,7 +91,7 @@
                                           (favoriteImage.generatedImage.outputImagePath.contains('.png') ? '.png' : '.jpg')}
                                 )}" 
                                class="btn btn-outline-success btn-sm d-none d-md-inline-block"
-                               title="Download image">
+                               th:title="#{favorite_images.download}">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>

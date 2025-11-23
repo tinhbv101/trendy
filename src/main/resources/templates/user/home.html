@@ -3,26 +3,26 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Home - Trendy</title>
+    <title th:text="|#{app.name} - Home|">Trendy - Home</title>
     <th:block th:fragment="extra-head">
-        <meta name="description" content="Transform your photos with AI-powered trends. Explore featured styles and create amazing images in seconds with Trendy - AI Image Generator.">
+        <meta name="description" th:content="#{app.description}">
     </th:block>
 </head>
 <body>
     <div layout:fragment="content">
         <!-- Hero Section -->
         <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
-            <h1 class="display-4">Welcome to Trendy</h1>
-            <p class="lead">Transform your photos with AI-powered trends. Choose from various styles and create amazing images in seconds!</p>
+            <h1 class="display-4" th:text="#{home.title}">Welcome to Trendy</h1>
+            <p class="lead" th:text="#{home.subtitle}">Transform your photos with AI-powered trends. Choose from various styles and create amazing images in seconds!</p>
             <hr class="my-4 bg-white">
-            <p>Explore our collection of trending styles and start creating now.</p>
+            <p th:text="#{home.explore_collection}">Explore our collection of trending styles and start creating now.</p>
             <a class="btn btn-light btn-lg" th:href="@{/trends}" role="button">
-                <i class="bi bi-stars"></i> Browse Trends
+                <i class="bi bi-stars"></i> <span th:text="#{home.get_started}">Browse Trends</span>
             </a>
         </div>
 
         <!-- Featured Trends -->
-        <h2 class="mb-4">Featured Trends</h2>
+        <h2 class="mb-4" th:text="#{home.features_title}">Featured Trends</h2>
         
         <div class="row row-cols-1 row-cols-md-3 g-4" th:if="${trends != null and !trends.isEmpty()}">
             <div class="col" th:each="trend, iterStat : ${trends}">
@@ -31,7 +31,7 @@
                     <div th:if="${trend.thumbnailPath != null}" style="height: 200px; overflow: hidden;">
                         <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
                              class="card-img-top" 
-                             alt="Trend thumbnail"
+                             th:alt="#{home.trend_thumbnail}"
                              th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                              decoding="async"
                              width="400"
@@ -50,20 +50,19 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${trend.category}">Category</span>
                             <small class="text-muted">
-                                <i class="bi bi-fire"></i> <span th:text="${trend.usageCount}">0</span> uses
+                                <i class="bi bi-fire"></i> <span th:text="|${trend.usageCount} #{common.uses}|">0 uses</span>
                             </small>
                         </div>
                     </div>
                     <div class="card-footer bg-transparent">
                         <div class="d-flex gap-2">
                             <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-primary flex-grow-1">
-                                <i class="bi bi-arrow-right-circle"></i> View Details
+                                <i class="bi bi-arrow-right-circle"></i> <span th:text="#{home.view_details}">View Details</span>
                             </a>
                             <button type="button" 
                                     class="btn btn-outline-danger favorite-btn" 
-                                    th:attr="data-trend-id=${trend.id}"
-                                    onclick="toggleFavorite(this)"
-                                    title="Add to favorites">
+                                    th:attr="data-trend-id=${trend.id}, title=#{home.add_to_favorites}"
+                                    onclick="toggleFavorite(this)">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
@@ -73,13 +72,13 @@
         </div>
 
         <div class="alert alert-info mt-4" th:if="${trends == null or trends.isEmpty()}">
-            <i class="bi bi-info-circle"></i> No trends available yet. Check back soon!
+            <i class="bi bi-info-circle"></i> <span th:text="#{home.no_trends_available}">No trends available yet. Check back soon!</span>
         </div>
 
         <!-- Call to Action -->
         <div class="text-center mt-5">
             <a th:href="@{/trends}" class="btn btn-primary btn-lg">
-                View All Trends <i class="bi bi-arrow-right"></i>
+                <span th:text="#{home.view_all_trends}">View All Trends</span> <i class="bi bi-arrow-right"></i>
             </a>
         </div>
     </div>
@@ -122,18 +121,20 @@
                     const data = await response.json();
                     
                     if (data.success) {
+                        const addToFavoritesText = /*[[#{home.add_to_favorites}]]*/ 'Add to favorites';
+                        const removeFromFavoritesText = /*[[#{home.remove_from_favorites}]]*/ 'Remove from favorites';
                         if (data.favorited) {
                             icon.classList.remove('bi-heart');
                             icon.classList.add('bi-heart-fill');
                             button.classList.remove('btn-outline-danger');
                             button.classList.add('btn-danger');
-                            button.title = 'Remove from favorites';
+                            button.title = removeFromFavoritesText;
                         } else {
                             icon.classList.remove('bi-heart-fill');
                             icon.classList.add('bi-heart');
                             button.classList.remove('btn-danger');
                             button.classList.add('btn-outline-danger');
-                            button.title = 'Add to favorites';
+                            button.title = addToFavoritesText;
                         }
                     }
                 } catch (error) {
@@ -150,12 +151,13 @@
                     document.querySelectorAll('.favorite-btn').forEach(button => {
                         const trendId = parseInt(button.getAttribute('data-trend-id'));
                         if (favoriteTrendIds.includes(trendId)) {
+                            const removeFromFavoritesText = /*[[#{home.remove_from_favorites}]]*/ 'Remove from favorites';
                             const icon = button.querySelector('i');
                             icon.classList.remove('bi-heart');
                             icon.classList.add('bi-heart-fill');
                             button.classList.remove('btn-outline-danger');
                             button.classList.add('btn-danger');
-                            button.title = 'Remove from favorites';
+                            button.title = removeFromFavoritesText;
                         }
                     });
                 } catch (error) {

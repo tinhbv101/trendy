@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>My Shared Links</title>
+    <title th:text="#{my_shares.title}">My Shared Links</title>
 </head>
 <body>
     <div layout:fragment="content">
@@ -57,11 +57,13 @@
                     if (successful) {
                         window.updateCopyButton(button);
                     } else {
-                        alert('Failed to copy. Please copy manually.');
+                        const failedCopyText = /*[[#{my_shares.failed_to_copy}]]*/ 'Failed to copy. Please copy manually.';
+                        alert(failedCopyText);
                     }
                 } catch (err) {
                     console.error('Fallback copy failed:', err);
-                    alert('Failed to copy. Please copy manually.');
+                    const failedCopyText = /*[[#{my_shares.failed_to_copy}]]*/ 'Failed to copy. Please copy manually.';
+                    alert(failedCopyText);
                 }
                 
                 document.body.removeChild(textArea);
@@ -70,8 +72,9 @@
             window.revokeShare = async function(button) {
                 const token = button.getAttribute('data-token');
                 const card = button.closest('.col');
+                const revokeConfirmText = /*[[#{my_shares.revoke_confirm}]]*/ 'Revoke this share link? It will no longer be accessible.';
                 
-                if (!confirm('Revoke this share link? It will no longer be accessible.')) {
+                if (!confirm(revokeConfirmText)) {
                     return;
                 }
                 
@@ -93,29 +96,32 @@
                         const badge = card.querySelector('.badge');
                         badge.classList.remove('bg-success');
                         badge.classList.add('bg-secondary');
-                        badge.textContent = 'Revoked';
+                        badge.textContent = /*[[#{my_shares.revoked}]]*/ 'Revoked';
                         
                         // Remove revoke button
                         button.remove();
                         
                         // Show success message
+                        const successText = /*[[#{my_shares.share_link_revoked}]]*/ 'Share link revoked successfully!';
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
                         alertDiv.innerHTML = `
-                            <i class="bi bi-check-circle"></i> Share link revoked successfully!
+                            <i class="bi bi-check-circle"></i> ${successText}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         `;
                         card.querySelector('.card-body').appendChild(alertDiv);
                         
                         setTimeout(() => alertDiv.remove(), 3000);
                     } else {
-                        alert(data.message || 'Failed to revoke share link');
+                        const failedRevokeText = /*[[#{my_shares.failed_to_revoke}]]*/ 'Failed to revoke share link';
+                        alert(data.message || failedRevokeText);
                         button.disabled = false;
                         button.innerHTML = '<i class="bi bi-x-circle"></i>';
                     }
                 } catch (error) {
                     console.error('Error revoking share:', error);
-                    alert('Failed to revoke share link. Please try again.');
+                    const failedRevokeText = /*[[#{my_shares.failed_to_revoke}]]*/ 'Failed to revoke share link. Please try again.';
+                    alert(failedRevokeText);
                     button.disabled = false;
                     button.innerHTML = '<i class="bi bi-x-circle"></i>';
                 }
@@ -124,25 +130,25 @@
             console.log('Share functions loaded:', typeof window.copyShareLinkFromList);
         </script>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="bi bi-share-fill text-success"></i> My Shared Links</h1>
-            <a href="/gallery" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Gallery
+            <h1><i class="bi bi-share-fill text-success"></i> <span th:text="#{my_shares.title}">My Shared Links</span></h1>
+            <a th:href="@{/gallery}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> <span th:text="#{my_shares.go_to_gallery}">Back to Gallery</span>
             </a>
         </div>
 
         <!-- Stats -->
         <div class="alert alert-info">
             <i class="bi bi-info-circle"></i> 
-            You have <strong th:text="${activeShares}">0</strong> active shared link(s).
+            <span th:text="#{my_shares.active_shares(${activeShares})}">You have 0 active shared link(s).</span>
         </div>
 
         <!-- Empty State -->
         <div th:if="${shares == null or !shares.hasContent()}" class="text-center py-5">
             <i class="bi bi-share" style="font-size: 4rem; color: #ccc;"></i>
-            <h3 class="mt-3">No Shared Links Yet</h3>
-            <p class="text-muted">Share your generated images with others!</p>
-            <a href="/gallery" class="btn btn-primary mt-3">
-                <i class="bi bi-images"></i> Go to Gallery
+            <h3 class="mt-3" th:text="#{my_shares.no_shares}">No Shared Links Yet</h3>
+            <p class="text-muted" th:text="#{my_shares.no_shares_message}">Share your generated images with others!</p>
+            <a th:href="@{/gallery}" class="btn btn-primary mt-3">
+                <i class="bi bi-images"></i> <span th:text="#{my_shares.go_to_gallery}">Go to Gallery</span>
             </a>
         </div>
 
@@ -155,7 +161,7 @@
                         <div style="height: 200px; overflow: hidden;">
                             <img th:src="@{/images/{filename}(filename=${share.generatedImage.outputImagePath})}" 
                                  class="card-img-top" 
-                                 alt="Shared image"
+                                 th:alt="#{my_shares.shared_image_alt}"
                                  th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
                                  decoding="async"
                                  width="400"
@@ -164,24 +170,24 @@
                                  style="width: 100%; height: 200px; object-fit: cover;">
                         </div>
                         
-                        <div class="card-body">
+                        <div class="card-body" th:with="activeLabel=#{my_shares.active}, revokedLabel=#{my_shares.revoked}, expiredLabel=#{my_shares.expired}">
                             <h3 class="card-title h6" th:text="${share.generatedImage.trend.trendName}">Trend Name</h3>
                             
                             <div class="small text-muted mb-2">
-                                <div><i class="bi bi-calendar"></i> Shared: 
+                                <div><i class="bi bi-calendar"></i> <span th:text="|#{my_shares.shared_label}#{common.colon}|">Shared:</span>
                                     <span th:text="${#temporals.format(share.createdAt, 'dd/MM/yyyy')}">Date</span>
                                 </div>
                                 <div th:if="${share.expiresAt != null}">
-                                    <i class="bi bi-clock"></i> Expires: 
+                                    <i class="bi bi-clock"></i> <span th:text="|#{my_shares.expires}#{common.colon}|">Expires:</span>
                                     <span th:text="${#temporals.format(share.expiresAt, 'dd/MM/yyyy')}">Date</span>
                                 </div>
-                                <div><i class="bi bi-eye"></i> Views: <span th:text="${share.viewCount}">0</span></div>
+                                <div><i class="bi bi-eye"></i> <span th:text="|#{my_shares.views}#{common.colon}|">Views:</span> <span th:text="${share.viewCount}">0</span></div>
                             </div>
                             
                             <!-- Status Badge -->
                             <span class="badge" 
                                   th:classappend="${share.isActive and !share.isExpired()} ? 'bg-success' : 'bg-secondary'"
-                                  th:text="${share.isActive ? (share.isExpired() ? 'Expired' : 'Active') : 'Revoked'}">
+                                  th:text="${share.isActive ? (share.isExpired() ? expiredLabel : activeLabel) : revokedLabel}">
                                 Status
                             </span>
                         </div>
@@ -192,8 +198,8 @@
                                 <a th:href="@{/share/{token}(token=${share.shareToken})}" 
                                    class="btn btn-outline-primary btn-sm flex-grow-1"
                                    target="_blank"
-                                   title="View shared page">
-                                    <i class="bi bi-eye"></i> View
+                                   th:title="#{common.view}">
+                                    <i class="bi bi-eye"></i> <span th:text="#{common.view}">View</span>
                                 </a>
                                 
                                 <!-- Copy Link Button -->
@@ -201,7 +207,7 @@
                                         class="btn btn-outline-success btn-sm"
                                         th:attr="data-share-url=@{/share/{token}(token=${share.shareToken})}"
                                         onclick="copyShareLinkFromList(this)"
-                                        title="Copy link">
+                                        th:title="#{my_shares.copy_link}">
                                     <i class="bi bi-link-45deg"></i>
                                 </button>
                                 
@@ -211,7 +217,7 @@
                                         th:if="${share.isActive}"
                                         th:attr="data-token=${share.shareToken}"
                                         onclick="revokeShare(this)"
-                                        title="Revoke access">
+                                        th:title="#{my_shares.revoke}">
                                     <i class="bi bi-x-circle"></i>
                                 </button>
                             </div>
@@ -224,7 +230,7 @@
             <nav th:if="${shares.totalPages > 1}" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${shares.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{/my-shares(page=${shares.number - 1})}" aria-label="Previous">
+                        <a class="page-link" th:href="@{/my-shares(page=${shares.number - 1})}" th:attr="aria-label=#{common.previous}">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -233,7 +239,7 @@
                         <a class="page-link" th:href="@{/my-shares(page=${i})}" th:text="${i + 1}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${shares.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{/my-shares(page=${shares.number + 1})}" aria-label="Next">
+                        <a class="page-link" th:href="@{/my-shares(page=${shares.number + 1})}" th:attr="aria-label=#{common.next}">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>

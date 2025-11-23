@@ -76,7 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteButtons = document.querySelectorAll('[data-confirm-delete]');
     deleteButtons.forEach(function(button) {
         button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item?')) {
+            const confirmText = window.i18n?.deleteConfirm || 'Are you sure you want to delete this item?';
+            if (!confirm(confirmText)) {
                 e.preventDefault();
             }
         });
@@ -113,7 +114,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitButton = form.querySelector('button[type="submit"]');
             if (submitButton && form.checkValidity()) {
                 submitButton.disabled = true;
-                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+                const processingText = window.i18n?.processing || 'Processing...';
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + processingText;
             }
         });
     });
@@ -137,10 +139,12 @@ function showToast(message, type = 'info') {
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        showToast('Copied to clipboard!', 'success');
+        const successText = window.i18n?.copiedToClipboard || 'Copied to clipboard!';
+        showToast(successText, 'success');
     }).catch(err => {
         console.error('Failed to copy:', err);
-        showToast('Failed to copy', 'danger');
+        const errorText = window.i18n?.failedToCopy || 'Failed to copy';
+        showToast(errorText, 'danger');
     });
 }
 

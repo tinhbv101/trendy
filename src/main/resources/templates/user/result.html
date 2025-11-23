@@ -3,11 +3,44 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/main}">
 <head>
-    <title>Generation Result</title>
+    <title th:text="#{result.title}">Generation Result</title>
+    <th:block layout:fragment="extra-head">
+        <!-- Translation strings for JavaScript (in head to ensure early load) -->
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            // Initialize or extend window.i18n object (merge with layout i18n)
+            if (!window.i18n) {
+                window.i18n = {};
+            }
+            
+            // Add result page specific translations
+            Object.assign(window.i18n, {
+                shareLinkCreated: /*[[#{result.share_link_created}]]*/ 'Share link created successfully!',
+                shareLinkLabel: /*[[#{result.share_link_label}]]*/ 'Share Link:',
+                copy: /*[[#{result.copy}]]*/ 'Copy',
+                linkExpires: /*[[#{result.link_expires}]]*/ 'Link expires in 30 days',
+                shareOnSocial: /*[[#{result.share_on_social}]]*/ 'Share on Social Media:',
+                checkOutImage: /*[[#{result.check_out_image}]]*/ 'Check out this AI-generated image from Trendy!',
+                aiGeneratedFromTrendy: /*[[#{result.ai_generated_from_trendy}]]*/ 'AI-generated image from Trendy',
+                shareInfo: /*[[#{shared_view.share_info}]]*/ 'Anyone with this link can view this image.',
+                manageShares: /*[[#{shared_view.manage_shares}]]*/ 'You can manage your shares from',
+                myShares: /*[[#{shared_view.my_shares}]]*/ 'My Shares',
+                shareImage: /*[[#{result.share_image}]]*/ 'Share Image',
+                facebook: /*[[#{shared_view.facebook}]]*/ 'Facebook',
+                twitter: /*[[#{shared_view.twitter}]]*/ 'Twitter',
+                pinterest: /*[[#{shared_view.pinterest}]]*/ 'Pinterest'
+            });
+            
+            // Debug: log to verify translations are loaded
+            console.log('Result page i18n loaded:', window.i18n);
+            console.log('Result page i18n keys:', Object.keys(window.i18n));
+            /*]]>*/
+        </script>
+    </th:block>
 </head>
 <body>
     <div layout:fragment="content">
-        <h1 class="mb-4">Generation Result</h1>
+        <h1 class="mb-4" th:text="#{result.title}">Generation Result</h1>
 
         <div class="row">
             <div class="col-md-8">
@@ -16,10 +49,10 @@
                         <div th:if="${image.status.name() == 'PENDING' or image.status.name() == 'PROCESSING'}">
                             <div class="text-center py-5">
                                 <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                                    <span class="visually-hidden" th:text="#{result.loading}">Loading...</span>
                                 </div>
-                                <h3 class="mt-3">Generating your image...</h3>
-                                <p class="text-muted">This may take a few moments. Please wait...</p>
+                                <h3 class="mt-3" th:text="#{result.generating}">Generating your image...</h3>
+                                <p class="text-muted" th:text="#{result.please_wait}">This may take a few moments. Please wait...</p>
                                 <div class="progress mt-3" style="height: 25px;">
                                     <div class="progress-bar progress-bar-striped progress-bar-animated" 
                                          role="progressbar" style="width: 100%"></div>
@@ -29,9 +62,9 @@
 
                         <div th:if="${image.status.name() == 'COMPLETED'}">
                             <div class="alert alert-success">
-                                <i class="bi bi-check-circle"></i> Image generated successfully!
+                                <i class="bi bi-check-circle"></i> <span th:text="#{result.image_generated_successfully}">Image generated successfully!</span>
                                 <span th:if="${image.generationTimeSeconds != null}">
-                                    (Generated in <span th:text="${image.generationTimeSeconds}">0</span> seconds)
+                                    (<span th:text="|#{result.generated_in} ${image.generationTimeSeconds} #{result.seconds}|">Generated in 0 seconds</span>)
                                 </span>
                             </div>
 
@@ -40,7 +73,7 @@
                                 <div th:if="${image.outputImagePath != null}">
                                     <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}" 
                                          class="img-fluid rounded" 
-                                         alt="Generated image"
+                                         th:alt="#{result.generated_image}"
                                          style="max-height: 600px; width: 100%; object-fit: contain;">
                                 </div>
                                 <!-- Placeholder if no image path -->
@@ -49,7 +82,7 @@
                                      style="height: 500px;">
                                     <div class="text-center">
                                         <i class="bi bi-image text-white" style="font-size: 5rem;"></i>
-                                        <p class="text-white mt-3">Generated image will appear here</p>
+                                        <p class="text-white mt-3" th:text="#{result.generated_image_will_appear}">Generated image will appear here</p>
                                     </div>
                                 </div>
                             </div>
@@ -66,13 +99,13 @@
                                                            #temporals.format(image.createdAt, 'yyyyMMdd-HHmmss') + 
                                                            (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}"
                                                 onclick="shareOrDownloadImage(this)">
-                                            <i class="bi bi-share"></i> <span id="shareButtonText">Save/Share</span>
+                                            <i class="bi bi-share"></i> <span id="shareButtonText" th:text="#{result.save_share}">Save/Share</span>
                                         </button>
                                         <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
                                            th:href="@{/images/download-inputs/{id}(id=${image.id})}" 
                                            class="btn btn-outline-primary flex-fill"
-                                           title="Download all input images as ZIP">
-                                            <i class="bi bi-file-zip"></i> Inputs
+                                           th:title="#{result.download_all_inputs}">
+                                            <i class="bi bi-file-zip"></i> <span th:text="#{result.inputs}">Inputs</span>
                                         </a>
                                     </div>
                                     
@@ -85,39 +118,39 @@
                                                       (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}
                                             )}" 
                                            class="btn btn-primary flex-fill">
-                                            <i class="bi bi-download"></i> Download Result
+                                            <i class="bi bi-download"></i> <span th:text="#{result.download_result}">Download Result</span>
                                         </a>
                                         <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
                                            th:href="@{/images/download-inputs/{id}(id=${image.id})}" 
                                            class="btn btn-outline-primary flex-fill"
-                                           title="Download all input images as ZIP">
-                                            <i class="bi bi-file-zip"></i> Download Inputs
+                                           th:title="#{result.download_all_inputs}">
+                                            <i class="bi bi-file-zip"></i> <span th:text="#{result.download_inputs}">Download Inputs</span>
                                         </a>
                                     </div>
                                 </div>
                                 
                                 <!-- Share Button -->
-                                <button type="button" 
+                                <button type="button"
                                         class="btn btn-success"
                                         th:attr="data-image-id=${image.id}"
                                         onclick="shareImage(this)"
-                                        title="Share this image publicly">
-                                    <i class="bi bi-share-fill"></i> Share Image
+                                        th:title="#{result.share_publicly_title}">
+                                    <i class="bi bi-share-fill"></i> <span th:text="#{result.share_image}">Share Image</span>
                                 </button>
                                 
                                 <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-repeat"></i> Generate Another
+                                    <i class="bi bi-arrow-repeat"></i> <span th:text="#{result.generate_another}">Generate Another</span>
                                 </a>
                             </div>
                         </div>
 
                         <div th:if="${image.status.name() == 'FAILED'}">
                             <div class="alert alert-danger">
-                                <h3 class="h5"><i class="bi bi-exclamation-triangle"></i> Generation Failed</h3>
+                                <h3 class="h5"><i class="bi bi-exclamation-triangle"></i> <span th:text="#{result.generation_failed}">Generation Failed</span></h3>
                                 <p th:text="${image.errorMessage}">An error occurred during generation.</p>
                             </div>
                             <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-primary">
-                                <i class="bi bi-arrow-repeat"></i> Try Again
+                                <i class="bi bi-arrow-repeat"></i> <span th:text="#{result.try_again}">Try Again</span>
                             </a>
                         </div>
                     </div>
@@ -127,22 +160,22 @@
             <div class="col-md-4">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> Generation Info</h2>
+                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> <span th:text="#{result.generation_info}">Generation Info</span></h2>
                         <ul class="list-unstyled mb-0">
-                            <li class="mb-2"><strong><i class="bi bi-palette"></i> Trend:</strong> 
+                            <li class="mb-2"><strong><i class="bi bi-palette"></i> <span th:text="#{result.trend_label}">Trend</span>:</strong> 
                                 <span th:text="${image.trend.trendName}">Trend</span>
                             </li>
-                            <li class="mb-2"><strong><i class="bi bi-flag"></i> Status:</strong> 
+                            <li class="mb-2"><strong><i class="bi bi-flag"></i> <span th:text="#{result.status_label}">Status</span>:</strong> 
                                 <span class="badge" 
                                       th:classappend="${image.status.name() == 'COMPLETED'} ? 'bg-success' : (${image.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
                                       th:text="${image.status}">Status</span>
                             </li>
-                            <li class="mb-2"><strong><i class="bi bi-calendar"></i> Created:</strong> 
+                            <li class="mb-2"><strong><i class="bi bi-calendar"></i> <span th:text="#{result.created_label}">Created</span>:</strong> 
                                 <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
                             </li>
                             <li th:if="${image.generationTimeSeconds != null}" class="mb-2">
-                                <strong><i class="bi bi-clock"></i> Generation Time:</strong> 
-                                <span th:text="${image.generationTimeSeconds} + 's'">0s</span>
+                                <strong><i class="bi bi-clock"></i> <span th:text="#{result.generation_time_label}">Generation Time</span>:</strong> 
+                                <span th:text="|${image.generationTimeSeconds}s|">0s</span>
                             </li>
                         </ul>
                     </div>
@@ -151,13 +184,13 @@
                 <!-- Input Images Preview -->
                 <div th:if="${image.inputImages != null and !image.inputImages.isEmpty()}" class="card">
                     <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-images"></i> Input Images</h2>
+                        <h2 class="card-title h5"><i class="bi bi-images"></i> <span th:text="#{result.input_images}">Input Images</span></h2>
                         <p class="text-muted small mb-2">
-                            Click to download all as ZIP
+                            <span th:text="#{result.click_to_download_zip}">Click to download all as ZIP</span>
                         </p>
                         <a th:href="@{/images/download-inputs/{id}(id=${image.id})}" 
                            class="btn btn-outline-primary btn-sm w-100">
-                            <i class="bi bi-file-zip"></i> Download All Inputs (ZIP)
+                            <i class="bi bi-file-zip"></i> <span th:text="#{result.download_all_inputs_zip}">Download All Inputs (ZIP)</span>
                         </a>
                     </div>
                 </div>
@@ -174,6 +207,18 @@
         </script>
         
         <script th:if="${image.status.name() == 'COMPLETED' and image.outputImagePath != null}">
+            // Ensure i18n object is ready before using it
+            (function() {
+                // Wait for DOM and i18n to be ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        console.log('DOM loaded, i18n:', window.i18n);
+                    });
+                } else {
+                    console.log('DOM already loaded, i18n:', window.i18n);
+                }
+            })();
+            
             async function shareOrDownloadImage(button) {
                 const imageUrl = button.getAttribute('data-image-url');
                 const imageName = button.getAttribute('data-image-name');
@@ -191,15 +236,15 @@
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
-                                title: 'Generated Image',
-                                text: 'Check out this AI-generated image!'
+                                title: /*[[#{result.share_title}]]*/ 'Generated Image',
+                                text: /*[[#{result.share_text}]]*/ 'Check out this AI-generated image!'
                             });
                             console.log('Image shared successfully');
                         } else {
                             // Fallback: share just the URL
                             await navigator.share({
-                                title: 'Generated Image',
-                                text: 'Check out this AI-generated image!',
+                                title: /*[[#{result.share_title}]]*/ 'Generated Image',
+                                text: /*[[#{result.share_text}]]*/ 'Check out this AI-generated image!',
                                 url: fullUrl
                             });
                         }
@@ -233,9 +278,9 @@
                 
                 if (shareButtonText && navigator.share) {
                     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                        shareButtonText.textContent = 'Save to Photos';
+                        shareButtonText.textContent = /*[[#{result.save_to_photos}]]*/ 'Save to Photos';
                     } else if (isMobile) {
-                        shareButtonText.textContent = 'Share';
+                        shareButtonText.textContent = /*[[#{result.share_button}]]*/ 'Share';
                     }
                 }
             });
@@ -278,7 +323,7 @@
                 
                 try {
                     // Show loading
-                    button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> ' + /*[[#{result.creating}]]*/ 'Creating...';
                     button.disabled = true;
                     
                     // Create share link (30 days expiry)
@@ -299,11 +344,11 @@
                         // Pass relative URL to modal, let modal handle full URL
                         showShareModal(data.shareUrl, data.token);
                     } else {
-                        alert(data.message || 'Failed to create share link');
+                        alert(data.message || /*[[#{result.failed_to_create_share_link}]]*/ 'Failed to create share link');
                     }
                 } catch (error) {
                     console.error('Error creating share link:', error);
-                    alert('Failed to create share link. Please try again.');
+                    alert(/*[[#{result.failed_to_create_share_link}]]*/ 'Failed to create share link. Please try again.');
                 } finally {
                     button.innerHTML = originalHtml;
                     button.disabled = false;
@@ -314,58 +359,73 @@
                 // Build full URL for sharing
                 const fullShareUrl = window.location.origin + shareUrl;
                 
-                // Create modal dynamically
+                // Use translation strings from window.i18n object
+                // Ensure we have the i18n object (it should be populated by Thymeleaf)
+                if (!window.i18n) {
+                    console.error('window.i18n is not defined!');
+                    window.i18n = {};
+                }
+                
+                const i18n = window.i18n;
+                
+                // Debug: log i18n object to verify translations
+                console.log('showShareModal - i18n object:', i18n);
+                console.log('showShareModal - shareImage:', i18n.shareImage);
+                console.log('showShareModal - shareLinkCreated:', i18n.shareLinkCreated);
+                console.log('showShareModal - all keys:', Object.keys(i18n));
+                
+                // Create modal dynamically using translated strings
                 const modalHtml = `
                     <div class="modal fade" id="shareModal" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header bg-success text-white">
                                     <h5 class="modal-title">
-                                        <i class="bi bi-share-fill"></i> Share Image
+                                        <i class="bi bi-share-fill"></i> ${i18n.shareImage || 'Share Image'}
                                     </h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p class="text-success"><i class="bi bi-check-circle"></i> Share link created successfully!</p>
+                                    <p class="text-success"><i class="bi bi-check-circle"></i> ${i18n.shareLinkCreated || 'Share link created successfully!'}</p>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Share Link:</label>
+                                        <label class="form-label fw-bold">${i18n.shareLinkLabel || 'Share Link:'}</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="shareLinkInput" value="${fullShareUrl}" readonly>
                                             <button class="btn btn-outline-primary" onclick="copyShareLink(event)">
-                                                <i class="bi bi-clipboard"></i> Copy
+                                                <i class="bi bi-clipboard"></i> ${i18n.copy || 'Copy'}
                                             </button>
                                         </div>
-                                        <small class="text-muted">Link expires in 30 days</small>
+                                        <small class="text-muted">${i18n.linkExpires || 'Link expires in 30 days'}</small>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Share on Social Media:</label>
+                                        <label class="form-label fw-bold">${i18n.shareOnSocial || 'Share on Social Media:'}</label>
                                         <div class="d-flex gap-2 flex-wrap">
                                             <a href="#" 
                                                onclick="shareToFacebook('${fullShareUrl}'); return false;"
                                                class="btn btn-primary flex-fill"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-facebook"></i> Facebook
+                                                <i class="bi bi-facebook"></i> ${i18n.facebook || 'Facebook'}
                                             </a>
-                                            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(fullShareUrl)}&text=${encodeURIComponent('Check out this AI-generated image from Trendy!')}" 
+                                            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(fullShareUrl)}&text=${encodeURIComponent(i18n.checkOutImage || 'Check out this AI-generated image from Trendy!')}" 
                                                target="_blank" 
                                                class="btn btn-info text-white flex-fill"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-twitter"></i> Twitter
+                                                <i class="bi bi-twitter"></i> ${i18n.twitter || 'Twitter'}
                                             </a>
-                                            <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(fullShareUrl)}&description=${encodeURIComponent('AI-generated image from Trendy')}" 
+                                            <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(fullShareUrl)}&description=${encodeURIComponent(i18n.aiGeneratedFromTrendy || 'AI-generated image from Trendy')}" 
                                                target="_blank" 
                                                class="btn btn-danger flex-fill"
                                                rel="noopener noreferrer">
-                                                <i class="bi bi-pinterest"></i> Pinterest
+                                                <i class="bi bi-pinterest"></i> ${i18n.pinterest || 'Pinterest'}
                                             </a>
                                         </div>
                                     </div>
                                     
                                     <div class="alert alert-info mb-0">
-                                        <i class="bi bi-info-circle"></i> Anyone with this link can view this image.
-                                        You can manage your shares from <a href="/my-shares">My Shares</a>.
+                                        <i class="bi bi-info-circle"></i> ${i18n.shareInfo || 'Anyone with this link can view this image.'}
+                                        ${i18n.manageShares || 'You can manage your shares from'} <a href="/my-shares">${i18n.myShares || 'My Shares'}</a>.
                                     </div>
                                 </div>
                             </div>
@@ -458,13 +518,15 @@
             function copyShareLink(event) {
                 const input = document.getElementById('shareLinkInput');
                 const urlToCopy = input.value; // Already has full URL from modal
+                const copiedText = /*[[#{result.copied}]]*/ 'Copied!';
+                const failedToCopy = /*[[#{result.failed_to_copy}]]*/ 'Failed to copy. Please copy manually';
                 
                 // Try modern clipboard API first
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(urlToCopy).then(() => {
                         const btn = event.target.closest('button');
                         const originalHtml = btn.innerHTML;
-                        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        btn.innerHTML = '<i class="bi bi-check"></i> ' + copiedText;
                         btn.classList.remove('btn-outline-primary');
                         btn.classList.add('btn-success');
                         
@@ -493,13 +555,16 @@
                 textArea.focus();
                 textArea.select();
                 
+                const copiedText = /*[[#{result.copied}]]*/ 'Copied!';
+                const failedToCopy = /*[[#{result.failed_to_copy}]]*/ 'Failed to copy. Please copy manually';
+                
                 try {
                     const successful = document.execCommand('copy');
                     const btn = event.target.closest('button');
                     
                     if (successful) {
                         const originalHtml = btn.innerHTML;
-                        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        btn.innerHTML = '<i class="bi bi-check"></i> ' + copiedText;
                         btn.classList.remove('btn-outline-primary');
                         btn.classList.add('btn-success');
                         
@@ -509,11 +574,11 @@
                             btn.classList.add('btn-outline-primary');
                         }, 2000);
                     } else {
-                        alert('Failed to copy. Please copy manually: ' + text);
+                        alert(failedToCopy + ': ' + text);
                     }
                 } catch (err) {
                     console.error('Fallback copy failed:', err);
-                    alert('Failed to copy. Please copy manually: ' + text);
+                    alert(failedToCopy + ': ' + text);
                 }
                 
                 document.body.removeChild(textArea);
