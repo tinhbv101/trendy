@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="update-trend-aspect-ratio" author="system">
+        <comment>Replace fixed width/height with aspect ratio enum in trends table</comment>
+
+        <!-- Add new aspect_ratio column -->
+        <addColumn tableName="trends">
+            <column name="aspect_ratio" type="varchar(20)" defaultValue="SQUARE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Migrate existing data: assume all current trends are SQUARE (1:1) -->
+        <update tableName="trends">
+            <column name="aspect_ratio" value="SQUARE"/>
+            <where>aspect_ratio IS NULL</where>
+        </update>
+
+        <!-- Drop old columns -->
+        <dropColumn tableName="trends" columnName="output_width"/>
+        <dropColumn tableName="trends" columnName="output_height"/>
+    </changeSet>
+
+</databaseChangeLog>

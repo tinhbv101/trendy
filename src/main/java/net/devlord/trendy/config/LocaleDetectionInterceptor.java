@@ -38,15 +38,15 @@ public class LocaleDetectionInterceptor implements HandlerInterceptor {
         
         // Only set locale if not already set by cookie or parameter (first visit)
         Locale currentLocale = localeResolver.resolveLocale(request);
-        
+
         // If no locale is set (first visit), detect from browser
         if (currentLocale == null || currentLocale.equals(Locale.getDefault()) || currentLocale.equals(Locale.ENGLISH)) {
             String acceptLanguage = request.getHeader("Accept-Language");
             Locale detectedLocale = InternationalizationConfig.getBestMatchingLocale(acceptLanguage);
-            
+
             // Only set if different from default
             if (!detectedLocale.equals(Locale.ENGLISH)) {
-                localeResolver.setLocale(request, response, detectedLocale);
+            localeResolver.setLocale(request, response, detectedLocale);
             }
         }
 

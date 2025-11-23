@@ -2,6 +2,7 @@ package net.devlord.trendy.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.devlord.trendy.exception.ImageGenerationException;
+import net.devlord.trendy.model.enums.AspectRatio;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -62,7 +63,7 @@ public class GeminiService {
      * Generate image with input image (image + text-to-image editing)
      * Uses Gemini's native image editing capabilities
      */
-    public String generateImageWithInput(String prompt, String inputImagesJson) {
+    public String generateImageWithInput(String prompt, String inputImagesJson, AspectRatio aspectRatio) {
         if (!isAvailable()) {
             throw new ImageGenerationException("Gemini service not configured. Please set GEMINI_API_KEY environment variable.");
         }
@@ -74,17 +75,17 @@ public class GeminiService {
             
             if (imagePaths.isEmpty()) {
                 // No input images, use text-only generation
-                return generateImage(prompt);
+                return generateImage(prompt, aspectRatio);
             }
             
             log.info("Generating image with Gemini (image editing). Prompt: {}, Input images: {}", prompt, imagePaths.size());
             
             // Build request with image + text
-            Map<String, Object> requestBody = buildImageEditRequest(prompt, imagePaths);
+            Map<String, Object> requestBody = buildImageEditRequest(prompt, imagePaths, AspectRatio.SQUARE);
             
             // Call Gemini API
-            String generatedImage = callGeminiAPI(requestBody);
-            
+            String generatedImage = callGeminiAPI(requestBody, aspectRatio);
+
             log.info("Gemini image editing successful: {}", generatedImage);
             return generatedImage;
             
@@ -97,7 +98,7 @@ public class GeminiService {
     /**
      * Generate image from text prompt only (text-to-image)
      */
-    public String generateImage(String prompt) {
+    public String generateImage(String prompt, AspectRatio aspectRatio) {
         if (!isAvailable()) {
             throw new ImageGenerationException("Gemini service not configured. Please set GEMINI_API_KEY environment variable.");
         }
@@ -106,11 +107,11 @@ public class GeminiService {
         
         try {
             // Build request with text only
-            Map<String, Object> requestBody = buildTextToImageRequest(prompt);
+            Map<String, Object> requestBody = buildTextToImageRequest(prompt, AspectRatio.SQUARE);
             
             // Call Gemini API
-            String generatedImage = callGeminiAPI(requestBody);
-            
+            String generatedImage = callGeminiAPI(requestBody, aspectRatio);
+
             log.info("Gemini text-to-image successful: {}", generatedImage);
             return generatedImage;
             
@@ -123,7 +124,7 @@ public class GeminiService {
     /**
      * Build request body for text-to-image generation
      */
-    private Map<String, Object> buildTextToImageRequest(String prompt) {
+    private Map<String, Object> buildTextToImageRequest(String prompt, AspectRatio aspectRatio) {
         Map<String, Object> requestBody = new HashMap<>();
         
         // Contents
@@ -146,7 +147,7 @@ public class GeminiService {
         
         // Image config with aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
-        imageConfig.put("aspectRatio", "1:1"); // Default to square
+        imageConfig.put("aspectRatio", aspectRatio != null ? aspectRatio.getGeminiAspectRatio() : "1:1"); // Use provided aspect ratio
         imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
         generationConfig.put("imageConfig", imageConfig);
         
@@ -158,7 +159,7 @@ public class GeminiService {
     /**
      * Build request body for image + text-to-image (editing)
      */
-    private Map<String, Object> buildImageEditRequest(String prompt, List<String> imagePaths) throws Exception {
+    private Map<String, Object> buildImageEditRequest(String prompt, List<String> imagePaths, AspectRatio aspectRatio) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
         
         // Contents with image + text
@@ -221,7 +222,7 @@ public class GeminiService {
         
         // Image config - aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
-        imageConfig.put("aspectRatio", "1:1"); // Default to square
+        imageConfig.put("aspectRatio", aspectRatio != null ? aspectRatio.getGeminiAspectRatio() : "1:1"); // Use provided aspect ratio
         imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
         generationConfig.put("imageConfig", imageConfig);
         
@@ -233,7 +234,7 @@ public class GeminiService {
     /**
      * Call Gemini API and handle response
      */
-    private String callGeminiAPI(Map<String, Object> requestBody) throws IOException {
+    private String callGeminiAPI(Map<String, Object> requestBody, AspectRatio aspectRatio) throws IOException {
         // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -274,7 +275,7 @@ public class GeminiService {
                 String base64Image = (String) inlineData.get("data");
                 
                 // Save image
-                String filename = saveBase64Image(base64Image);
+                String filename = saveBase64Image(base64Image, aspectRatio);
                 return filename;
             }
         }
@@ -285,15 +286,15 @@ public class GeminiService {
     /**
      * Save base64 encoded image to MinIO
      */
-    private String saveBase64Image(String base64Image) {
+    private String saveBase64Image(String base64Image, AspectRatio aspectRatio) {
         byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-        
+
         String filename = "generated_gemini_" + UUID.randomUUID().toString() + ".png";
         ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
-        
+
         String objectName = minioService.uploadFile(bais, "generated", filename, "image/png", imageBytes.length);
-        
-        log.info("Saved generated image to MinIO: {}", objectName);
+
+        log.info("Saved generated image to MinIO with aspect ratio {}: {}", aspectRatio, objectName);
         return objectName;
     }
     

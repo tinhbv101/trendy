@@ -79,19 +79,17 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                             <div class="mb-3">
-                                <label for="outputWidth" class="form-label" th:text="|#{admin.trend.form.output_width}#{admin.trend.form.required_asterisk}|">Output Width *</label>
-                                <input type="number" class="form-control" th:field="*{outputWidth}" 
-                                       id="outputWidth" min="256" step="64" required>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="outputHeight" class="form-label" th:text="|#{admin.trend.form.output_height}#{admin.trend.form.required_asterisk}|">Output Height *</label>
-                                <input type="number" class="form-control" th:field="*{outputHeight}" 
-                                       id="outputHeight" min="256" step="64" required>
+                                <label for="aspectRatio" class="form-label" th:text="|Aspect Ratio#{admin.trend.form.required_asterisk}|">Aspect Ratio *</label>
+                                <select class="form-select" th:field="*{aspectRatio}" id="aspectRatio" required>
+                                    <option value="SQUARE">Square (1:1) - 1024x1024</option>
+                                    <option value="PORTRAIT">Portrait (9:16) - 576x1024</option>
+                                    <option value="LANDSCAPE">Landscape (16:9) - 1024x576</option>
+                                    <option value="WIDE">Wide (4:3) - 1024x768</option>
+                                    <option value="TALL">Tall (3:4) - 768x1024</option>
+                                </select>
+                                <div class="form-text">Choose the aspect ratio for generated images</div>
                             </div>
                         </div>
                     </div>

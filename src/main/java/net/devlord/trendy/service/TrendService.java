@@ -88,8 +88,7 @@ public class TrendService {
         dto.setPromptTemplate(trend.getPromptTemplate());
         dto.setCategory(trend.getCategory());
         dto.setMaxInputImages(trend.getMaxInputImages());
-        dto.setOutputWidth(trend.getOutputWidth());
-        dto.setOutputHeight(trend.getOutputHeight());
+        dto.setAspectRatio(trend.getAspectRatio());
         dto.setStatus(trend.getStatus());
         dto.setUsageCount(trend.getUsageCount());
         dto.setCreatedAt(trend.getCreatedAt());
@@ -142,8 +141,7 @@ public class TrendService {
         trend.setPromptTemplate(dto.getPromptTemplate());
         trend.setCategory(dto.getCategory());
         trend.setMaxInputImages(dto.getMaxInputImages());
-        trend.setOutputWidth(dto.getOutputWidth());
-        trend.setOutputHeight(dto.getOutputHeight());
+        trend.setAspectRatio(dto.getAspectRatio());
         trend.setThumbnailPath(dto.getThumbnailPath());
         trend.setStatus(dto.getStatus());
         trend.setUsageCount(0);
@@ -160,8 +158,7 @@ public class TrendService {
         trend.setPromptTemplate(trendDetails.getPromptTemplate());
         trend.setCategory(trendDetails.getCategory());
         trend.setMaxInputImages(trendDetails.getMaxInputImages());
-        trend.setOutputWidth(trendDetails.getOutputWidth());
-        trend.setOutputHeight(trendDetails.getOutputHeight());
+        trend.setAspectRatio(trendDetails.getAspectRatio());
         trend.setStatus(trendDetails.getStatus());
         
         log.info("Updated trend: {}", id);
@@ -177,8 +174,7 @@ public class TrendService {
         trend.setPromptTemplate(dto.getPromptTemplate());
         trend.setCategory(dto.getCategory());
         trend.setMaxInputImages(dto.getMaxInputImages());
-        trend.setOutputWidth(dto.getOutputWidth());
-        trend.setOutputHeight(dto.getOutputHeight());
+        trend.setAspectRatio(dto.getAspectRatio());
         trend.setStatus(dto.getStatus());
         
         // Only update thumbnail if a new one was provided

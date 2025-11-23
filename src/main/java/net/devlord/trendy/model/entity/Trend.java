@@ -1,6 +1,7 @@
 package net.devlord.trendy.model.entity;
 
 import net.devlord.trendy.model.enums.TrendStatus;
+import net.devlord.trendy.model.enums.AspectRatio;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,12 +40,10 @@ public class Trend {
     
     @Column(name = "max_input_images")
     private Integer maxInputImages = 1;
-    
-    @Column(name = "output_width")
-    private Integer outputWidth = 1024;
-    
-    @Column(name = "output_height")
-    private Integer outputHeight = 1024;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "aspect_ratio", length = 20)
+    private AspectRatio aspectRatio = AspectRatio.SQUARE;
     
     @Column(name = "thumbnail_path")
     private String thumbnailPath;
@@ -73,8 +72,21 @@ public class Trend {
     
     @OneToMany(mappedBy = "trend", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TrendExample> examples = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "trend", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GeneratedImage> generatedImages = new ArrayList<>();
+
+    // Helper methods for backward compatibility and convenience
+    public int getOutputWidth() {
+        return aspectRatio != null ? aspectRatio.getWidth() : AspectRatio.SQUARE.getWidth();
+    }
+
+    public int getOutputHeight() {
+        return aspectRatio != null ? aspectRatio.getHeight() : AspectRatio.SQUARE.getHeight();
+    }
+
+    public String getAspectRatioDisplay() {
+        return aspectRatio != null ? aspectRatio.getDisplayName() : AspectRatio.SQUARE.getDisplayName();
+    }
 }
 

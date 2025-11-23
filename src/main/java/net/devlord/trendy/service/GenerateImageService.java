@@ -89,7 +89,8 @@ public class GenerateImageService {
             // Call AI service (mock implementation for now)
             String outputImagePath = aiService.generateImage(
                 generatedImage.getPromptUsed(),
-                generatedImage.getInputImages()
+                generatedImage.getInputImages(),
+                generatedImage.getTrend().getAspectRatio()
             );
             
             long endTime = System.currentTimeMillis();

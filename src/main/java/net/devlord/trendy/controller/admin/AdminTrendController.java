@@ -91,8 +91,7 @@ public class AdminTrendController {
         trendDTO.setPromptTemplate(trend.getPromptTemplate());
         trendDTO.setCategory(trend.getCategory());
         trendDTO.setMaxInputImages(trend.getMaxInputImages());
-        trendDTO.setOutputWidth(trend.getOutputWidth());
-        trendDTO.setOutputHeight(trend.getOutputHeight());
+        trendDTO.setAspectRatio(trend.getAspectRatio());
         trendDTO.setThumbnailPath(trend.getThumbnailPath());
         trendDTO.setStatus(trend.getStatus());
         

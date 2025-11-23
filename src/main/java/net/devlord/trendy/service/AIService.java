@@ -1,6 +1,7 @@
 package net.devlord.trendy.service;
 
 import net.devlord.trendy.exception.ImageGenerationException;
+import net.devlord.trendy.model.enums.AspectRatio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class AIService {
      * Generate image using AI
      * Uses Gemini, falls back to Mock if not available
      */
-    public String generateImage(String prompt, String inputImages) {
+    public String generateImage(String prompt, String inputImages, AspectRatio aspectRatio) {
         log.info("Generating image with prompt: {}", prompt);
         log.info("Input images: {}", inputImages);
 
@@ -40,7 +41,7 @@ public class AIService {
                 log.info("Using Google Gemini AI for generation");
                 log.info("Model info: {}", geminiService.getModelInfo());
 
-                String generatedFilename = geminiService.generateImageWithInput(prompt, inputImages);
+                String generatedFilename = geminiService.generateImageWithInput(prompt, inputImages, AspectRatio.SQUARE);
 
                 log.info("Gemini generation successful: {}", generatedFilename);
                 return generatedFilename;
@@ -62,7 +63,7 @@ public class AIService {
             Thread.sleep(2000);
             
             // Generate a mock placeholder image
-            String generatedFilename = createMockImage(prompt);
+            String generatedFilename = createMockImage(prompt, aspectRatio);
             
             log.info("Mock image generated: {}", generatedFilename);
             return generatedFilename;
@@ -79,11 +80,11 @@ public class AIService {
     /**
      * Create a mock placeholder image for testing and upload to MinIO
      */
-    private String createMockImage(String prompt) {
+    private String createMockImage(String prompt, AspectRatio aspectRatio) {
         try {
-            // Create a simple placeholder image
-            int width = 1024;
-            int height = 1024;
+            // Create a simple placeholder image with aspect ratio
+            int width = aspectRatio != null ? aspectRatio.getWidth() : 1024;
+            int height = aspectRatio != null ? aspectRatio.getHeight() : 1024;
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = image.createGraphics();
             

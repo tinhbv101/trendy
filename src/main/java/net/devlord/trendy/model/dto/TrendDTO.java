@@ -1,6 +1,7 @@
 package net.devlord.trendy.model.dto;
 
 import net.devlord.trendy.model.enums.TrendStatus;
+import net.devlord.trendy.model.enums.AspectRatio;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -32,12 +33,9 @@ public class TrendDTO {
     
     @NotNull(message = "Max input images is required")
     private Integer maxInputImages = 1;
-    
-    @NotNull(message = "Output width is required")
-    private Integer outputWidth = 1024;
-    
-    @NotNull(message = "Output height is required")
-    private Integer outputHeight = 1024;
+
+    @NotNull(message = "Aspect ratio is required")
+    private AspectRatio aspectRatio = AspectRatio.SQUARE;
     
     private String thumbnailPath;
     

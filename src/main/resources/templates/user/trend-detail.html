@@ -39,7 +39,7 @@
                         <h2 class="card-title h5"><i class="bi bi-info-circle"></i> <span th:text="#{trend_detail.details}">Details</span></h2>
                         <ul class="list-unstyled">
                             <li><strong th:text="#{trend_detail.max_input_images} + ':'">Max Input Images:</strong> <span th:text="${trend.maxInputImages}">1</span></li>
-                            <li><strong th:text="#{trend_detail.output_size} + ':'">Output Size:</strong> <span th:text="${trend.outputWidth} + 'x' + ${trend.outputHeight}">512x512</span></li>
+                            <li><strong th:text="#{trend_detail.output_size} + ':'">Output Size:</strong> <span th:text="${trend.aspectRatioDisplay} + ' (' + ${trend.outputWidth} + 'x' + ${trend.outputHeight} + ')'">Square (1024x1024)</span></li>
                             <li><strong th:text="#{trend_detail.ai_model} + ':'">AI Model:</strong> <span class="text-muted">Google Gemini 2.5 Flash Image</span></li>
                             <li><strong th:text="#{trend_detail.times_used} + ':'">Times Used:</strong> <span th:text="${trend.usageCount}">0</span></li>
                         </ul>
