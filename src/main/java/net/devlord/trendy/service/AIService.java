@@ -15,7 +15,7 @@ import java.util.UUID;
 
 /**
  * AI Service for image generation
- * Now integrated with Google Gemini AI (Gemini 2.0 Flash + Imagen 3)!
+ * Now integrated with Google Gemini AI (Gemini 3 Pro Image)!
  * Falls back to mock implementation if Gemini is not configured or fails
  */
 @Service
