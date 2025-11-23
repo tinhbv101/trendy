@@ -19,6 +19,7 @@
     <include file="db/changelog/changes/v1.4-create-favorite-images-table.xml"/>
     <include file="db/changelog/changes/v1.5-create-shared-images-table.xml"/>
     <include file="db/changelog/changes/v1.6-update-trend-aspect-ratio.xml"/>
+    <include file="db/changelog/changes/v1.7-add-ai-model-to-trends.xml"/>
     
     <!-- Initial Data -->
     <include file="db/changelog/data/v1.0-initial-data.xml"/>

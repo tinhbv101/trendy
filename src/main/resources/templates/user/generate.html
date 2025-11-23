@@ -39,6 +39,33 @@
 
                             <div id="imagePreview" class="mb-3"></div>
 
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="aspectRatio" class="form-label" th:text="#{generate.aspect_ratio}">Aspect Ratio</label>
+                                    <select class="form-select" id="aspectRatio" name="aspectRatio">
+                                        <option value="" th:text="#{generate.use_trend_defaults}">Use trend defaults</option>
+                                        <option th:each="ratio : ${aspectRatios}" 
+                                                th:value="${ratio.name()}" 
+                                                th:text="${ratio.displayName + ' (' + ratio.width + 'x' + ratio.height + ')'}"
+                                                th:selected="${ratio == trend.aspectRatio}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text" th:text="#{generate.aspect_ratio_help}">Choose the aspect ratio for the generated image</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="aiModel" class="form-label" th:text="#{generate.ai_model}">AI Model</label>
+                                    <select class="form-select" id="aiModel" name="aiModel">
+                                        <option value="" th:text="#{generate.use_trend_defaults}">Use trend defaults</option>
+                                        <option th:each="model : ${aiModels}" 
+                                                th:value="${model.name()}" 
+                                                th:text="${model.displayName}"
+                                                th:selected="${model == trend.aiModel}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text" th:text="#{generate.ai_model_help}">Choose the AI model for image generation</div>
+                                </div>
+                            </div>
+
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="bi bi-magic"></i> <span th:text="#{generate.generate_button}">Generate Image</span>

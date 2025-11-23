@@ -92,6 +92,7 @@ public class AdminTrendController {
         trendDTO.setCategory(trend.getCategory());
         trendDTO.setMaxInputImages(trend.getMaxInputImages());
         trendDTO.setAspectRatio(trend.getAspectRatio());
+        trendDTO.setAiModel(trend.getAiModel());
         trendDTO.setThumbnailPath(trend.getThumbnailPath());
         trendDTO.setStatus(trend.getStatus());
         

@@ -3,6 +3,7 @@ package net.devlord.trendy.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.devlord.trendy.exception.ImageGenerationException;
 import net.devlord.trendy.model.enums.AspectRatio;
+import net.devlord.trendy.model.enums.AIModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -38,10 +39,6 @@ public class GeminiService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     
-    // Gemini 3 Pro Image - Latest image generation model with advanced reasoning
-    private static final String GEMINI_IMAGE_MODEL = "gemini-3-pro-image-preview";
-    private static final String GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_IMAGE_MODEL + ":generateContent";
-    
     public GeminiService(
             @Value("${gemini.api.key:}") String apiKey,
             MinioService minioService) {
@@ -53,7 +50,6 @@ public class GeminiService {
         
         if (isAvailable()) {
             log.info("Google Gemini AI service is configured and ready!");
-            log.info("Using model: {}", GEMINI_IMAGE_MODEL);
         } else {
             log.warn("Gemini API key not configured. Set GEMINI_API_KEY environment variable.");
         }
@@ -63,7 +59,7 @@ public class GeminiService {
      * Generate image with input image (image + text-to-image editing)
      * Uses Gemini's native image editing capabilities
      */
-    public String generateImageWithInput(String prompt, String inputImagesJson, AspectRatio aspectRatio) {
+    public String generateImageWithInput(String prompt, String inputImagesJson, AspectRatio aspectRatio, AIModel aiModel) {
         if (!isAvailable()) {
             throw new ImageGenerationException("Gemini service not configured. Please set GEMINI_API_KEY environment variable.");
         }
@@ -75,16 +71,16 @@ public class GeminiService {
             
             if (imagePaths.isEmpty()) {
                 // No input images, use text-only generation
-                return generateImage(prompt, aspectRatio);
+                return generateImage(prompt, aspectRatio, aiModel);
             }
             
-            log.info("Generating image with Gemini (image editing). Prompt: {}, Input images: {}", prompt, imagePaths.size());
+            log.info("Generating image with Gemini (image editing). Model: {}, Prompt: {}, Input images: {}", aiModel, prompt, imagePaths.size());
             
             // Build request with image + text
-            Map<String, Object> requestBody = buildImageEditRequest(prompt, imagePaths, AspectRatio.SQUARE);
+            Map<String, Object> requestBody = buildImageEditRequest(prompt, imagePaths, aspectRatio, aiModel);
             
             // Call Gemini API
-            String generatedImage = callGeminiAPI(requestBody, aspectRatio);
+            String generatedImage = callGeminiAPI(requestBody, aspectRatio, aiModel);
 
             log.info("Gemini image editing successful: {}", generatedImage);
             return generatedImage;
@@ -98,19 +94,19 @@ public class GeminiService {
     /**
      * Generate image from text prompt only (text-to-image)
      */
-    public String generateImage(String prompt, AspectRatio aspectRatio) {
+    public String generateImage(String prompt, AspectRatio aspectRatio, AIModel aiModel) {
         if (!isAvailable()) {
             throw new ImageGenerationException("Gemini service not configured. Please set GEMINI_API_KEY environment variable.");
         }
         
-        log.info("Generating image with Gemini (text-to-image). Prompt: {}", prompt);
+        log.info("Generating image with Gemini (text-to-image). Model: {}, Prompt: {}", aiModel, prompt);
         
         try {
             // Build request with text only
-            Map<String, Object> requestBody = buildTextToImageRequest(prompt, AspectRatio.SQUARE);
+            Map<String, Object> requestBody = buildTextToImageRequest(prompt, aspectRatio, aiModel);
             
             // Call Gemini API
-            String generatedImage = callGeminiAPI(requestBody, aspectRatio);
+            String generatedImage = callGeminiAPI(requestBody, aspectRatio, aiModel);
 
             log.info("Gemini text-to-image successful: {}", generatedImage);
             return generatedImage;
@@ -124,7 +120,7 @@ public class GeminiService {
     /**
      * Build request body for text-to-image generation
      */
-    private Map<String, Object> buildTextToImageRequest(String prompt, AspectRatio aspectRatio) {
+    private Map<String, Object> buildTextToImageRequest(String prompt, AspectRatio aspectRatio, AIModel aiModel) {
         Map<String, Object> requestBody = new HashMap<>();
         
         // Contents
@@ -145,10 +141,13 @@ public class GeminiService {
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
         
-        // Image config with aspect ratio and size (Gemini 3 supports 4K)
+        // Image config with aspect ratio and size
         Map<String, Object> imageConfig = new HashMap<>();
         imageConfig.put("aspectRatio", aspectRatio != null ? aspectRatio.getGeminiAspectRatio() : "1:1"); // Use provided aspect ratio
-        imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
+        // Only set imageSize for Gemini 3 Pro (supports 4K), Gemini 2.5 Flash may not support this parameter
+        if (aiModel == AIModel.GEMINI_3_PRO) {
+            imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
+        }
         generationConfig.put("imageConfig", imageConfig);
         
         requestBody.put("generationConfig", generationConfig);
@@ -159,7 +158,7 @@ public class GeminiService {
     /**
      * Build request body for image + text-to-image (editing)
      */
-    private Map<String, Object> buildImageEditRequest(String prompt, List<String> imagePaths, AspectRatio aspectRatio) throws Exception {
+    private Map<String, Object> buildImageEditRequest(String prompt, List<String> imagePaths, AspectRatio aspectRatio, AIModel aiModel) throws Exception {
         Map<String, Object> requestBody = new HashMap<>();
         
         // Contents with image + text
@@ -220,10 +219,13 @@ public class GeminiService {
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
         
-        // Image config - aspect ratio and size (Gemini 3 supports 4K)
+        // Image config - aspect ratio and size
         Map<String, Object> imageConfig = new HashMap<>();
         imageConfig.put("aspectRatio", aspectRatio != null ? aspectRatio.getGeminiAspectRatio() : "1:1"); // Use provided aspect ratio
-        imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
+        // Only set imageSize for Gemini 3 Pro (supports 4K), Gemini 2.5 Flash may not support this parameter
+        if (aiModel == AIModel.GEMINI_3_PRO) {
+            imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
+        }
         generationConfig.put("imageConfig", imageConfig);
         
         requestBody.put("generationConfig", generationConfig);
@@ -234,15 +236,15 @@ public class GeminiService {
     /**
      * Call Gemini API and handle response
      */
-    private String callGeminiAPI(Map<String, Object> requestBody, AspectRatio aspectRatio) throws IOException {
+    private String callGeminiAPI(Map<String, Object> requestBody, AspectRatio aspectRatio, AIModel aiModel) throws IOException {
         // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         
-        // Call API with API key in URL
-        String url = GEMINI_ENDPOINT + "?key=" + apiKey;
+        // Call API with API key in URL - use endpoint from model
+        String url = aiModel.getEndpoint() + "?key=" + apiKey;
         
         log.debug("Calling Gemini API: {}", url);
         

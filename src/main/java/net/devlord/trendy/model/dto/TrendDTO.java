@@ -2,6 +2,7 @@ package net.devlord.trendy.model.dto;
 
 import net.devlord.trendy.model.enums.TrendStatus;
 import net.devlord.trendy.model.enums.AspectRatio;
+import net.devlord.trendy.model.enums.AIModel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -36,6 +37,9 @@ public class TrendDTO {
 
     @NotNull(message = "Aspect ratio is required")
     private AspectRatio aspectRatio = AspectRatio.SQUARE;
+
+    @NotNull(message = "AI Model is required")
+    private AIModel aiModel = AIModel.GEMINI_2_5_FLASH;
     
     private String thumbnailPath;
     

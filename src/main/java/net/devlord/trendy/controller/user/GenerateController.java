@@ -2,6 +2,8 @@ package net.devlord.trendy.controller.user;
 
 import net.devlord.trendy.model.entity.GeneratedImage;
 import net.devlord.trendy.model.entity.Trend;
+import net.devlord.trendy.model.enums.AIModel;
+import net.devlord.trendy.model.enums.AspectRatio;
 import net.devlord.trendy.service.GenerateImageService;
 import net.devlord.trendy.service.TrendService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ public class GenerateController {
     public String generateForm(@PathVariable Long trendId, Model model) {
         Trend trend = trendService.getTrendById(trendId);
         model.addAttribute("trend", trend);
+        model.addAttribute("aspectRatios", AspectRatio.values());
+        model.addAttribute("aiModels", AIModel.values());
         model.addAttribute("pageTitle", "Generate Image - " + trend.getTrendName());
         return "user/generate";
     }
@@ -33,6 +37,8 @@ public class GenerateController {
     public String generateImage(
             @PathVariable Long trendId,
             @RequestParam("inputImages") MultipartFile[] files,
+            @RequestParam(value = "aspectRatio", required = false) String aspectRatioStr,
+            @RequestParam(value = "aiModel", required = false) String aiModelStr,
             @AuthenticationPrincipal UserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         
@@ -43,8 +49,14 @@ public class GenerateController {
                 return "redirect:/generate/" + trendId;
             }
             
+            // Parse aspect ratio and AI model (use null if not provided to use trend defaults)
+            AspectRatio aspectRatio = aspectRatioStr != null && !aspectRatioStr.isEmpty() 
+                ? AspectRatio.valueOf(aspectRatioStr) : null;
+            AIModel aiModel = aiModelStr != null && !aiModelStr.isEmpty() 
+                ? AIModel.valueOf(aiModelStr) : null;
+            
             GeneratedImage image = generateImageService.generateImage(
-                trendId, files, userDetails.getUsername());
+                trendId, files, userDetails.getUsername(), aspectRatio, aiModel);
             
             redirectAttributes.addFlashAttribute("success", "Image generation started!");
             return "redirect:/generate/result/" + image.getId();

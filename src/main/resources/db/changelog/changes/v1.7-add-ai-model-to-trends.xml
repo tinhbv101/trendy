@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="add-ai-model-to-trends" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="trends" columnName="ai_model"/>
+            </not>
+        </preConditions>
+
+        <comment>Add AI model selection to trends table</comment>
+
+        <!-- Add new ai_model column -->
+        <addColumn tableName="trends">
+            <column name="ai_model" type="varchar(50)" defaultValue="GEMINI_2_5_FLASH">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Set default value for existing trends -->
+        <update tableName="trends">
+            <column name="ai_model" value="GEMINI_2_5_FLASH"/>
+            <where>ai_model IS NULL</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

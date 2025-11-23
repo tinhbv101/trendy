@@ -2,6 +2,7 @@ package net.devlord.trendy.service;
 
 import net.devlord.trendy.exception.ImageGenerationException;
 import net.devlord.trendy.model.enums.AspectRatio;
+import net.devlord.trendy.model.enums.AIModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class AIService {
      * Generate image using AI
      * Uses Gemini, falls back to Mock if not available
      */
-    public String generateImage(String prompt, String inputImages, AspectRatio aspectRatio) {
+    public String generateImage(String prompt, String inputImages, AspectRatio aspectRatio, AIModel aiModel) {
         log.info("Generating image with prompt: {}", prompt);
         log.info("Input images: {}", inputImages);
 
@@ -39,9 +40,9 @@ public class AIService {
         if (geminiService.isAvailable()) {
             try {
                 log.info("Using Google Gemini AI for generation");
-                log.info("Model info: {}", geminiService.getModelInfo());
+                log.info("Model: {}", aiModel.getDisplayName());
 
-                String generatedFilename = geminiService.generateImageWithInput(prompt, inputImages, AspectRatio.SQUARE);
+                String generatedFilename = geminiService.generateImageWithInput(prompt, inputImages, aspectRatio, aiModel);
 
                 log.info("Gemini generation successful: {}", generatedFilename);
                 return generatedFilename;

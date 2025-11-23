@@ -2,6 +2,7 @@ package net.devlord.trendy.model.entity;
 
 import net.devlord.trendy.model.enums.TrendStatus;
 import net.devlord.trendy.model.enums.AspectRatio;
+import net.devlord.trendy.model.enums.AIModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,6 +45,10 @@ public class Trend {
     @Enumerated(EnumType.STRING)
     @Column(name = "aspect_ratio", length = 20)
     private AspectRatio aspectRatio = AspectRatio.SQUARE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ai_model", length = 50)
+    private AIModel aiModel = AIModel.GEMINI_2_5_FLASH;
     
     @Column(name = "thumbnail_path")
     private String thumbnailPath;

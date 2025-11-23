@@ -5,11 +5,18 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <changeSet id="update-trend-aspect-ratio" author="system">
-        <comment>Replace fixed width/height with aspect ratio enum in trends table</comment>
+    <changeSet id="update-trend-aspect-ratio-1" author="system">
+        <!-- Check if aspect_ratio column already exists -->
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="trends" columnName="aspect_ratio"/>
+            </not>
+        </preConditions>
 
-        <!-- Add new aspect_ratio column if not exists -->
-        <addColumn tableName="trends" ifNotExists="true">
+        <comment>Add aspect_ratio column to trends table</comment>
+
+        <!-- Add new aspect_ratio column -->
+        <addColumn tableName="trends">
             <column name="aspect_ratio" type="varchar(20)" defaultValue="SQUARE">
                 <constraints nullable="false"/>
             </column>
@@ -20,10 +27,44 @@
             <column name="aspect_ratio" value="SQUARE"/>
             <where>aspect_ratio IS NULL</where>
         </update>
+    </changeSet>
 
-        <!-- Drop old columns if they exist -->
-        <dropColumn tableName="trends" columnName="output_width" cascadeConstraints="true"/>
-        <dropColumn tableName="trends" columnName="output_height" cascadeConstraints="true"/>
+    <changeSet id="update-trend-aspect-ratio-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="trends" columnName="output_width"/>
+        </preConditions>
+        <comment>Drop output_width column from trends table</comment>
+        <dropColumn tableName="trends" columnName="output_width"/>
+    </changeSet>
+
+    <changeSet id="update-trend-aspect-ratio-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="trends" columnName="output_height"/>
+        </preConditions>
+        <comment>Drop output_height column from trends table</comment>
+        <dropColumn tableName="trends" columnName="output_height"/>
+    </changeSet>
+
+    <changeSet id="update-trend-aspect-ratio-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="trends" columnName="aspect_ratio"/>
+        </preConditions>
+        <comment>Fix invalid aspect_ratio values (convert display names to enum names)</comment>
+        
+        <!-- Fix any invalid values - convert display names to enum names -->
+        <update tableName="trends">
+            <column name="aspect_ratio" value="SQUARE"/>
+            <where>aspect_ratio NOT IN ('SQUARE', 'PORTRAIT', 'LANDSCAPE', 'WIDE', 'TALL')</where>
+        </update>
+        
+        <!-- Also fix common display name formats -->
+        <sql>
+            UPDATE trends SET aspect_ratio = 'SQUARE' WHERE aspect_ratio = '1:1';
+            UPDATE trends SET aspect_ratio = 'PORTRAIT' WHERE aspect_ratio = '9:16';
+            UPDATE trends SET aspect_ratio = 'LANDSCAPE' WHERE aspect_ratio = '16:9';
+            UPDATE trends SET aspect_ratio = 'WIDE' WHERE aspect_ratio = '4:3';
+            UPDATE trends SET aspect_ratio = 'TALL' WHERE aspect_ratio = '3:4';
+        </sql>
     </changeSet>
 
 </databaseChangeLog>

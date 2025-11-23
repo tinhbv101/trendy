@@ -95,6 +95,15 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="aiModel" class="form-label" th:text="|#{admin.trend.form.ai_model}#{admin.trend.form.required_asterisk}|">AI Model *</label>
+                        <select class="form-select" th:field="*{aiModel}" id="aiModel" required>
+                            <option value="GEMINI_2_5_FLASH">Google Gemini 2.5 Flash Image</option>
+                            <option value="GEMINI_3_PRO">Gemini 3 Pro Image</option>
+                        </select>
+                        <div class="form-text" th:text="#{admin.trend.form.ai_model_help}">Choose the AI model for image generation</div>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="status" class="form-label" th:text="|#{admin.trend.form.status}#{admin.trend.form.required_asterisk}|">Status *</label>
                         <select class="form-select" th:field="*{status}" id="status" required>
                             <option value="TESTING" th:text="#{admin.trend.form.status_testing}">Testing</option>
@@ -102,7 +111,7 @@
                             <option value="INACTIVE" th:text="#{admin.trend.form.status_inactive}">Inactive</option>
                         </select>
                         <div class="form-text">
-                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.trend.form.model_info}">Using Google Gemini 2.5 Flash Image for AI generation</span>
+                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.trend.form.model_info}">Select AI model for image generation</span>
                         </div>
                     </div>
 

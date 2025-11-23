@@ -89,6 +89,7 @@ public class TrendService {
         dto.setCategory(trend.getCategory());
         dto.setMaxInputImages(trend.getMaxInputImages());
         dto.setAspectRatio(trend.getAspectRatio());
+        dto.setAiModel(trend.getAiModel());
         dto.setStatus(trend.getStatus());
         dto.setUsageCount(trend.getUsageCount());
         dto.setCreatedAt(trend.getCreatedAt());
@@ -142,6 +143,7 @@ public class TrendService {
         trend.setCategory(dto.getCategory());
         trend.setMaxInputImages(dto.getMaxInputImages());
         trend.setAspectRatio(dto.getAspectRatio());
+        trend.setAiModel(dto.getAiModel());
         trend.setThumbnailPath(dto.getThumbnailPath());
         trend.setStatus(dto.getStatus());
         trend.setUsageCount(0);
@@ -159,6 +161,7 @@ public class TrendService {
         trend.setCategory(trendDetails.getCategory());
         trend.setMaxInputImages(trendDetails.getMaxInputImages());
         trend.setAspectRatio(trendDetails.getAspectRatio());
+        trend.setAiModel(trendDetails.getAiModel());
         trend.setStatus(trendDetails.getStatus());
         
         log.info("Updated trend: {}", id);
@@ -175,6 +178,7 @@ public class TrendService {
         trend.setCategory(dto.getCategory());
         trend.setMaxInputImages(dto.getMaxInputImages());
         trend.setAspectRatio(dto.getAspectRatio());
+        trend.setAiModel(dto.getAiModel());
         trend.setStatus(dto.getStatus());
         
         // Only update thumbnail if a new one was provided

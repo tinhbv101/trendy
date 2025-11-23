@@ -6,6 +6,8 @@ import net.devlord.trendy.exception.ImageGenerationException;
 import net.devlord.trendy.model.entity.GeneratedImage;
 import net.devlord.trendy.model.entity.Trend;
 import net.devlord.trendy.model.entity.User;
+import net.devlord.trendy.model.enums.AIModel;
+import net.devlord.trendy.model.enums.AspectRatio;
 import net.devlord.trendy.model.enums.GenerationStatus;
 import net.devlord.trendy.repository.GeneratedImageRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,8 @@ public class GenerateImageService {
     private final ObjectMapper objectMapper;
     
     @Transactional
-    public GeneratedImage generateImage(Long trendId, MultipartFile[] files, String username) {
+    public GeneratedImage generateImage(Long trendId, MultipartFile[] files, String username, 
+                                        AspectRatio aspectRatio, AIModel aiModel) {
         // Get trend and user
         Trend trend = trendService.getTrendById(trendId);
         User user = userService.findByUsername(username)
@@ -73,12 +76,15 @@ public class GenerateImageService {
         trendService.incrementUsageCount(trendId);
         
         // Process generation asynchronously (in real implementation)
-        processGeneration(savedImage);
+        // Use user-selected aspectRatio and aiModel if provided, otherwise use trend defaults
+        AspectRatio finalAspectRatio = aspectRatio != null ? aspectRatio : trend.getAspectRatio();
+        AIModel finalAiModel = aiModel != null ? aiModel : trend.getAiModel();
+        processGeneration(savedImage, finalAspectRatio, finalAiModel);
         
         return savedImage;
     }
     
-    private void processGeneration(GeneratedImage generatedImage) {
+    private void processGeneration(GeneratedImage generatedImage, AspectRatio aspectRatio, AIModel aiModel) {
         try {
             // Update status to processing
             generatedImage.setStatus(GenerationStatus.PROCESSING);
@@ -86,11 +92,12 @@ public class GenerateImageService {
             
             long startTime = System.currentTimeMillis();
             
-            // Call AI service (mock implementation for now)
+            // Call AI service with user-selected aspectRatio and aiModel
             String outputImagePath = aiService.generateImage(
                 generatedImage.getPromptUsed(),
                 generatedImage.getInputImages(),
-                generatedImage.getTrend().getAspectRatio()
+                aspectRatio,
+                aiModel
             );
             
             long endTime = System.currentTimeMillis();
