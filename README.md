@@ -5,7 +5,7 @@
   
   <p><strong>Transform your photos with AI-powered trends</strong></p>
 
-  [![Version](https://img.shields.io/badge/Version-v1.1.1-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.1)
+  [![Version](https://img.shields.io/badge/Version-v1.1.2-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.2)
   [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -29,6 +29,21 @@
 ## 📖 Introduction
 
 **Trendy** is a web platform that allows users to transform their photos using popular AI trends. The application integrates with Google Gemini AI to create unique and creative images.
+
+### 🆕 What's New in v1.1.2
+
+**🌍 Internationalization & Multi-language Support:**
+- 🎯 **15 Supported Languages**: English, Vietnamese, Chinese, German, French, Portuguese, Russian, Japanese, Korean, Arabic, Hindi, Italian, Indonesian, Thai, Spanish
+- 🔄 **Seamless Language Switching**: Language selector in header with URL persistence
+- 🌐 **Complete Translation**: All UI components, error messages, and notifications fully translated
+- 🎨 **RTL Support**: Right-to-left language support for Arabic
+- 🔧 **Advanced i18n Implementation**: Thymeleaf inline JavaScript and global i18n objects for dynamic translations
+
+**Technical Improvements:**
+- 🐛 Fixed language switching issues on login/register pages
+- ⚡ Enhanced locale detection and cookie management
+- 🔒 Improved Spring i18n configuration with proper interceptor ordering
+- 📝 Complete message properties for all supported languages (477 keys each)
 
 ### 🆕 What's New in v1.1.0
 
@@ -239,7 +254,7 @@ gemini:
 ./gradlew bootRun
 
 # Or run JAR file
-java -jar build/libs/Trendy-1.1.0.jar
+java -jar build/libs/trendy-1.1.2.jar
 ```
 
 ---
@@ -648,6 +663,13 @@ If you encounter any issues or have questions:
 ---
 
 ## 🗺️ Roadmap
+
+### Version 1.1.2 ✅ (Released)
+- [x] 🌍 **Multi-language Support** - 15 languages (English, Vietnamese, Chinese, German, French, Portuguese, Russian, Japanese, Korean, Arabic, Hindi, Italian, Indonesian, Thai, Spanish)
+- [x] 🔄 **Internationalization (i18n)** - Complete translation system with Thymeleaf
+- [x] 🌐 **Language Selector** - Seamless language switching with URL persistence
+- [x] 🎯 **RTL Support** - Right-to-left language support for Arabic
+- [x] 🔧 **Advanced i18n Configuration** - Spring i18n with proper locale detection
 
 ### Version 1.1.0 ✅ (Released)
 - [x] User Profile Management
