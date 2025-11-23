@@ -18,9 +18,15 @@ import java.util.*;
 
 /**
  * Service for generating images using Google Gemini AI (Native Image Generation)
- * Uses Gemini 2.5 Flash Image model - supports both text-to-image and image+text-to-image
+ * Uses Gemini 3 Pro Image model - supports both text-to-image and image+text-to-image
  * 
- * Reference: https://ai.google.dev/gemini-api/docs/image-generation
+ * Features:
+ * - Native 4K & text rendering
+ * - Grounded generation with Google Search
+ * - Conversational editing with Thought Signatures
+ * - Advanced reasoning with thinking levels
+ * 
+ * Reference: https://ai.google.dev/gemini-api/docs/gemini-3
  */
 @Service
 @Slf4j
@@ -31,8 +37,8 @@ public class GeminiService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     
-    // Gemini 2.5 Flash Image - Native image generation model
-    private static final String GEMINI_IMAGE_MODEL = "gemini-2.5-flash-image";
+    // Gemini 3 Pro Image - Latest image generation model with advanced reasoning
+    private static final String GEMINI_IMAGE_MODEL = "gemini-3-pro-image-preview";
     private static final String GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_IMAGE_MODEL + ":generateContent";
     
     public GeminiService(
@@ -138,9 +144,14 @@ public class GeminiService {
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
         
-        // Image config with aspect ratio
+        // Gemini 3: Thinking level (low for faster responses, high for better quality)
+        // Using "low" by default for image generation to optimize latency
+        generationConfig.put("thinkingLevel", "low");
+        
+        // Image config with aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
         imageConfig.put("aspectRatio", "1:1"); // Default to square
+        imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
         generationConfig.put("imageConfig", imageConfig);
         
         requestBody.put("generationConfig", generationConfig);
@@ -212,9 +223,14 @@ public class GeminiService {
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
         
-        // Image config - aspect ratio (Gemini will try to match input image size)
+        // Gemini 3: Thinking level (low for faster responses, high for better quality)
+        // Using "low" by default for image generation to optimize latency
+        generationConfig.put("thinkingLevel", "low");
+        
+        // Image config - aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
-        imageConfig.put("aspectRatio", "1:1");
+        imageConfig.put("aspectRatio", "1:1"); // Default to square
+        imageConfig.put("imageSize", "2K"); // Use 2K by default (4K available but uses more tokens)
         generationConfig.put("imageConfig", imageConfig);
         
         requestBody.put("generationConfig", generationConfig);
@@ -317,6 +333,6 @@ public class GeminiService {
      * Get model information
      */
     public String getModelInfo() {
-        return "Google Gemini 2.5 Flash Image (Native Image Generation)";
+        return "Google Gemini 3 Pro Image (Native Image Generation with 4K support)";
     }
 }

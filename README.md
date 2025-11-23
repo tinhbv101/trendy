@@ -91,7 +91,7 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 - MinIO (S3-compatible object storage)
 
 **AI Integration:**
-- Google Gemini 2.5 Flash Image API
+- Google Gemini 3 Pro Image API (with 4K support and advanced reasoning)
 
 **DevOps:**
 - Docker & Docker Compose
