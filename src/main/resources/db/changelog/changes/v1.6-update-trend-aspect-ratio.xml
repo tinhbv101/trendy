@@ -8,8 +8,8 @@
     <changeSet id="update-trend-aspect-ratio" author="system">
         <comment>Replace fixed width/height with aspect ratio enum in trends table</comment>
 
-        <!-- Add new aspect_ratio column -->
-        <addColumn tableName="trends">
+        <!-- Add new aspect_ratio column if not exists -->
+        <addColumn tableName="trends" ifNotExists="true">
             <column name="aspect_ratio" type="varchar(20)" defaultValue="SQUARE">
                 <constraints nullable="false"/>
             </column>
@@ -21,9 +21,9 @@
             <where>aspect_ratio IS NULL</where>
         </update>
 
-        <!-- Drop old columns -->
-        <dropColumn tableName="trends" columnName="output_width"/>
-        <dropColumn tableName="trends" columnName="output_height"/>
+        <!-- Drop old columns if they exist -->
+        <dropColumn tableName="trends" columnName="output_width" cascadeConstraints="true"/>
+        <dropColumn tableName="trends" columnName="output_height" cascadeConstraints="true"/>
     </changeSet>
 
 </databaseChangeLog>
