@@ -19,13 +19,13 @@ import java.util.*;
 /**
  * Service for generating images using Google Gemini AI (Native Image Generation)
  * Uses Gemini 3 Pro Image model - supports both text-to-image and image+text-to-image
- * 
+ *
  * Features:
  * - Native 4K & text rendering
  * - Grounded generation with Google Search
  * - Conversational editing with Thought Signatures
- * - Advanced reasoning with thinking levels
- * 
+ * - Advanced image generation capabilities
+ *
  * Reference: https://ai.google.dev/gemini-api/docs/gemini-3
  */
 @Service
@@ -144,10 +144,6 @@ public class GeminiService {
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
         
-        // Gemini 3: Thinking level (low for faster responses, high for better quality)
-        // Using "low" by default for image generation to optimize latency
-        generationConfig.put("thinkingLevel", "low");
-        
         // Image config with aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
         imageConfig.put("aspectRatio", "1:1"); // Default to square
@@ -222,10 +218,6 @@ public class GeminiService {
         // Generation config
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("responseModalities", List.of("Image"));
-        
-        // Gemini 3: Thinking level (low for faster responses, high for better quality)
-        // Using "low" by default for image generation to optimize latency
-        generationConfig.put("thinkingLevel", "low");
         
         // Image config - aspect ratio and size (Gemini 3 supports 4K)
         Map<String, Object> imageConfig = new HashMap<>();
