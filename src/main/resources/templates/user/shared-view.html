@@ -45,6 +45,36 @@
     <div layout:fragment="content">
         <!-- Define functions at the TOP of content fragment -->
         <script>
+            // Detect mobile device
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+            
+            // Detect iOS
+            function isIOS() {
+                return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            }
+            
+            // Detect Android
+            function isAndroid() {
+                return /Android/i.test(navigator.userAgent);
+            }
+            
+            // Get Facebook share URL (deeplink for mobile, web for desktop)
+            function getFacebookShareUrl(url) {
+                if (isMobile()) {
+                    if (isIOS()) {
+                        // iOS Facebook deeplink
+                        return 'fb://share?href=' + encodeURIComponent(url);
+                    } else if (isAndroid()) {
+                        // Android Facebook deeplink with fallback
+                        return 'intent://share?url=' + encodeURIComponent(url) + '#Intent;scheme=fb;package=com.facebook.katana;end';
+                    }
+                }
+                // Desktop web URL
+                return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+            }
+            
             window.copyCurrentUrl = function() {
                 const url = window.location.href;
                 
@@ -84,6 +114,93 @@
                     alert('Failed to copy link');
                 }
                 document.body.removeChild(input);
+            };
+            
+            // Define share function globally - MUST be defined before onclick
+            window.shareToSocial = function(platform) {
+                console.log('shareToSocial called with:', platform);
+                
+                const url = window.location.href;
+                const text = encodeURIComponent('Check out this AI-generated image from Trendy!');
+                
+                let shareUrl = '';
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = getFacebookShareUrl(url);
+                        break;
+                    case 'twitter':
+                        shareUrl = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + text;
+                        break;
+                    case 'pinterest':
+                        shareUrl = 'https://pinterest.com/pin/create/button/?url=' + encodeURIComponent(url) + '&description=' + text;
+                        break;
+                    default:
+                        console.error('Unknown platform:', platform);
+                        alert('Unknown platform: ' + platform);
+                        return;
+                }
+                
+                console.log('Opening URL:', shareUrl);
+                
+                // For mobile deeplinks, try to open directly
+                if (isMobile() && platform === 'facebook' && (shareUrl.startsWith('fb://') || shareUrl.startsWith('intent://'))) {
+                    // Track if we should fallback
+                    let shouldFallback = true;
+                    let fallbackTimer = null;
+                    
+                    // Listen for page visibility change (app opened = page hidden)
+                    const handleVisibilityChange = function() {
+                        if (document.hidden || document.visibilityState === 'hidden') {
+                            // App opened successfully, cancel fallback
+                            shouldFallback = false;
+                            if (fallbackTimer) {
+                                clearTimeout(fallbackTimer);
+                            }
+                            document.removeEventListener('visibilitychange', handleVisibilityChange);
+                            document.removeEventListener('blur', handleVisibilityChange);
+                        }
+                    };
+                    
+                    // Listen for blur event (page loses focus when app opens)
+                    const handleBlur = function() {
+                        shouldFallback = false;
+                        if (fallbackTimer) {
+                            clearTimeout(fallbackTimer);
+                        }
+                        document.removeEventListener('visibilitychange', handleVisibilityChange);
+                        document.removeEventListener('blur', handleBlur);
+                    };
+                    
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
+                    document.addEventListener('blur', handleBlur);
+                    
+                    // Create a temporary link element and click it (works better on mobile)
+                    const link = document.createElement('a');
+                    link.href = shareUrl;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Fallback: if app doesn't open within 2.5 seconds and page is still visible
+                    fallbackTimer = setTimeout(function() {
+                        document.removeEventListener('visibilitychange', handleVisibilityChange);
+                        document.removeEventListener('blur', handleBlur);
+                        
+                        if (shouldFallback && document.visibilityState === 'visible') {
+                            console.log('Deeplink timeout, opening web version');
+                            window.location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+                        }
+                    }, 2500);
+                } else {
+                    // Desktop: Try to open in new window
+                    const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
+                    
+                    if (!popup) {
+                        console.warn('Popup blocked, trying new tab');
+                        window.open(shareUrl, '_blank');
+                    }
+                }
             };
             
             console.log('Shared view functions loaded');
@@ -147,8 +264,8 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
                                             <a class="dropdown-item" 
-                                               th:href="@{https://www.facebook.com/sharer/sharer.php(u=${shareUrl})}"
-                                               target="_blank"
+                                               href="#"
+                                               onclick="event.preventDefault(); shareToSocial('facebook'); return false;"
                                                rel="noopener noreferrer">
                                                 <i class="bi bi-facebook"></i> Facebook
                                             </a>
@@ -178,48 +295,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- Inline script to ensure function is available immediately -->
-    <script>
-        // Define share function globally - MUST be defined before onclick
-        window.shareToSocial = function(platform) {
-            console.log('shareToSocial called with:', platform);
-            
-            const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent('Check out this AI-generated image from Trendy!');
-            
-            let shareUrl = '';
-            switch(platform) {
-                case 'facebook':
-                    shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
-                    break;
-                case 'twitter':
-                    shareUrl = 'https://twitter.com/intent/tweet?url=' + url + '&text=' + text;
-                    break;
-                case 'pinterest':
-                    shareUrl = 'https://pinterest.com/pin/create/button/?url=' + url + '&description=' + text;
-                    break;
-                default:
-                    console.error('Unknown platform:', platform);
-                    alert('Unknown platform: ' + platform);
-                    return;
-            }
-            
-            console.log('Opening URL:', shareUrl);
-            
-            // Try to open in new window
-            const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
-            
-            if (!popup) {
-                console.warn('Popup blocked, trying new tab');
-                window.open(shareUrl, '_blank');
-            }
-        };
-    </script>
-
-    <th:block layout:fragment="scripts">
-        <!-- Functions already defined in content fragment -->
-    </th:block>
 </body>
 </html>
 
