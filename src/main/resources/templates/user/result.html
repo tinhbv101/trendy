@@ -257,6 +257,12 @@
             
             // Get Facebook share URL (deeplink for mobile, web for desktop)
             function getFacebookShareUrl(url) {
+                // Ensure URL is valid
+                if (!url || url === 'null' || url === 'undefined') {
+                    console.error('Invalid URL passed to getFacebookShareUrl:', url);
+                    return null;
+                }
+
                 if (isMobile()) {
                     if (isIOS()) {
                         // iOS Facebook deeplink
@@ -311,9 +317,9 @@
             }
             
             function showShareModal(shareUrl, token) {
-                // Build full URL for sharing
-                const fullShareUrl = window.location.origin + shareUrl;
-                
+                // Build full URL for sharing (more robust than window.location.origin)
+                const fullShareUrl = window.location.protocol + '//' + window.location.host + shareUrl;
+
                 // Create modal dynamically
                 const modalHtml = `
                     <div class="modal fade" id="shareModal" tabindex="-1">
@@ -327,7 +333,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <p class="text-success"><i class="bi bi-check-circle"></i> Share link created successfully!</p>
-                                    
+
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Share Link:</label>
                                         <div class="input-group">
@@ -338,31 +344,30 @@
                                         </div>
                                         <small class="text-muted">Link expires in 30 days</small>
                                     </div>
-                                    
+
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Share on Social Media:</label>
                                         <div class="d-flex gap-2 flex-wrap">
-                                            <a href="#" 
-                                               onclick="shareToFacebook('${fullShareUrl}'); return false;"
-                                               class="btn btn-primary flex-fill"
-                                               rel="noopener noreferrer">
+                                            <button type="button"
+                                               data-share-url="${fullShareUrl}"
+                                               class="btn btn-primary flex-fill share-facebook-btn">
                                                 <i class="bi bi-facebook"></i> Facebook
-                                            </a>
-                                            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(fullShareUrl)}&text=${encodeURIComponent('Check out this AI-generated image from Trendy!')}" 
-                                               target="_blank" 
+                                            </button>
+                                            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(fullShareUrl)}&text=${encodeURIComponent('Check out this AI-generated image from Trendy!')}"
+                                               target="_blank"
                                                class="btn btn-info text-white flex-fill"
                                                rel="noopener noreferrer">
                                                 <i class="bi bi-twitter"></i> Twitter
                                             </a>
-                                            <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(fullShareUrl)}&description=${encodeURIComponent('AI-generated image from Trendy')}" 
-                                               target="_blank" 
+                                            <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(fullShareUrl)}&description=${encodeURIComponent('AI-generated image from Trendy')}"
+                                               target="_blank"
                                                class="btn btn-danger flex-fill"
                                                rel="noopener noreferrer">
                                                 <i class="bi bi-pinterest"></i> Pinterest
                                             </a>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="alert alert-info mb-0">
                                         <i class="bi bi-info-circle"></i> Anyone with this link can view this image.
                                         You can manage your shares from <a href="/my-shares">My Shares</a>.
@@ -372,20 +377,34 @@
                         </div>
                     </div>
                 `;
-                
+
                 // Remove existing modal if any
                 const existingModal = document.getElementById('shareModal');
                 if (existingModal) {
                     existingModal.remove();
                 }
-                
+
                 // Add modal to page
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
+
+                // Add event listener for Facebook button
+                const facebookBtn = document.querySelector('.share-facebook-btn');
+                if (facebookBtn) {
+                    facebookBtn.addEventListener('click', function() {
+                        const url = this.getAttribute('data-share-url');
+                        if (url) {
+                            shareToFacebook(url);
+                        } else {
+                            console.error('Share URL not found');
+                            alert('Error: Share URL not available');
+                        }
+                    });
+                }
+
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('shareModal'));
                 modal.show();
-                
+
                 // Clean up after close
                 document.getElementById('shareModal').addEventListener('hidden.bs.modal', function() {
                     this.remove();
@@ -394,6 +413,15 @@
             
             // Share to Facebook with deeplink support
             function shareToFacebook(url) {
+                console.log('shareToFacebook called with URL:', url);
+
+                // Validate URL
+                if (!url || url === 'null' || url === 'undefined') {
+                    console.error('Invalid URL passed to shareToFacebook:', url);
+                    alert('Error: Invalid share URL');
+                    return;
+                }
+
                 const shareUrl = getFacebookShareUrl(url);
                 
                 // For mobile deeplinks, try to open directly
