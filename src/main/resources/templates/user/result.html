@@ -240,6 +240,36 @@
                 }
             });
             
+            // Detect mobile device
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+            
+            // Detect iOS
+            function isIOS() {
+                return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            }
+            
+            // Detect Android
+            function isAndroid() {
+                return /Android/i.test(navigator.userAgent);
+            }
+            
+            // Get Facebook share URL (deeplink for mobile, web for desktop)
+            function getFacebookShareUrl(url) {
+                if (isMobile()) {
+                    if (isIOS()) {
+                        // iOS Facebook deeplink
+                        return 'fb://share?href=' + encodeURIComponent(url);
+                    } else if (isAndroid()) {
+                        // Android Facebook deeplink with fallback
+                        return 'intent://share?url=' + encodeURIComponent(url) + '#Intent;scheme=fb;package=com.facebook.katana;end';
+                    }
+                }
+                // Desktop web URL
+                return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+            }
+            
             // Share Image functionality
             async function shareImage(button) {
                 const imageId = button.getAttribute('data-image-id');
@@ -312,8 +342,8 @@
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Share on Social Media:</label>
                                         <div class="d-flex gap-2 flex-wrap">
-                                            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullShareUrl)}" 
-                                               target="_blank" 
+                                            <a href="#" 
+                                               onclick="shareToFacebook('${fullShareUrl}'); return false;"
                                                class="btn btn-primary flex-fill"
                                                rel="noopener noreferrer">
                                                 <i class="bi bi-facebook"></i> Facebook
@@ -360,6 +390,69 @@
                 document.getElementById('shareModal').addEventListener('hidden.bs.modal', function() {
                     this.remove();
                 });
+            }
+            
+            // Share to Facebook with deeplink support
+            function shareToFacebook(url) {
+                const shareUrl = getFacebookShareUrl(url);
+                
+                // For mobile deeplinks, try to open directly
+                if (isMobile() && (shareUrl.startsWith('fb://') || shareUrl.startsWith('intent://'))) {
+                    // Track if we should fallback
+                    let shouldFallback = true;
+                    let fallbackTimer = null;
+                    
+                    // Listen for page visibility change (app opened = page hidden)
+                    const handleVisibilityChange = function() {
+                        if (document.hidden || document.visibilityState === 'hidden') {
+                            // App opened successfully, cancel fallback
+                            shouldFallback = false;
+                            if (fallbackTimer) {
+                                clearTimeout(fallbackTimer);
+                            }
+                            document.removeEventListener('visibilitychange', handleVisibilityChange);
+                            document.removeEventListener('blur', handleVisibilityChange);
+                        }
+                    };
+                    
+                    // Listen for blur event (page loses focus when app opens)
+                    const handleBlur = function() {
+                        shouldFallback = false;
+                        if (fallbackTimer) {
+                            clearTimeout(fallbackTimer);
+                        }
+                        document.removeEventListener('visibilitychange', handleVisibilityChange);
+                        document.removeEventListener('blur', handleBlur);
+                    };
+                    
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
+                    document.addEventListener('blur', handleBlur);
+                    
+                    // Create a temporary link element and click it (works better on mobile)
+                    const link = document.createElement('a');
+                    link.href = shareUrl;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Fallback: if app doesn't open within 2.5 seconds and page is still visible
+                    fallbackTimer = setTimeout(function() {
+                        document.removeEventListener('visibilitychange', handleVisibilityChange);
+                        document.removeEventListener('blur', handleBlur);
+                        
+                        if (shouldFallback && document.visibilityState === 'visible') {
+                            console.log('Deeplink timeout, opening web version');
+                            window.location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+                        }
+                    }, 2500);
+                } else {
+                    // Desktop: Open in new window
+                    const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
+                    if (!popup) {
+                        window.open(shareUrl, '_blank');
+                    }
+                }
             }
             
             function copyShareLink(event) {
