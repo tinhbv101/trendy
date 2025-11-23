@@ -5,7 +5,7 @@
   
   <p><strong>Transform your photos with AI-powered trends</strong></p>
 
-  [![Version](https://img.shields.io/badge/Version-v1.1.0-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.0)
+  [![Version](https://img.shields.io/badge/Version-v1.1.1-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.1)
   [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -30,7 +30,19 @@
 
 **Trendy** is a web platform that allows users to transform their photos using popular AI trends. The application integrates with Google Gemini AI to create unique and creative images.
 
-### 🆕 What's New in v1.1.0
+### 🆕 What's New in v1.1.1
+
+**New Features:**
+- 🎨 **Flexible Image Output Configuration** - Admin can select aspect ratio (1:1, 16:9, 9:16, 4:3, 3:4, 21:9) and image size (2K or 4K)
+- 🤖 **Gemini Model Selection** - Choose between Gemini 3 Pro Image (latest, 4K support) or Gemini 2.5 Flash Image (faster, lower cost)
+- 🔧 **Automatic Dimension Calculation** - Output width/height calculated automatically based on aspect ratio and image size
+
+**Improvements:**
+- 🐛 Fixed logging issue where request body was being modified during API calls
+- 🐛 Fixed Gemini 2.5 Flash Image API compatibility (removed unsupported imageSize parameter)
+- 📝 Enhanced error logging for better debugging
+
+### Previous Version (v1.1.0)
 
 **Major Features Added:**
 - 👤 **User Profile Management** - View and edit your profile, see statistics
@@ -57,7 +69,7 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 - 🔒 **User Authentication**: Secure registration and login
 - 👑 **Admin Panel**: Manage trends, users, and system
 
-**v1.1.0 New Features:**
+**v1.1.0 Features:**
 - 👤 **User Profile Management**: View and edit profile, display statistics
 - 📥 **Enhanced Downloads**: Custom filenames and ZIP download for input images
 - 📱 **iOS Share Integration**: Native share functionality for mobile devices
@@ -91,7 +103,10 @@ See [CHANGELOG.md](CHANGELOG.md) for complete details.
 - MinIO (S3-compatible object storage)
 
 **AI Integration:**
-- Google Gemini 2.5 Flash Image API
+- Google Gemini 3 Pro Image API (with 4K support and advanced reasoning)
+- Google Gemini 2.5 Flash Image API (faster, lower cost)
+- Flexible aspect ratio selection (1:1, 16:9, 9:16, 4:3, 3:4, 21:9)
+- Image size options (2K or 4K resolution)
 
 **DevOps:**
 - Docker & Docker Compose
@@ -239,7 +254,7 @@ gemini:
 ./gradlew bootRun
 
 # Or run JAR file
-java -jar build/libs/Trendy-1.1.0.jar
+java -jar build/libs/Trendy-1.1.1.jar
 ```
 
 ---
@@ -364,6 +379,10 @@ trendy/
 #### 2. Manage Trends
 - Go to http://localhost:8080/admin/trends
 - **Create**: Click "New Trend", fill in details and upload images
+  - **Aspect Ratio**: Choose from 1:1 (Square), 16:9 (Landscape), 9:16 (Portrait), 4:3 (Standard), 3:4 (Portrait), or 21:9 (Ultra Wide)
+  - **Image Size**: Select 2K (Recommended) or 4K (Higher Quality) - 4K uses more tokens
+  - **Gemini Model**: Choose between Gemini 3 Pro Image (Latest, 4K support) or Gemini 2.5 Flash Image (Faster, Lower cost)
+  - Output dimensions are calculated automatically based on aspect ratio and image size
 - **Edit**: Click "Edit" on the trend you want to modify
 - **Delete**: Click "Delete" to remove (soft delete)
 - **Test**: Click "Test" to try out the trend
@@ -648,6 +667,11 @@ If you encounter any issues or have questions:
 ---
 
 ## 🗺️ Roadmap
+
+### Version 1.1.1 ✅ (Released)
+- [x] Flexible Image Output Configuration (Aspect Ratio & Image Size)
+- [x] Gemini Model Selection (3 Pro Image or 2.5 Flash Image)
+- [x] Fixed logging and API compatibility issues
 
 ### Version 1.1.0 ✅ (Released)
 - [x] User Profile Management
