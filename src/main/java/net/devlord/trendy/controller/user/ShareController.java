@@ -33,22 +33,27 @@ public class ShareController {
     public ResponseEntity<Map<String, Object>> createShareLink(
             @RequestParam Long imageId,
             @RequestParam(required = false) Integer expiryDays,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request) {
         
         try {
-            String token = shareService.createShareLink(
+            net.devlord.trendy.model.dto.ShareInfo shareInfo = shareService.createShareLink(
                 imageId, 
                 userDetails.getUsername(), 
                 expiryDays
             );
             
             // Build full share URL
-            String shareUrl = "/share/" + token;
+            String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+            String fullShareUrl = baseUrl + shareInfo.getShareUrl();
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("token", token);
-            response.put("shareUrl", shareUrl);
+            response.put("token", shareInfo.getToken());
+            response.put("shareUrl", shareInfo.getShareUrl());
+            response.put("fullShareUrl", fullShareUrl);
+            response.put("username", shareInfo.getUsername());
+            response.put("trendName", shareInfo.getTrendName());
             response.put("message", "Share link created successfully");
             
             return ResponseEntity.ok(response);
@@ -123,11 +128,18 @@ public class ShareController {
                 String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "");
                 String imageUrl = baseUrl + "/images/" + sharedImage.getGeneratedImage().getOutputImagePath();
                 
+                // Get username and trend name for share message
+                String username = sharedImage.getUser().getFullName() != null && !sharedImage.getUser().getFullName().isEmpty()
+                    ? sharedImage.getUser().getFullName()
+                    : sharedImage.getUser().getUsername();
+                String trendName = sharedImage.getGeneratedImage().getTrend().getTrendName();
+                
                 model.addAttribute("sharedImage", sharedImage);
-                model.addAttribute("pageTitle", "Shared Image - " + 
-                                   sharedImage.getGeneratedImage().getTrend().getTrendName());
+                model.addAttribute("pageTitle", "Shared Image - " + trendName);
                 model.addAttribute("shareUrl", shareUrl);
                 model.addAttribute("imageUrl", imageUrl);
+                model.addAttribute("username", username);
+                model.addAttribute("trendName", trendName);
                 return "user/shared-view";
             })
             .orElseGet(() -> {
