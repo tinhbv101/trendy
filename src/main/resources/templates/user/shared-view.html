@@ -1,46 +1,53 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
 <head>
     <title th:text="${sharedImage.generatedImage.trend.trendName} + ' - Shared Image'">Shared Image</title>
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" th:content="${shareUrl}">
-    <meta property="og:title" th:content="${sharedImage.generatedImage.trend.trendName} + ' - AI Generated Image'">
-    <meta property="og:description" th:content="'Check out this amazing AI-generated image created with Trendy! Style: ' + ${sharedImage.generatedImage.trend.trendName}">
+    <meta property="og:title" th:content="${trendName} + ' - AI Generated Image'">
+    <meta property="og:description"
+        th:content="${#messages.msgOrNull('result.share_message_template').replace('{username}', username).replace('{trendName}', trendName).replace('{url}', shareUrl)}">
     <meta property="og:image" th:content="${imageUrl}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Trendy - AI Image Generator">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" th:content="${sharedImage.generatedImage.trend.trendName} + ' - AI Generated Image'">
-    <meta name="twitter:description" th:content="'Check out this amazing AI-generated image created with Trendy! Style: ' + ${sharedImage.generatedImage.trend.trendName}">
+    <meta name="twitter:title" th:content="${trendName} + ' - AI Generated Image'">
+    <meta name="twitter:description"
+        th:content="${#messages.msgOrNull('result.share_message_template').replace('{username}', username).replace('{trendName}', trendName).replace('{url}', shareUrl)}">
     <meta name="twitter:image" th:content="${imageUrl}">
-    
+
     <style>
         /* Fix dropdown being cut off */
         .card {
             overflow: visible !important;
         }
+
         .card-body {
             overflow: visible !important;
         }
+
         .card-footer {
             overflow: visible !important;
         }
+
         .btn-group {
             position: relative !important;
         }
+
         .dropdown-menu {
             position: absolute !important;
             z-index: 1050 !important;
         }
     </style>
 </head>
+
 <body>
     <div layout:fragment="content">
         <!-- Define functions at the TOP of content fragment -->
@@ -49,35 +56,47 @@
             function isMobile() {
                 return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
-            
+
             // Detect iOS
             function isIOS() {
                 return /iPhone|iPad|iPod/i.test(navigator.userAgent);
             }
-            
+
             // Detect Android
             function isAndroid() {
                 return /Android/i.test(navigator.userAgent);
             }
-            
-            // Get Facebook share URL (deeplink for mobile, web for desktop)
-            function getFacebookShareUrl(url) {
+
+            // Get Facebook share URL
+            // On mobile: use deeplink to open Facebook app
+            // On desktop: use Share Dialog
+            function getFacebookShareUrl(url, quote) {
+                const encodedUrl = encodeURIComponent(url);
+
                 if (isMobile()) {
+                    // Use Facebook app deeplink on mobile
+                    // Note: quote parameter is not supported in deeplink, but link will be shared
                     if (isIOS()) {
-                        // iOS Facebook deeplink
-                        return 'fb://share?href=' + encodeURIComponent(url);
+                        // iOS Facebook app URL scheme
+                        return 'fb://share/?link=' + encodedUrl;
                     } else if (isAndroid()) {
-                        // Android Facebook deeplink with fallback
-                        return 'intent://share?url=' + encodeURIComponent(url) + '#Intent;scheme=fb;package=com.facebook.katana;end';
+                        // Android intent with proper format
+                        return 'intent://share/#Intent;scheme=https;package=com.facebook.katana;S.browser_fallback_url=' + encodedUrl + ';end';
                     }
                 }
-                // Desktop web URL
-                return 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+
+                // Desktop or fallback: Use Facebook Share Dialog (supports quote parameter)
+                const encodedQuote = quote ? encodeURIComponent(quote) : '';
+                let shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl;
+                if (encodedQuote) {
+                    shareUrl += '&quote=' + encodedQuote;
+                }
+                return shareUrl;
             }
-            
-            window.copyCurrentUrl = function() {
+
+            window.copyCurrentUrl = function () {
                 const url = window.location.href;
-                
+
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(url).then(() => {
                         const btn = event.target.closest('button');
@@ -86,7 +105,7 @@
                         btn.innerHTML = '<i class="bi bi-check"></i> ' + copiedText;
                         btn.classList.remove('btn-outline-primary');
                         btn.classList.add('btn-success');
-                        
+
                         setTimeout(() => {
                             btn.innerHTML = originalHtml;
                             btn.classList.remove('btn-success');
@@ -100,8 +119,8 @@
                     window.fallbackCopyUrl(url);
                 }
             };
-            
-            window.fallbackCopyUrl = function(url) {
+
+            window.fallbackCopyUrl = function (url) {
                 const input = document.createElement('input');
                 input.value = url;
                 input.style.position = 'fixed';
@@ -118,19 +137,56 @@
                 }
                 document.body.removeChild(input);
             };
-            
+
             // Define share function globally - MUST be defined before onclick
-            window.shareToSocial = function(platform) {
+            window.shareToSocial = function (platform) {
                 console.log('shareToSocial called with:', platform);
-                
+
                 const url = window.location.href;
-                const text = encodeURIComponent('Check out this AI-generated image from Trendy!');
-                
+                // Get share message from meta tag (which uses the template)
+                const shareMessage = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || 'Check out this AI-generated image from Trendy!';
+                const text = encodeURIComponent(shareMessage);
+
                 let shareUrl = '';
-                switch(platform) {
+                switch (platform) {
                     case 'facebook':
-                        shareUrl = getFacebookShareUrl(url);
+                        shareUrl = getFacebookShareUrl(url, shareMessage);
+
+                        // Handle mobile deeplink with fallback
+                        if (isMobile() && (shareUrl.startsWith('fb://') || shareUrl.startsWith('intent://'))) {
+                            // Try to open Facebook app
+                            window.location.href = shareUrl;
+
+                            // Fallback to web dialog after short delay if app doesn't open
+                            setTimeout(function () {
+                                const fallbackUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(shareMessage);
+                                window.open(fallbackUrl, '_blank');
+                            }, 1500);
+                            return; // Exit early
+                        }
                         break;
+                    case 'messenger':
+                        // Handle Messenger separately due to special deeplink logic
+                        if (isMobile()) {
+                            // Try Messenger app deeplink on mobile
+                            // Note: Messenger deeplink has limited support, may not work on all devices
+                            const messengerUrl = 'fb-messenger://share/?link=' + encodeURIComponent(url);
+                            window.location.href = messengerUrl;
+
+                            // Fallback to web dialog after short delay if app doesn't open
+                            setTimeout(function () {
+                                const fallbackUrl = 'https://www.facebook.com/dialog/send?link=' + encodeURIComponent(url) + '&app_id=YOUR_APP_ID&redirect_uri=' + encodeURIComponent(url);
+                                window.open(fallbackUrl, '_blank');
+                            }, 1500);
+                        } else {
+                            // Desktop: use web Send Dialog
+                            shareUrl = 'https://www.facebook.com/dialog/send?link=' + encodeURIComponent(url) + '&app_id=YOUR_APP_ID&redirect_uri=' + encodeURIComponent(url);
+                            const popup = window.open(shareUrl, 'messenger-share', 'width=600,height=400,menubar=no,toolbar=no,location=no');
+                            if (!popup) {
+                                window.open(shareUrl, '_blank');
+                            }
+                        }
+                        return; // Exit early for messenger
                     case 'twitter':
                         shareUrl = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + text;
                         break;
@@ -142,80 +198,31 @@
                         alert('Unknown platform: ' + platform);
                         return;
                 }
-                
+
                 console.log('Opening URL:', shareUrl);
-                
-                // For mobile deeplinks, try to open directly
-                if (isMobile() && platform === 'facebook' && (shareUrl.startsWith('fb://') || shareUrl.startsWith('intent://'))) {
-                    // Track if we should fallback
-                    let shouldFallback = true;
-                    let fallbackTimer = null;
-                    
-                    // Listen for page visibility change (app opened = page hidden)
-                    const handleVisibilityChange = function() {
-                        if (document.hidden || document.visibilityState === 'hidden') {
-                            // App opened successfully, cancel fallback
-                            shouldFallback = false;
-                            if (fallbackTimer) {
-                                clearTimeout(fallbackTimer);
-                            }
-                            document.removeEventListener('visibilitychange', handleVisibilityChange);
-                            document.removeEventListener('blur', handleVisibilityChange);
-                        }
-                    };
-                    
-                    // Listen for blur event (page loses focus when app opens)
-                    const handleBlur = function() {
-                        shouldFallback = false;
-                        if (fallbackTimer) {
-                            clearTimeout(fallbackTimer);
-                        }
-                        document.removeEventListener('visibilitychange', handleVisibilityChange);
-                        document.removeEventListener('blur', handleBlur);
-                    };
-                    
-                    document.addEventListener('visibilitychange', handleVisibilityChange);
-                    document.addEventListener('blur', handleBlur);
-                    
-                    // Create a temporary link element and click it (works better on mobile)
-                    const link = document.createElement('a');
-                    link.href = shareUrl;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // Fallback: if app doesn't open within 2.5 seconds and page is still visible
-                    fallbackTimer = setTimeout(function() {
-                        document.removeEventListener('visibilitychange', handleVisibilityChange);
-                        document.removeEventListener('blur', handleBlur);
-                        
-                        if (shouldFallback && document.visibilityState === 'visible') {
-                            console.log('Deeplink timeout, opening web version');
-                            window.location.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
-                        }
-                    }, 2500);
-                } else {
-                    // Desktop: Try to open in new window
-                    const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
-                    
-                    if (!popup) {
-                        console.warn('Popup blocked, trying new tab');
-                        window.open(shareUrl, '_blank');
-                    }
+
+                // Open share URL in popup or new tab
+                const popup = window.open(shareUrl, 'share-popup', 'width=600,height=400,menubar=no,toolbar=no,location=no');
+
+                if (!popup) {
+                    console.warn('Popup blocked, trying new tab');
+                    window.open(shareUrl, '_blank');
                 }
             };
-            
+
             console.log('Shared view functions loaded');
         </script>
-        
+
         <div class="container py-4">
             <!-- Header with share info -->
             <div class="text-center mb-4">
-                <h1><i class="bi bi-share-fill text-success"></i> <span th:text="#{shared_view.title}">Shared Image</span></h1>
+                <h1><i class="bi bi-share-fill text-success"></i> <span th:text="#{shared_view.title}">Shared
+                        Image</span></h1>
                 <p class="text-muted">
-                    <span th:text="#{shared_view.created_by}">Created by</span> <strong th:text="${sharedImage.user.fullName ?: sharedImage.user.username}">User</strong>
-                    • <i class="bi bi-eye"></i> <span th:text="${sharedImage.viewCount}">0</span> <span th:text="#{shared_view.views}">views</span>
+                    <span th:text="#{shared_view.created_by}">Created by</span> <strong
+                        th:text="${sharedImage.user.fullName ?: sharedImage.user.username}">User</strong>
+                    • <i class="bi bi-eye"></i> <span th:text="${sharedImage.viewCount}">0</span> <span
+                        th:text="#{shared_view.views}">views</span>
                 </p>
             </div>
 
@@ -223,70 +230,82 @@
                 <!-- Main Image -->
                 <div class="col-md-8 mx-auto">
                     <div class="card shadow-sm">
-                        <img th:src="@{/images/{filename}(filename=${sharedImage.generatedImage.outputImagePath})}" 
-                             class="card-img-top" 
-                             alt="Shared generated image"
-                             style="max-height: 600px; object-fit: contain; background-color: #f8f9fa;">
-                        
+                        <img th:src="@{/images/{filename}(filename=${sharedImage.generatedImage.outputImagePath})}"
+                            class="card-img-top" alt="Shared generated image"
+                            style="max-height: 600px; object-fit: contain; background-color: #f8f9fa;">
+
                         <div class="card-body">
-                            <h4 class="card-title" th:text="${sharedImage.generatedImage.trend.trendName}">Trend Name</h4>
+                            <h4 class="card-title" th:text="${sharedImage.generatedImage.trend.trendName}">Trend Name
+                            </h4>
                             <p class="card-text text-muted" th:text="${sharedImage.generatedImage.trend.description}">
                                 Trend description
                             </p>
-                            
+
                             <div class="d-flex gap-2 align-items-center text-muted small">
-                                <span><i class="bi bi-calendar"></i> 
-                                    <span th:text="${#temporals.format(sharedImage.createdAt, 'MMM dd, yyyy')}">Date</span>
+                                <span><i class="bi bi-calendar"></i>
+                                    <span
+                                        th:text="${#temporals.format(sharedImage.createdAt, 'MMM dd, yyyy')}">Date</span>
                                 </span>
                                 <span th:if="${sharedImage.expiresAt != null}">
                                     • <i class="bi bi-clock"></i> <span th:text="#{shared_view.expires}">Expires</span>
-                                    <span th:text="${#temporals.format(sharedImage.expiresAt, 'MMM dd, yyyy')}">Date</span>
+                                    <span
+                                        th:text="${#temporals.format(sharedImage.expiresAt, 'MMM dd, yyyy')}">Date</span>
                                 </span>
                             </div>
-                            
+
                             <hr>
-                            
+
                             <!-- Actions -->
                             <div class="d-flex gap-2 flex-wrap">
                                 <a th:href="@{/images/download/{filename}(
                                         filename=${sharedImage.generatedImage.outputImagePath},
                                         name=${sharedImage.generatedImage.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-shared.jpg'}
-                                    )}" 
-                                   class="btn btn-primary">
-                                    <i class="bi bi-download"></i> <span th:text="#{shared_view.download}">Download</span>
+                                    )}" class="btn btn-primary">
+                                    <i class="bi bi-download"></i> <span
+                                        th:text="#{shared_view.download}">Download</span>
                                 </a>
-                                
+
                                 <button type="button" class="btn btn-outline-primary" onclick="copyCurrentUrl()">
-                                    <i class="bi bi-link-45deg"></i> <span th:text="#{shared_view.copy_link}">Copy Link</span>
+                                    <i class="bi bi-link-45deg"></i> <span th:text="#{shared_view.copy_link}">Copy
+                                        Link</span>
                                 </button>
-                                
+
                                 <div class="btn-group dropup">
-                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true">
+                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="true">
                                         <i class="bi bi-share"></i> <span th:text="#{shared_view.share}">Share</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" 
-                                               href="#"
-                                               onclick="event.preventDefault(); shareToSocial('facebook'); return false;"
-                                               rel="noopener noreferrer">
-                                                <i class="bi bi-facebook"></i> <span th:text="#{shared_view.facebook}">Facebook</span>
+                                            <a class="dropdown-item" href="#"
+                                                onclick="event.preventDefault(); shareToSocial('facebook'); return false;"
+                                                rel="noopener noreferrer">
+                                                <i class="bi bi-facebook"></i> <span
+                                                    th:text="#{shared_view.facebook}">Facebook</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" 
-                                               th:href="@{https://twitter.com/intent/tweet(url=${shareUrl},text='Check out this AI-generated image from Trendy!')}"
-                                               target="_blank"
-                                               rel="noopener noreferrer">
-                                                <i class="bi bi-twitter"></i> <span th:text="#{shared_view.twitter}">Twitter</span>
+                                            <a class="dropdown-item" href="#"
+                                                onclick="event.preventDefault(); shareToSocial('messenger'); return false;"
+                                                rel="noopener noreferrer">
+                                                <i class="bi bi-messenger"></i> <span
+                                                    th:text="#{shared_view.messenger}">Messenger</span>
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" 
-                                               th:href="@{https://pinterest.com/pin/create/button/(url=${shareUrl},description='AI-generated image from Trendy')}"
-                                               target="_blank"
-                                               rel="noopener noreferrer">
-                                                <i class="bi bi-pinterest"></i> <span th:text="#{shared_view.pinterest}">Pinterest</span>
+                                            <a class="dropdown-item"
+                                                th:href="@{https://twitter.com/intent/tweet(url=${shareUrl},text='Check out this AI-generated image from Trendy!')}"
+                                                target="_blank" rel="noopener noreferrer">
+                                                <i class="bi bi-twitter"></i> <span
+                                                    th:text="#{shared_view.twitter}">Twitter</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
+                                                th:href="@{https://pinterest.com/pin/create/button/(url=${shareUrl},description='AI-generated image from Trendy')}"
+                                                target="_blank" rel="noopener noreferrer">
+                                                <i class="bi bi-pinterest"></i> <span
+                                                    th:text="#{shared_view.pinterest}">Pinterest</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -299,5 +318,5 @@
         </div>
     </div>
 </body>
-</html>
 
+</html>

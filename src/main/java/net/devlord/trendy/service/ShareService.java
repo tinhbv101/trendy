@@ -1,5 +1,6 @@
 package net.devlord.trendy.service;
 
+import net.devlord.trendy.model.dto.ShareInfo;
 import net.devlord.trendy.model.entity.GeneratedImage;
 import net.devlord.trendy.model.entity.SharedImage;
 import net.devlord.trendy.model.entity.User;
@@ -33,14 +34,14 @@ public class ShareService {
      * @param imageId Generated image ID
      * @param username User creating the share
      * @param expiryDays Number of days until expiry (null for no expiry)
-     * @return Share token
+     * @return ShareInfo containing token, username, trend name, and share URL
      */
     @Transactional
-    public String createShareLink(Long imageId, String username, Integer expiryDays) {
+    public ShareInfo createShareLink(Long imageId, String username, Integer expiryDays) {
         User user = userService.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
         
-        GeneratedImage image = generatedImageRepository.findById(imageId)
+        GeneratedImage image = generatedImageRepository.findByIdWithUserAndTrend(imageId)
             .orElseThrow(() -> new IllegalArgumentException("Image not found: " + imageId));
         
         // Verify ownership
@@ -52,30 +53,38 @@ public class ShareService {
         Optional<SharedImage> existingShare = sharedImageRepository
             .findActiveByGeneratedImageIdAndUserId(imageId, user.getId());
         
+        String token;
         if (existingShare.isPresent() && existingShare.get().isAccessible()) {
             log.info("Reusing existing share link for image {} by user {}", imageId, username);
-            return existingShare.get().getShareToken();
+            token = existingShare.get().getShareToken();
+        } else {
+            // Create new share
+            SharedImage sharedImage = new SharedImage();
+            sharedImage.setGeneratedImage(image);
+            sharedImage.setUser(user);
+            sharedImage.setShareToken(generateSecureToken());
+            
+            if (expiryDays != null && expiryDays > 0) {
+                sharedImage.setExpiresAt(LocalDateTime.now().plusDays(expiryDays));
+            }
+            
+            sharedImage.setIsActive(true);
+            sharedImage.setViewCount(0);
+            
+            sharedImageRepository.save(sharedImage);
+            
+            token = sharedImage.getShareToken();
+            log.info("Created share link for image {} by user {}: {}", 
+                     imageId, username, token);
         }
         
-        // Create new share
-        SharedImage sharedImage = new SharedImage();
-        sharedImage.setGeneratedImage(image);
-        sharedImage.setUser(user);
-        sharedImage.setShareToken(generateSecureToken());
+        // Build share URL
+        String shareUrl = "/share/" + token;
         
-        if (expiryDays != null && expiryDays > 0) {
-            sharedImage.setExpiresAt(LocalDateTime.now().plusDays(expiryDays));
-        }
+        // Get trend name (ensure it's loaded)
+        String trendName = image.getTrend().getTrendName();
         
-        sharedImage.setIsActive(true);
-        sharedImage.setViewCount(0);
-        
-        sharedImageRepository.save(sharedImage);
-        
-        log.info("Created share link for image {} by user {}: {}", 
-                 imageId, username, sharedImage.getShareToken());
-        
-        return sharedImage.getShareToken();
+        return new ShareInfo(token, username, trendName, shareUrl);
     }
     
     /**
