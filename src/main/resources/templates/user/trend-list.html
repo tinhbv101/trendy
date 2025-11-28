@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
 <head>
     <title th:text="#{trend_list.title} + ' - Trendy'">Browse Trends - Trendy</title>
     <th:block th:fragment="extra-head">
         <meta name="description" th:content="#{app.default_description}">
     </th:block>
 </head>
+
 <body>
     <div layout:fragment="content">
         <h1 class="mb-4" th:text="#{trend_list.title}">Browse Trends</h1>
-        
+
         <!-- Search and Filter -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <form th:action="@{/trends}" method="get">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" 
-                               th:placeholder="#{trend_list.search_placeholder}" th:value="${search}">
+                        <input type="text" name="search" class="form-control"
+                            th:placeholder="#{trend_list.search_placeholder}" th:value="${search}">
                         <input type="hidden" name="sort" th:value="${currentSort}">
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i> <span th:text="#{trend_list.search_button}">Search</span>
@@ -29,10 +30,8 @@
             <div class="col-md-4">
                 <select class="form-select" onchange="filterByCategory(this.value)">
                     <option value="" th:text="#{trend_list.all_categories}">All Categories</option>
-                    <option th:each="cat : ${categories}" 
-                            th:value="${cat}" 
-                            th:text="${cat}"
-                            th:selected="${category == cat}"></option>
+                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                        th:selected="${category == cat}"></option>
                 </select>
             </div>
             <div class="col-md-4">
@@ -52,32 +51,33 @@
                 </select>
             </div>
         </div>
-        
+
+        <!-- AdSense - Trends Top Banner -->
+        <div th:replace="~{fragments/adsense :: display(${TRENDS_BETWEEN})}">
+        </div>
+
         <!-- Trends Grid -->
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${trends != null and trends.hasContent()}">
             <div class="col" th:each="trend, iterStat : ${trends.content}">
                 <div class="card h-100 shadow-sm">
                     <!-- Thumbnail -->
                     <div th:if="${trend.thumbnailPath != null}" style="height: 180px; overflow: hidden;">
-                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
-                             class="card-img-top" 
-                             alt="Trend thumbnail"
-                             th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
-                             decoding="async"
-                             width="400"
-                             height="180"
-                             sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
-                             style="width: 100%; height: 180px; object-fit: cover;">
+                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" class="card-img-top"
+                            alt="Trend thumbnail"
+                            th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
+                            decoding="async" width="400" height="180"
+                            sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
+                            style="width: 100%; height: 180px; object-fit: cover;">
                     </div>
-                    <div th:if="${trend.thumbnailPath == null}" 
-                         class="card-img-top bg-secondary" 
-                         style="height: 180px; display: flex; align-items: center; justify-content: center;">
+                    <div th:if="${trend.thumbnailPath == null}" class="card-img-top bg-secondary"
+                        style="height: 180px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-image text-white" style="font-size: 2.5rem;"></i>
                     </div>
-                    
+
                     <div class="card-body">
                         <h3 class="card-title h5" th:text="${trend.trendName}">Trend Name</h3>
-                        <p class="card-text small" th:text="${#strings.abbreviate(trend.description, 80)}">Description</p>
+                        <p class="card-text small" th:text="${#strings.abbreviate(trend.description, 80)}">Description
+                        </p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${trend.category}">Category</span>
                             <small class="text-muted" th:text="|${trend.usageCount} #{trend_list.uses}|">0 uses</small>
@@ -85,14 +85,13 @@
                     </div>
                     <div class="card-footer bg-transparent">
                         <div class="d-flex gap-2">
-                            <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-outline-primary btn-sm flex-grow-1" th:text="#{trend_list.view_details}">
+                            <a th:href="@{/trends/{id}(id=${trend.id})}"
+                                class="btn btn-outline-primary btn-sm flex-grow-1" th:text="#{trend_list.view_details}">
                                 View Details
                             </a>
-                            <button type="button" 
-                                    class="btn btn-outline-danger btn-sm favorite-btn" 
-                                    th:attr="data-trend-id=${trend.id}"
-                                    onclick="toggleFavorite(this)"
-                                    th:title="#{trend_list.add_to_favorites}">
+                            <button type="button" class="btn btn-outline-danger btn-sm favorite-btn"
+                                th:attr="data-trend-id=${trend.id}" onclick="toggleFavorite(this)"
+                                th:title="#{trend_list.add_to_favorites}">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
@@ -100,41 +99,46 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="alert alert-info" th:if="${trends == null or !trends.hasContent()}">
-            <i class="bi bi-info-circle"></i> <span th:text="#{trend_list.no_trends_found}">No trends found. Try a different search or category.</span>
+            <i class="bi bi-info-circle"></i> <span th:text="#{trend_list.no_trends_found}">No trends found. Try a
+                different search or category.</span>
         </div>
-        
+
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4" th:if="${trends != null and trends.totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${trends.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category}, sort=${currentSort})}" th:text="#{common.previous}">
+                    <a class="page-link"
+                        th:href="@{/trends(page=${trends.number - 1}, search=${search}, category=${category}, sort=${currentSort})}"
+                        th:text="#{common.previous}">
                         Previous
                     </a>
                 </li>
-                <li class="page-item" 
-                    th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, trends.totalPages - 1)}"
                     th:classappend="${i == trends.number} ? 'active'">
-                    <a class="page-link" th:href="@{/trends(page=${i}, search=${search}, category=${category}, sort=${currentSort})}" 
-                       th:text="${i + 1}">1</a>
+                    <a class="page-link"
+                        th:href="@{/trends(page=${i}, search=${search}, category=${category}, sort=${currentSort})}"
+                        th:text="${i + 1}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${trends.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category}, sort=${currentSort})}" th:text="#{common.next}">
+                    <a class="page-link"
+                        th:href="@{/trends(page=${trends.number + 1}, search=${search}, category=${category}, sort=${currentSort})}"
+                        th:text="#{common.next}">
                         Next
                     </a>
                 </li>
             </ul>
         </nav>
     </div>
-    
+
     <th:block layout:fragment="extra-scripts">
         <script th:inline="javascript">
             /*<![CDATA[*/
             const currentSearch = /*[[${search}]]*/ '';
             const currentCategory = /*[[${category}]]*/ '';
             const currentSort = /*[[${currentSort}]]*/ 'popular';
-            
+
             function filterByCategory(category) {
                 let url = '/trends?';
                 if (category) url += 'category=' + encodeURIComponent(category) + '&';
@@ -142,49 +146,49 @@
                 if (currentSort) url += 'sort=' + encodeURIComponent(currentSort);
                 window.location.href = url;
             }
-            
+
             function sortTrends(sortBy) {
                 let url = '/trends?sort=' + encodeURIComponent(sortBy);
                 if (currentSearch) url += '&search=' + encodeURIComponent(currentSearch);
                 if (currentCategory) url += '&category=' + encodeURIComponent(currentCategory);
                 window.location.href = url;
             }
-            
+
             // Get CSRF token from meta tag or cookie
             function getCsrfToken() {
                 const token = document.querySelector('meta[name="_csrf"]');
                 return token ? token.getAttribute('content') : '';
             }
-            
+
             function getCsrfHeader() {
                 const header = document.querySelector('meta[name="_csrf_header"]');
                 return header ? header.getAttribute('content') : 'X-CSRF-TOKEN';
             }
-            
+
             // Toggle favorite
             async function toggleFavorite(button) {
                 const trendId = button.getAttribute('data-trend-id');
                 const icon = button.querySelector('i');
-                
+
                 try {
                     const csrfToken = getCsrfToken();
                     const csrfHeader = getCsrfHeader();
-                    
+
                     const headers = {
                         'Content-Type': 'application/json',
                     };
-                    
+
                     if (csrfToken) {
                         headers[csrfHeader] = csrfToken;
                     }
-                    
+
                     const response = await fetch(`/favorite/${trendId}`, {
                         method: 'POST',
                         headers: headers
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         if (data.favorited) {
                             icon.classList.remove('bi-heart');
@@ -204,13 +208,13 @@
                     console.error('Error toggling favorite:', error);
                 }
             }
-            
+
             // Load favorite states on page load
-            document.addEventListener('DOMContentLoaded', async function() {
+            document.addEventListener('DOMContentLoaded', async function () {
                 try {
                     const response = await fetch('/api/favorites/ids');
                     const favoriteTrendIds = await response.json();
-                    
+
                     document.querySelectorAll('.favorite-btn').forEach(button => {
                         const trendId = parseInt(button.getAttribute('data-trend-id'));
                         if (favoriteTrendIds.includes(trendId)) {
@@ -230,5 +234,5 @@
         </script>
     </th:block>
 </body>
-</html>
 
+</html>

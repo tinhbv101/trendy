@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:if="${isEdit}" th:text="#{admin.ads.edit}">Edit Ad</title>
+    <title th:unless="${isEdit}" th:text="#{admin.ads.create}">Create Ad</title>
+</head>
+
+<body>
+    <main layout:fragment="content" class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 th:if="${isEdit}" th:text="#{admin.ads.edit}">Edit Ad</h2>
+                        <h2 th:unless="${isEdit}" th:text="#{admin.ads.create}">Create Ad</h2>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${isEdit ? '/admin/ads/' + ad.id : '/admin/ads'}" method="post"
+                            th:object="${ad}">
+
+                            <!-- Ad Name -->
+                            <div class="mb-3">
+                                <label for="adName" class="form-label" th:text="#{admin.ads.name}">Ad Name</label>
+                                <input type="text" class="form-control" id="adName" th:field="*{adName}" required
+                                    maxlength="100" th:placeholder="#{admin.ads.name_placeholder}">
+                                <div class="form-text" th:text="#{admin.ads.name_help}">
+                                    A descriptive name for this ad configuration (e.g., "Home Page Banner")
+                                </div>
+                            </div>
+
+                            <!-- Ad Position -->
+                            <div class="mb-3">
+                                <label for="adPosition" class="form-label"
+                                    th:text="#{admin.ads.position}">Position</label>
+                                <select class="form-select" id="adPosition" th:field="*{adPosition}" required>
+                                    <option value="" th:text="#{admin.ads.select_position}">Select a position...
+                                    </option>
+                                    <option th:each="position : ${adPositions}" th:value="${position}"
+                                        th:text="${position.displayName}">
+                                        Position
+                                    </option>
+                                </select>
+                                <div class="form-text" th:text="#{admin.ads.position_help}">
+                                    Choose where this ad will be displayed on the website
+                                </div>
+                            </div>
+
+                            <!-- AdSense Client ID -->
+                            <div class="mb-3">
+                                <label for="adClient" class="form-label" th:text="#{admin.ads.client_id}">AdSense Client
+                                    ID</label>
+                                <input type="text" class="form-control" id="adClient" th:field="*{adClient}" required
+                                    maxlength="100" pattern="ca-pub-[0-9]+" placeholder="ca-pub-1234567890123456">
+                                <div class="form-text" th:text="#{admin.ads.client_id_help}">
+                                    Your Google AdSense publisher ID (format: ca-pub-xxxxxxxxxxxxxxxx)
+                                </div>
+                            </div>
+
+                            <!-- AdSense Slot ID -->
+                            <div class="mb-3">
+                                <label for="adSlot" class="form-label" th:text="#{admin.ads.slot_id}">Ad Slot ID</label>
+                                <input type="text" class="form-control" id="adSlot" th:field="*{adSlot}" required
+                                    maxlength="50" pattern="[0-9]+" placeholder="1234567890">
+                                <div class="form-text" th:text="#{admin.ads.slot_id_help}">
+                                    The ad unit slot ID from your AdSense account
+                                </div>
+                            </div>
+
+                            <!-- Ad Format -->
+                            <div class="mb-3">
+                                <label for="adFormat" class="form-label" th:text="#{admin.ads.format}">Ad Format</label>
+                                <select class="form-select" id="adFormat" th:field="*{adFormat}" required>
+                                    <option value="auto" th:text="#{admin.ads.format_auto}">Auto (Responsive)</option>
+                                    <option value="rectangle" th:text="#{admin.ads.format_rectangle}">Rectangle</option>
+                                    <option value="horizontal" th:text="#{admin.ads.format_horizontal}">Horizontal
+                                    </option>
+                                    <option value="vertical" th:text="#{admin.ads.format_vertical}">Vertical</option>
+                                </select>
+                                <div class="form-text" th:text="#{admin.ads.format_help}">
+                                    Choose the ad format (auto is recommended for responsive design)
+                                </div>
+                            </div>
+
+                            <!-- Active Status -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="isActive" th:field="*{isActive}">
+                                <label class="form-check-label" for="isActive" th:text="#{admin.ads.active}">
+                                    Active
+                                </label>
+                                <div class="form-text" th:text="#{admin.ads.active_help}">
+                                    Only active ads will be displayed on the website
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> <span th:text="#{common.save}">Save</span>
+                                </button>
+                                <a th:href="@{/admin/ads}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> <span th:text="#{common.cancel}">Cancel</span>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle"></i> <span th:text="#{admin.ads.help_title}">How to get AdSense
+                            IDs</span>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li th:text="#{admin.ads.help_step1}">Sign in to your Google AdSense account</li>
+                            <li th:text="#{admin.ads.help_step2}">Go to "Ads" → "Overview"</li>
+                            <li th:text="#{admin.ads.help_step3}">Click "By ad unit" and create a new ad unit</li>
+                            <li th:text="#{admin.ads.help_step4}">Copy the Publisher ID (ca-pub-xxxxx) and Ad Slot ID
+                            </li>
+                            <li th:text="#{admin.ads.help_step5}">Paste them into the form above</li>
+                        </ol>
+                        <p class="mb-0">
+                            <a href="https://support.google.com/adsense/answer/9274025" target="_blank"
+                                class="text-decoration-none">
+                                <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{admin.ads.help_link}">Learn
+                                    more about AdSense</span>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

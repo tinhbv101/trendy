@@ -1,47 +1,50 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
 <head>
     <title th:text="|#{app.name} - Home|">Trendy - Home</title>
     <th:block th:fragment="extra-head">
         <meta name="description" th:content="#{app.description}">
     </th:block>
 </head>
+
 <body>
     <div layout:fragment="content">
         <!-- Hero Section -->
         <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
             <h1 class="display-4" th:text="#{home.title}">Welcome to Trendy</h1>
-            <p class="lead" th:text="#{home.subtitle}">Transform your photos with AI-powered trends. Choose from various styles and create amazing images in seconds!</p>
+            <p class="lead" th:text="#{home.subtitle}">Transform your photos with AI-powered trends. Choose from various
+                styles and create amazing images in seconds!</p>
             <hr class="my-4 bg-white">
-            <p th:text="#{home.explore_collection}">Explore our collection of trending styles and start creating now.</p>
+            <p th:text="#{home.explore_collection}">Explore our collection of trending styles and start creating now.
+            </p>
             <a class="btn btn-light btn-lg" th:href="@{/trends}" role="button">
                 <i class="bi bi-stars"></i> <span th:text="#{home.get_started}">Browse Trends</span>
             </a>
         </div>
 
+        <!-- AdSense - Home Top Banner -->
+        <div th:replace="~{fragments/adsense :: display(${HOME_TOP})}"></div>
+
+
         <!-- Featured Trends -->
         <h2 class="mb-4" th:text="#{home.features_title}">Featured Trends</h2>
-        
+
         <div class="row row-cols-1 row-cols-md-3 g-4" th:if="${trends != null and !trends.isEmpty()}">
             <div class="col" th:each="trend, iterStat : ${trends}">
                 <div class="card h-100 shadow-sm">
                     <!-- Thumbnail -->
                     <div th:if="${trend.thumbnailPath != null}" style="height: 200px; overflow: hidden;">
-                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
-                             class="card-img-top" 
-                             th:alt="#{home.trend_thumbnail}"
-                             th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
-                             decoding="async"
-                             width="400"
-                             height="200"
-                             sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
-                             style="width: 100%; height: 200px; object-fit: cover;">
+                        <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" class="card-img-top"
+                            th:alt="#{home.trend_thumbnail}"
+                            th:attr="loading=${iterStat.first ? 'eager' : 'lazy'}, fetchpriority=${iterStat.first ? 'high' : null}"
+                            decoding="async" width="400" height="200"
+                            sizes="(max-width: 576px) 100vw, (max-width: 768px) 50vw, (max-width: 992px) 33vw, 25vw"
+                            style="width: 100%; height: 200px; object-fit: cover;">
                     </div>
-                    <div th:if="${trend.thumbnailPath == null}" 
-                         class="card-img-top bg-secondary" 
-                         style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <div th:if="${trend.thumbnailPath == null}" class="card-img-top bg-secondary"
+                        style="height: 200px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
                     </div>
                     <div class="card-body">
@@ -50,19 +53,20 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="badge bg-primary" th:text="${trend.category}">Category</span>
                             <small class="text-muted">
-                                <i class="bi bi-fire"></i> <span th:text="|${trend.usageCount} #{common.uses}|">0 uses</span>
+                                <i class="bi bi-fire"></i> <span th:text="|${trend.usageCount} #{common.uses}|">0
+                                    uses</span>
                             </small>
                         </div>
                     </div>
                     <div class="card-footer bg-transparent">
                         <div class="d-flex gap-2">
                             <a th:href="@{/trends/{id}(id=${trend.id})}" class="btn btn-primary flex-grow-1">
-                                <i class="bi bi-arrow-right-circle"></i> <span th:text="#{home.view_details}">View Details</span>
+                                <i class="bi bi-arrow-right-circle"></i> <span th:text="#{home.view_details}">View
+                                    Details</span>
                             </a>
-                            <button type="button" 
-                                    class="btn btn-outline-danger favorite-btn" 
-                                    th:attr="data-trend-id=${trend.id}, title=#{home.add_to_favorites}"
-                                    onclick="toggleFavorite(this)">
+                            <button type="button" class="btn btn-outline-danger favorite-btn"
+                                th:attr="data-trend-id=${trend.id}, title=#{home.add_to_favorites}"
+                                onclick="toggleFavorite(this)">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
@@ -72,7 +76,8 @@
         </div>
 
         <div class="alert alert-info mt-4" th:if="${trends == null or trends.isEmpty()}">
-            <i class="bi bi-info-circle"></i> <span th:text="#{home.no_trends_available}">No trends available yet. Check back soon!</span>
+            <i class="bi bi-info-circle"></i> <span th:text="#{home.no_trends_available}">No trends available yet. Check
+                back soon!</span>
         </div>
 
         <!-- Call to Action -->
@@ -82,7 +87,7 @@
             </a>
         </div>
     </div>
-    
+
     <th:block layout:fragment="extra-scripts">
         <script>
             // Get CSRF token
@@ -90,36 +95,36 @@
                 const token = document.querySelector('meta[name="_csrf"]');
                 return token ? token.getAttribute('content') : '';
             }
-            
+
             function getCsrfHeader() {
                 const header = document.querySelector('meta[name="_csrf_header"]');
                 return header ? header.getAttribute('content') : 'X-CSRF-TOKEN';
             }
-            
+
             // Toggle favorite
             async function toggleFavorite(button) {
                 const trendId = button.getAttribute('data-trend-id');
                 const icon = button.querySelector('i');
-                
+
                 try {
                     const csrfToken = getCsrfToken();
                     const csrfHeader = getCsrfHeader();
-                    
+
                     const headers = {
                         'Content-Type': 'application/json',
                     };
-                    
+
                     if (csrfToken) {
                         headers[csrfHeader] = csrfToken;
                     }
-                    
+
                     const response = await fetch(`/favorite/${trendId}`, {
                         method: 'POST',
                         headers: headers
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         const addToFavoritesText = /*[[#{home.add_to_favorites}]]*/ 'Add to favorites';
                         const removeFromFavoritesText = /*[[#{home.remove_from_favorites}]]*/ 'Remove from favorites';
@@ -141,13 +146,13 @@
                     console.error('Error toggling favorite:', error);
                 }
             }
-            
+
             // Load favorite states on page load
-            document.addEventListener('DOMContentLoaded', async function() {
+            document.addEventListener('DOMContentLoaded', async function () {
                 try {
                     const response = await fetch('/api/favorites/ids');
                     const favoriteTrendIds = await response.json();
-                    
+
                     document.querySelectorAll('.favorite-btn').forEach(button => {
                         const trendId = parseInt(button.getAttribute('data-trend-id'));
                         if (favoriteTrendIds.includes(trendId)) {
@@ -167,5 +172,5 @@
         </script>
     </th:block>
 </body>
-</html>
 
+</html>
