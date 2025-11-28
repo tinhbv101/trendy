@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v1.8-create-ad-config-table" author="trendy">
+        <createTable tableName="ad_configs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ad_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ad_position" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ad_client" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ad_slot" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ad_format" type="VARCHAR(50)" defaultValue="auto">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="ad_configs"
+                columnNames="ad_position"
+                constraintName="uk_ad_configs_position"/>
+    </changeSet>
+
+</databaseChangeLog>

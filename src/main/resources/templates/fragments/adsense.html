@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>AdSense Fragment</title>
+</head>
+
+<body>
+    <!-- AdSense Ad Display Fragment -->
+    <div th:fragment="display(position)" th:with="ad=${adConfigService.getActiveAdByPosition(position).orElse(null)}">
+        <div th:if="${ad != null}" class="adsense-container my-3">
+            <!-- AdSense Ad Unit -->
+            <ins class="adsbygoogle" style="display:block" th:attr="data-ad-client=${ad.adClient},
+                          data-ad-slot=${ad.adSlot},
+                          data-ad-format=${ad.adFormat}" data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>
