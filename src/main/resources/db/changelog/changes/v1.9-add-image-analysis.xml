@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v1.9-add-image-analysis" author="trendy">
+        
+        <!-- Add columns to trends table for AI analysis -->
+        <addColumn tableName="trends">
+            <column name="auto_tags" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ai_description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="style_tags" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Create image_analysis table -->
+        <createTable tableName="image_analysis">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="trend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tags" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="style_analysis" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="color_palette" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="objects_detected" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="edit_suggestions" type="JSON">
+                <constraints nullable="true"/>
+            </column>
+            <column name="confidence" type="DOUBLE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="analyzed_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <!-- Add foreign key constraint -->
+        <addForeignKeyConstraint
+                baseTableName="image_analysis"
+                baseColumnNames="trend_id"
+                referencedTableName="trends"
+                referencedColumnNames="id"
+                constraintName="fk_image_analysis_trend"
+                onDelete="CASCADE"/>
+                
+        <!-- Add index for faster lookups -->
+        <createIndex tableName="image_analysis" indexName="idx_image_analysis_trend_id">
+            <column name="trend_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

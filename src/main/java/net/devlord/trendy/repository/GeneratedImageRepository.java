@@ -1,6 +1,7 @@
 package net.devlord.trendy.repository;
 
 import net.devlord.trendy.model.entity.GeneratedImage;
+import net.devlord.trendy.model.entity.User;
 import net.devlord.trendy.model.enums.GenerationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,10 @@ public interface GeneratedImageRepository extends JpaRepository<GeneratedImage, 
     
     @Query("SELECT g FROM GeneratedImage g JOIN FETCH g.user JOIN FETCH g.trend WHERE g.id = :id")
     Optional<GeneratedImage> findByIdWithUserAndTrend(@Param("id") Long id);
+    
+    // Find recent images by user with eager loading (use LEFT JOIN in case some images don't have trend)
+    @Query(value = "SELECT g FROM GeneratedImage g LEFT JOIN FETCH g.trend WHERE g.user = :user ORDER BY g.createdAt DESC")
+    List<GeneratedImage> findTop20ByUserOrderByCreatedAtDesc(@Param("user") User user, Pageable pageable);
     
     // Advanced filtering methods
     @Query("SELECT g FROM GeneratedImage g JOIN FETCH g.trend WHERE g.user.id = :userId " +

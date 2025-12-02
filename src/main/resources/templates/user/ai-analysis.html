@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:text="#{menu.ai_analysis}">AI Image Analysis</title>
+</head>
+
+<body>
+    <main layout:fragment="content" class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="bi bi-robot"></i> <span th:text="#{ai_analysis.title}">AI Image Analysis</span></h2>
+                        <p class="mb-0 text-muted" th:text="#{ai_analysis.subtitle}">Upload an image to get AI-powered analysis and suggestions</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upload Form -->
+                        <div class="mb-4">
+                            <label for="imageFile" class="form-label" th:text="#{ai_analysis.select_image}">Select Image</label>
+                            <input type="file" class="form-control" id="imageFile" accept="image/*">
+                            <div class="form-text" th:text="#{ai_analysis.supported_formats}">Supported formats: JPG, PNG, WebP</div>
+                        </div>
+
+                        <!-- Analysis Type Selection -->
+                        <div class="mb-4">
+                            <label class="form-label" th:text="#{ai_analysis.analysis_type}">Analysis Type</label>
+                            <div class="btn-group d-flex" role="group">
+                                <input type="radio" class="btn-check" name="analysisType" id="typeComprehensive"
+                                    value="comprehensive" checked>
+                                <label class="btn btn-outline-primary" for="typeComprehensive">
+                                    <i class="bi bi-stars"></i> <span th:text="#{ai_analysis.type_comprehensive}">Comprehensive</span>
+                                </label>
+
+                                <input type="radio" class="btn-check" name="analysisType" id="typeTags" value="tags">
+                                <label class="btn btn-outline-primary" for="typeTags">
+                                    <i class="bi bi-tags"></i> <span th:text="#{ai_analysis.type_tags}">Tags Only</span>
+                                </label>
+
+                                <input type="radio" class="btn-check" name="analysisType" id="typeStyle" value="style">
+                                <label class="btn btn-outline-primary" for="typeStyle">
+                                    <i class="bi bi-palette"></i> <span th:text="#{ai_analysis.type_style}">Style</span>
+                                </label>
+
+                                <input type="radio" class="btn-check" name="analysisType" id="typeColors"
+                                    value="colors">
+                                <label class="btn btn-outline-primary" for="typeColors">
+                                    <i class="bi bi-rainbow"></i> <span th:text="#{ai_analysis.type_colors}">Colors</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Analyze Button -->
+                        <button id="analyzeBtn" class="btn btn-primary btn-lg w-100" onclick="analyzeImage()">
+                            <i class="bi bi-search"></i> <span th:text="#{ai_analysis.analyze_button}">Analyze Image</span>
+                        </button>
+
+                        <!-- Loading Spinner -->
+                        <div id="loadingSpinner" class="text-center my-4" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden" th:text="#{ai_analysis.analyzing}">Analyzing...</span>
+                            </div>
+                            <p class="mt-2" th:text="#{ai_analysis.analyzing}">AI is analyzing your image...</p>
+                        </div>
+
+                        <!-- Results Container -->
+                        <div id="resultsContainer" class="mt-4" style="display: none;">
+                            <!-- Image Preview -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 th:text="#{ai_analysis.image_preview}">Image Preview</h5>
+                                    <img id="imagePreview" src="" alt="Preview" class="img-fluid rounded"
+                                        style="max-height: 400px;">
+                                </div>
+                            </div>
+
+                            <!-- Analysis Results -->
+                            <div id="analysisResults"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <th:block layout:fragment="extra-scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+
+            const i18n = {
+                selectImageFirst: /*[[#{ai_analysis.select_image_first}]]*/ 'Please select an image first',
+                description: /*[[#{ai_analysis.description}]]*/ 'Description',
+                tags: /*[[#{ai_analysis.tags}]]*/ 'Tags',
+                styleAnalysis: /*[[#{ai_analysis.style_analysis}]]*/ 'Style Analysis',
+                artStyle: /*[[#{ai_analysis.art_style}]]*/ 'Art Style',
+                mood: /*[[#{ai_analysis.mood}]]*/ 'Mood',
+                technique: /*[[#{ai_analysis.technique}]]*/ 'Technique',
+                colorPalette: /*[[#{ai_analysis.color_palette}]]*/ 'Color Palette',
+                colorScheme: /*[[#{ai_analysis.color_scheme}]]*/ 'Color Scheme',
+                temperature: /*[[#{ai_analysis.temperature}]]*/ 'Temperature',
+                editSuggestions: /*[[#{ai_analysis.edit_suggestions}]]*/ 'Edit Suggestions',
+                priority: /*[[#{ai_analysis.priority}]]*/ 'Priority',
+                generatedTags: /*[[#{ai_analysis.generated_tags}]]*/ 'Generated Tags',
+                colorAnalysis: /*[[#{ai_analysis.color_analysis}]]*/ 'Color Analysis',
+                dominantColors: /*[[#{ai_analysis.dominant_colors}]]*/ 'Dominant Colors',
+                saturation: /*[[#{ai_analysis.saturation}]]*/ 'Saturation',
+                brightness: /*[[#{ai_analysis.brightness}]]*/ 'Brightness',
+                genre: /*[[#{ai_analysis.genre}]]*/ 'Genre',
+                era: /*[[#{ai_analysis.era}]]*/ 'Era',
+                influences: /*[[#{ai_analysis.influences}]]*/ 'Influences'
+            };
+
+            function analyzeImage() {
+                const fileInput = document.getElementById('imageFile');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert(i18n.selectImageFirst);
+                    return;
+                }
+
+                const analysisType = document.querySelector('input[name="analysisType"]:checked').value;
+
+                // Show loading
+                document.getElementById('loadingSpinner').style.display = 'block';
+                document.getElementById('resultsContainer').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = true;
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Determine API endpoint
+                let endpoint = '/api/image/';
+                switch (analysisType) {
+                    case 'comprehensive':
+                        endpoint += 'analyze';
+                        break;
+                    case 'tags':
+                        endpoint += 'tags';
+                        break;
+                    case 'style':
+                        endpoint += 'style';
+                        break;
+                    case 'colors':
+                        endpoint += 'colors';
+                        break;
+                }
+
+                // Call API
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        displayResults(data, analysisType);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error analyzing image: ' + error.message);
+                    })
+                    .finally(() => {
+                        document.getElementById('loadingSpinner').style.display = 'none';
+                        document.getElementById('resultsContainer').style.display = 'block';
+                        document.getElementById('analyzeBtn').disabled = false;
+                    });
+            }
+
+            function displayResults(data, type) {
+                const container = document.getElementById('analysisResults');
+                let html = '';
+
+                if (type === 'comprehensive') {
+                    html = displayComprehensiveResults(data);
+                } else if (type === 'tags') {
+                    html = displayTagsResults(data);
+                } else if (type === 'style') {
+                    html = displayStyleResults(data);
+                } else if (type === 'colors') {
+                    html = displayColorsResults(data);
+                }
+
+                container.innerHTML = html;
+            }
+
+            function displayComprehensiveResults(data) {
+                let html = '<div class="row">';
+
+                // Description
+                if (data.description) {
+                    html += `
+                        <div class="col-12 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-file-text"></i> ${i18n.description}</h5>
+                                    <p>${data.description}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Tags
+                if (data.tags && data.tags.length > 0) {
+                    html += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-tags"></i> ${i18n.tags}</h5>
+                                    ${data.tags.map(tag => `<span class="badge bg-primary me-1 mb-1">${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Style
+                if (data.style) {
+                    html += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-palette"></i> ${i18n.styleAnalysis}</h5>
+                                    <p><strong>${i18n.artStyle}:</strong> ${data.style.artStyle || 'N/A'}</p>
+                                    <p><strong>${i18n.mood}:</strong> ${data.style.mood || 'N/A'}</p>
+                                    <p><strong>${i18n.technique}:</strong> ${data.style.technique || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Colors
+                if (data.colors && data.colors.dominantColors) {
+                    html += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-rainbow"></i> ${i18n.colorPalette}</h5>
+                                    <div class="d-flex gap-2 mb-2">
+                                        ${data.colors.dominantColors.map(color =>
+                        `<div style="width:50px;height:50px;background:${color}" class="rounded border" title="${color}"></div>`
+                    ).join('')}
+                                    </div>
+                                    <p><strong>${i18n.colorScheme}:</strong> ${data.colors.colorScheme || 'N/A'}</p>
+                                    <p><strong>${i18n.temperature}:</strong> ${data.colors.temperature || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Edit Suggestions
+                if (data.suggestions && data.suggestions.length > 0) {
+                    html += `
+                        <div class="col-12 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><i class="bi bi-lightbulb"></i> ${i18n.editSuggestions}</h5>
+                                    <ul class="list-group list-group-flush">
+                                        ${data.suggestions.map(s => `
+                                            <li class="list-group-item">
+                                                <strong>${s.type}:</strong> ${s.suggestion}
+                                                <br><small class="text-muted">${s.reason}</small>
+                                                <span class="badge bg-${s.priority <= 2 ? 'danger' : s.priority <= 4 ? 'warning' : 'info'} float-end">
+                                                    ${i18n.priority}: ${s.priority}
+                                                </span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                return html;
+            }
+
+            function displayTagsResults(data) {
+                return `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-tags"></i> ${i18n.generatedTags} (${data.count})</h5>
+                            ${data.tags.map(tag => `<span class="badge bg-primary me-1 mb-1">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function displayStyleResults(data) {
+                return `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-palette"></i> ${i18n.styleAnalysis}</h5>
+                            <p><strong>${i18n.artStyle}:</strong> ${data.artStyle || 'N/A'}</p>
+                            <p><strong>${i18n.mood}:</strong> ${data.mood || 'N/A'}</p>
+                            <p><strong>${i18n.technique}:</strong> ${data.technique || 'N/A'}</p>
+                            <p><strong>${i18n.genre}:</strong> ${data.genre || 'N/A'}</p>
+                            <p><strong>${i18n.era}:</strong> ${data.era || 'N/A'}</p>
+                            ${data.influences && data.influences.length > 0 ?
+                        `<p><strong>${i18n.influences}:</strong> ${data.influences.join(', ')}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function displayColorsResults(data) {
+                return `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5><i class="bi bi-rainbow"></i> ${i18n.colorAnalysis}</h5>
+                            <div class="mb-3">
+                                <strong>${i18n.dominantColors}:</strong>
+                                <div class="d-flex gap-2 mt-2">
+                                    ${data.dominantColors.map(color =>
+                    `<div style="width:60px;height:60px;background:${color}" class="rounded border" title="${color}">
+                                            <small class="text-white d-block text-center pt-4" style="text-shadow: 1px 1px 2px black;">${color}</small>
+                                        </div>`
+                ).join('')}
+                                </div>
+                            </div>
+                            <p><strong>${i18n.colorScheme}:</strong> ${data.colorScheme || 'N/A'}</p>
+                            <p><strong>${i18n.temperature}:</strong> ${data.temperature || 'N/A'}</p>
+                            <p><strong>${i18n.saturation}:</strong> ${data.saturation || 'N/A'}</p>
+                            <p><strong>${i18n.brightness}:</strong> ${data.brightness || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            /*]]>*/
+        </script>
+    </th:block>
+</body>
+
+</html>

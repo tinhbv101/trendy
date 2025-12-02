@@ -5,7 +5,7 @@
   
   <p><strong>Transform your photos with AI-powered trends</strong></p>
 
-  [![Version](https://img.shields.io/badge/Version-v1.1.2-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.1.2)
+  [![Version](https://img.shields.io/badge/Version-v1.2.0-brightgreen.svg)](https://github.com/tinhbv101/trendy/releases/tag/v1.2.0)
   [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -29,6 +29,31 @@
 ## 📖 Introduction
 
 **Trendy** is a web platform that allows users to transform their photos using popular AI trends. The application integrates with Google Gemini AI to create unique and creative images.
+
+### 🆕 What's New in v1.2.0
+
+**🎨 AI Image Analysis & Editing Features:**
+- 🤖 **AI Image Analysis**: Upload images to get detailed AI-powered analysis including:
+  - 📊 Dominant colors and color palette extraction
+  - 🎯 Object detection and identification
+  - 🎨 Style analysis (artistic, photographic, abstract, etc.)
+  - 💡 Smart editing suggestions based on image content
+- ✏️ **AI Image Editing**: Transform your images with AI-powered editing tools:
+  - 🖼️ Multiple edit types: Remove background, Enhance quality, Change style, Add effects, Resize/crop
+  - 🎭 Style transformations and artistic effects
+  - 🔍 Smart quality enhancement
+  - ✨ Background removal and modification
+
+**🔧 UI/UX Improvements:**
+- 🎯 **Hidden AI Features from Public Trends**: "AI Image Editing" trend is now hidden from public trend listings
+- 🎨 **Cleaner Navigation**: Removed AI-specific menu items from user dropdown to reduce clutter
+- 📱 **Better Organization**: AI features remain accessible via navbar for authenticated users
+
+**Technical Improvements:**
+- 🗄️ **New Database Schema**: Added image analysis tables for storing AI analysis results
+- 🔄 **Enhanced API Controllers**: New endpoints for image analysis and editing operations
+- 📊 **DTO Pattern**: Comprehensive DTOs for image analysis results and editing requests
+- 🎨 **Color Palette System**: Advanced color extraction and analysis capabilities
 
 ### 🆕 What's New in v1.1.2
 
@@ -265,7 +290,7 @@ gemini:
 ./gradlew bootRun
 
 # Or run JAR file
-java -jar build/libs/trendy-1.1.2.jar
+java -jar build/libs/trendy-1.2.0.jar
 ```
 
 ---
@@ -352,7 +377,28 @@ trendy/
 - Wait for AI processing (2-30 seconds)
 - View the result
 
-#### 4. My Gallery
+#### 4. AI Image Analysis (New in v1.2.0)
+- Go to http://localhost:8080/user/ai-analysis
+- Upload an image to analyze
+- View AI-powered analysis results:
+  - **Color Palette**: See dominant colors extracted from the image
+  - **Detected Objects**: Identify objects in the image with confidence scores
+  - **Style Analysis**: Understand the artistic style of the image
+  - **Edit Suggestions**: Get smart recommendations for image editing
+
+#### 5. AI Image Editing (New in v1.2.0)
+- Go to http://localhost:8080/user/image-edit
+- Upload one or multiple images
+- Select edit type:
+  - **Remove Background**: Smart background removal
+  - **Enhance Quality**: AI-powered quality enhancement
+  - **Change Style**: Transform image style (artistic, vintage, modern, etc.)
+  - **Add Effects**: Apply creative effects
+  - **Resize/Crop**: Smart cropping and resizing
+- Click "Edit" to process with AI
+- Download individual results or all as ZIP
+
+#### 6. My Gallery
 - Go to http://localhost:8080/gallery
 - View all generated images
 - **Filter & Search**: Use filters to find images by trend, status, or date range
@@ -362,20 +408,20 @@ trendy/
 - Click "Delete" to remove unwanted images
 - **Favorite**: Click heart icon to save favorite images
 
-#### 5. User Profile & Account Settings
+#### 7. User Profile & Account Settings
 - Go to http://localhost:8080/account
 - View your profile information and statistics
 - Edit full name and email address
 - Change password securely
 - View total images generated count
 
-#### 6. Favorites
+#### 8. Favorites
 - **Favorite Trends**: Click heart icon on any trend card to save it
 - **Favorite Images**: Click heart icon on generated images in gallery
 - View favorites: Go to "My Favorites" from user menu
 - Manage favorite trends and images from dedicated pages
 
-#### 7. Social Sharing
+#### 9. Social Sharing
 - After generating an image, click "Share Image" button
 - Create a public share link with customizable expiry
 - Copy link to share with others
@@ -497,20 +543,25 @@ GET  /api/trends/search?q=... - Search trends
 
 #### User API (Authenticated)
 ```
-POST /generate/{trendId}           - Generate image
-GET  /gallery                      - View user gallery (with filters)
-POST /gallery/delete/{id}          - Delete generated image
-GET  /account                      - View account settings
-POST /account/change-password      - Change password
-POST /account/update-profile        - Update profile info
-GET  /favorites                    - View favorite trends
-GET  /favorites/images             - View favorite images
-POST /api/favorites/toggle/{id}    - Toggle trend favorite
-POST /api/favorites/image/{id}     - Toggle image favorite
-POST /api/share/create             - Create share link
-POST /api/share/revoke/{token}     - Revoke share link
-GET  /my-shares                    - View my shared links
-GET  /share/{token}                - View public shared image
+POST /generate/{trendId}              - Generate image
+GET  /gallery                         - View user gallery (with filters)
+POST /gallery/delete/{id}             - Delete generated image
+GET  /account                         - View account settings
+POST /account/change-password         - Change password
+POST /account/update-profile          - Update profile info
+GET  /favorites                       - View favorite trends
+GET  /favorites/images                - View favorite images
+POST /api/favorites/toggle/{id}       - Toggle trend favorite
+POST /api/favorites/image/{id}        - Toggle image favorite
+POST /api/share/create                - Create share link
+POST /api/share/revoke/{token}        - Revoke share link
+GET  /my-shares                       - View my shared links
+GET  /share/{token}                   - View public shared image
+GET  /user/ai-analysis                - AI Image Analysis page (v1.2.0)
+POST /api/image-analysis/analyze      - Analyze image with AI (v1.2.0)
+GET  /user/image-edit                 - AI Image Editing page (v1.2.0)
+POST /api/image-edit/upload           - Upload images for editing (v1.2.0)
+POST /api/image-edit/edit             - Edit images with AI (v1.2.0)
 ```
 
 #### Admin API (Admin only)
@@ -695,13 +746,21 @@ If you encounter any issues or have questions:
 - [x] Favorites System (Trends & Images)
 - [x] Social Sharing with Public Links
 
-### Version 1.2 (Planned)
+### Version 1.2.0 ✅ (Released)
+- [x] 🤖 **AI Image Analysis** - Detailed image analysis with color palette, object detection, and style analysis
+- [x] ✏️ **AI Image Editing** - Transform images with AI-powered editing tools
+- [x] 🎯 **Hidden AI Trends** - Remove "AI Image Editing" from public trend listings
+- [x] 🎨 **Cleaner Navigation** - Improved UI/UX with streamlined menus
+- [x] 🗄️ **Database Schema Updates** - New tables for image analysis storage
+
+### Version 1.3 (Planned)
+- [ ] 🗂️ **Batch Image Editing** - Edit multiple images at once with the same settings
+- [ ] 📥 **Download All Results** - Download edited images as ZIP
 - [ ] Bulk image generation
-- [ ] Image editing tools
 - [ ] Comments & ratings on shared images
 - [ ] Email notifications
 - [ ] Export gallery as PDF/ZIP
-- [ ] Advanced image analytics
+- [ ] AI-powered image recommendations
 
 ### Version 2.0 (Future)
 - [ ] Mobile app (iOS/Android)

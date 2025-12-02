@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:text="#{image_edit.title} + ' - Trendy'">AI Image Editing Tools - Trendy</title>
+    <th:block th:fragment="extra-head">
+        <meta name="description" th:content="#{image_edit.subtitle}">
+        <style>
+            .edit-tool-card {
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: 2px solid transparent;
+            }
+
+            .edit-tool-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+                border-color: var(--bs-primary);
+            }
+
+            .edit-tool-card.selected {
+                border-color: var(--bs-primary);
+                background-color: rgba(13, 110, 253, 0.1);
+            }
+
+            .image-preview {
+                max-width: 100%;
+                max-height: 400px;
+                object-fit: contain;
+                border-radius: 8px;
+            }
+
+            .recent-image-thumb {
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: transform 0.2s;
+            }
+
+            .recent-image-thumb:hover {
+                transform: scale(1.05);
+            }
+
+            .processing-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
+
+            .processing-overlay.active {
+                display: flex;
+            }
+
+            .style-preset-btn {
+                margin: 5px;
+                transition: all 0.2s;
+            }
+
+            .style-preset-btn.selected {
+                background-color: var(--bs-primary);
+                color: white;
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Hero Section -->
+        <div class="jumbotron bg-gradient text-white rounded p-5 mb-4"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h1 class="display-4">
+                <i class="bi bi-magic"></i> <span th:text="#{image_edit.title}">AI Image Editing Tools</span>
+            </h1>
+            <p class="lead" th:text="#{image_edit.subtitle}">Transform your images with powerful AI editing capabilities
+            </p>
+            <hr class="my-4 bg-white">
+            <p th:text="#{image_edit.description}">Remove backgrounds, transfer styles, upscale resolution, and more!
+            </p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Result Display -->
+        <div th:if="${editedImageUrl}" class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> <span th:text="#{image_edit.result_title}">Edited
+                        Image Result</span></h5>
+            </div>
+            <div class="card-body text-center">
+                <img th:src="${editedImageUrl}" class="image-preview mb-3" alt="Edited Image">
+                <div>
+                    <a th:href="${editedImageUrl}" class="btn btn-primary" download>
+                        <i class="bi bi-download"></i> <span th:text="#{image_edit.result_download}">Download</span>
+                    </a>
+                    <a th:href="@{/generate/result/{id}(id=${editedImageId})}" class="btn btn-outline-primary">
+                        <i class="bi bi-eye"></i> <span th:text="#{image_edit.result_view_details}">View Details</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Panel: Image Selection & Preview -->
+            <div class="col-lg-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-image"></i> <span th:text="#{image_edit.select_image}">Select
+                                Image to Edit</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="text-center mb-3" style="min-height: 200px;">
+                            <div id="noImageSelected" class="text-muted p-5">
+                                <i class="bi bi-image" style="font-size: 4rem;"></i>
+                                <p class="mt-3" th:text="#{image_edit.no_image_selected}">Select an image from your
+                                    gallery or upload a new one</p>
+                            </div>
+                            <img id="selectedImagePreview" class="image-preview d-none" alt="Selected Image">
+                        </div>
+
+                        <!-- Upload Button -->
+                        <div class="mb-3">
+                            <label for="imageUpload" class="btn btn-primary w-100">
+                                <i class="bi bi-upload"></i> <span th:text="#{image_edit.upload_new}">Upload New
+                                    Image</span>
+                            </label>
+                            <input type="file" id="imageUpload" class="d-none" accept="image/*">
+                        </div>
+
+                        <!-- Image URL Input -->
+                        <div class="mb-3">
+                            <label for="imageUrlInput" class="form-label" th:text="#{image_edit.paste_url}">Or paste
+                                image URL:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="imageUrlInput"
+                                    th:placeholder="#{image_edit.paste_url_placeholder}">
+                                <button class="btn btn-outline-secondary" type="button" onclick="loadImageFromUrl()">
+                                    <i class="bi bi-link"></i> <span th:text="#{image_edit.load_url}">Load</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Images -->
+                        <div th:if="${recentImages != null and !recentImages.isEmpty()}">
+                            <h6 class="mb-3" th:text="#{image_edit.recent_images}">Your Recent Images:</h6>
+                            <div class="row g-2">
+                                <div class="col-4" th:each="image : ${recentImages}">
+                                    <img th:src="@{/images/{path}(path=${image.outputImagePath})}"
+                                        class="recent-image-thumb"
+                                        th:attr="data-image-id=${image.id}, data-image-url=@{/images/{path}(path=${image.outputImagePath})}"
+                                        onclick="selectRecentImage(this)" alt="Recent image">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Editing Tools -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-tools"></i> <span th:text="#{image_edit.choose_tool}">Choose
+                                Editing Tool</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="editForm" th:action="@{/user/image-edit/process}" method="post">
+                            <input type="hidden" name="sourceImageId" id="sourceImageId">
+                            <input type="hidden" name="sourceImageUrl" id="sourceImageUrl">
+                            <input type="hidden" name="editType" id="editType">
+
+                            <!-- Edit Tools Grid -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6" th:each="editType : ${editTypes}">
+                                    <div class="card edit-tool-card h-100" th:attr="data-edit-type=${editType.type}"
+                                        onclick="selectEditTool(this)">
+                                        <div class="card-body">
+                                            <h6 class="card-title" th:text="#{${editType.nameKey}}">Tool Name</h6>
+                                            <p class="card-text small text-muted"
+                                                th:text="#{${editType.descriptionKey}}">
+                                                Description</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-success"
+                                                    th:text="#{image_edit.tool_free}">FREE</span>
+                                                <i class="bi bi-check-circle text-success d-none selected-icon"
+                                                    style="font-size: 1.5rem;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tool-specific Options -->
+                            <div id="toolOptions" class="d-none">
+                                <!-- Style Transfer Options -->
+                                <div id="styleTransferOptions" class="tool-option d-none">
+                                    <h6 th:text="#{image_edit.tool_select_style}">Select Art Style:</h6>
+                                    <div id="styleButtons">
+                                        <button type="button" class="btn btn-outline-primary style-preset-btn"
+                                            th:each="style : ${styles}" th:text="${style}" th:attr="data-style=${style}"
+                                            onclick="selectStyle(this)">Style</button>
+                                    </div>
+                                    <input type="hidden" name="styleName" id="styleName">
+                                </div>
+
+                                <!-- Upscaling Options -->
+                                <div id="upscalingOptions" class="tool-option d-none">
+                                    <h6 th:text="#{image_edit.tool_upscale_factor}">Upscale Factor:</h6>
+                                    <select class="form-select" name="upscaleFactor" id="upscaleFactor">
+                                        <option value="2" th:text="#{image_edit.tool_upscale_2x}">2x (Double Resolution)
+                                        </option>
+                                        <option value="4" th:text="#{image_edit.tool_upscale_4x}">4x (Quadruple
+                                            Resolution)</option>
+                                        <option value="8" th:text="#{image_edit.tool_upscale_8x}">8x (8x Resolution)
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Color Grading Options -->
+                                <div id="colorGradingOptions" class="tool-option d-none">
+                                    <h6 th:text="#{image_edit.tool_color_preset}">Color Preset:</h6>
+                                    <select class="form-select" name="colorGradingPreset" id="colorGradingPreset">
+                                        <option th:each="preset : ${colorPresets}" th:value="${preset}"
+                                            th:text="${preset}">Preset</option>
+                                    </select>
+                                </div>
+
+                                <!-- Face Enhancement Options -->
+                                <div id="faceEnhancementOptions" class="tool-option d-none">
+                                    <h6 th:text="#{image_edit.tool_enhancement_strength}">Enhancement Strength:</h6>
+                                    <input type="range" class="form-range" name="enhancementStrength"
+                                        id="enhancementStrength" min="0" max="1" step="0.1" value="0.7">
+                                    <div class="d-flex justify-content-between">
+                                        <small th:text="#{image_edit.tool_enhancement_subtle}">Subtle (0.0)</small>
+                                        <small id="strengthValue">0.7</small>
+                                        <small th:text="#{image_edit.tool_enhancement_strong}">Strong (1.0)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Prompt -->
+                                <div class="mt-3">
+                                    <label for="prompt" class="form-label"
+                                        th:text="#{image_edit.additional_instructions}">Additional Instructions
+                                        (Optional):</label>
+                                    <textarea class="form-control" name="prompt" id="prompt" rows="3"
+                                        th:placeholder="#{image_edit.additional_instructions_placeholder}"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn" disabled>
+                                    <i class="bi bi-magic"></i> <span th:text="#{image_edit.apply_edit}">Apply
+                                        Edit</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Overlay -->
+        <div class="processing-overlay" id="processingOverlay">
+            <div class="text-center text-white">
+                <div class="spinner-border" style="width: 4rem; height: 4rem;" role="status">
+                    <span class="visually-hidden" th:text="#{common.processing}">Processing...</span>
+                </div>
+                <h3 class="mt-3" th:text="#{image_edit.processing}">Processing Your Image...</h3>
+                <p th:text="#{image_edit.processing_wait}">This may take a few moments. Please don't close this page.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-scripts">
+        <script>
+            let selectedImageId = null;
+            let selectedImageUrl = null;
+            let selectedEditType = null;
+
+            // Select recent image
+            function selectRecentImage(img) {
+                selectedImageId = img.getAttribute('data-image-id');
+                selectedImageUrl = img.getAttribute('data-image-url');
+
+                // Update preview
+                const preview = document.getElementById('selectedImagePreview');
+                const noImage = document.getElementById('noImageSelected');
+
+                preview.src = selectedImageUrl;
+                preview.classList.remove('d-none');
+                noImage.classList.add('d-none');
+
+                // Update form
+                document.getElementById('sourceImageId').value = selectedImageId;
+                document.getElementById('sourceImageUrl').value = selectedImageUrl;
+
+                // Highlight selected
+                document.querySelectorAll('.recent-image-thumb').forEach(thumb => {
+                    thumb.style.border = '2px solid transparent';
+                });
+                img.style.border = '3px solid var(--bs-primary)';
+
+                updateSubmitButton();
+            }
+
+            // Upload image
+            document.getElementById('imageUpload').addEventListener('change', async function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        // Show loading
+                        const preview = document.getElementById('selectedImagePreview');
+                        const noImage = document.getElementById('noImageSelected');
+                        noImage.innerHTML = '<div class="spinner-border text-primary" role="status"></div><p class="mt-2">Uploading...</p>';
+
+                        // Upload file
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        const response = await fetch('/api/upload/image', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            selectedImageUrl = result.url;
+                            selectedImageId = null;
+
+                            preview.src = selectedImageUrl;
+                            preview.classList.remove('d-none');
+                            noImage.classList.add('d-none');
+                            noImage.innerHTML = '<i class="bi bi-image" style="font-size: 4rem;"></i><p class="mt-3">Select an image from your gallery or upload a new one</p>';
+
+                            document.getElementById('sourceImageUrl').value = result.path;
+                            document.getElementById('sourceImageId').value = '';
+
+                            updateSubmitButton();
+                        } else {
+                            alert('Upload failed: ' + result.message);
+                            noImage.innerHTML = '<i class="bi bi-image" style="font-size: 4rem;"></i><p class="mt-3">Select an image from your gallery or upload a new one</p>';
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Error uploading image. Please try again.');
+                        const noImage = document.getElementById('noImageSelected');
+                        noImage.innerHTML = '<i class="bi bi-image" style="font-size: 4rem;"></i><p class="mt-3">Select an image from your gallery or upload a new one</p>';
+                    }
+                }
+            });
+
+            // Load image from URL
+            function loadImageFromUrl() {
+                const url = document.getElementById('imageUrlInput').value.trim();
+                if (url) {
+                    selectedImageUrl = url;
+                    selectedImageId = null;
+
+                    const preview = document.getElementById('selectedImagePreview');
+                    const noImage = document.getElementById('noImageSelected');
+
+                    preview.src = selectedImageUrl;
+                    preview.classList.remove('d-none');
+                    noImage.classList.add('d-none');
+
+                    document.getElementById('sourceImageUrl').value = selectedImageUrl;
+                    document.getElementById('sourceImageId').value = '';
+
+                    updateSubmitButton();
+                }
+            }
+
+            // Select edit tool
+            function selectEditTool(card) {
+                selectedEditType = card.getAttribute('data-edit-type');
+
+                // Update UI
+                document.querySelectorAll('.edit-tool-card').forEach(c => {
+                    c.classList.remove('selected');
+                    c.querySelector('.selected-icon').classList.add('d-none');
+                });
+
+                card.classList.add('selected');
+                card.querySelector('.selected-icon').classList.remove('d-none');
+
+                // Update form
+                document.getElementById('editType').value = selectedEditType;
+
+                // Show tool-specific options
+                showToolOptions(selectedEditType);
+
+                updateSubmitButton();
+            }
+
+            // Show tool-specific options
+            function showToolOptions(editType) {
+                // Hide all options
+                document.querySelectorAll('.tool-option').forEach(opt => opt.classList.add('d-none'));
+
+                // Show relevant options
+                const optionsContainer = document.getElementById('toolOptions');
+                optionsContainer.classList.remove('d-none');
+
+                if (editType === 'STYLE_TRANSFER') {
+                    document.getElementById('styleTransferOptions').classList.remove('d-none');
+                } else if (editType === 'IMAGE_UPSCALING') {
+                    document.getElementById('upscalingOptions').classList.remove('d-none');
+                } else if (editType === 'COLOR_GRADING') {
+                    document.getElementById('colorGradingOptions').classList.remove('d-none');
+                } else if (editType === 'FACE_ENHANCEMENT') {
+                    document.getElementById('faceEnhancementOptions').classList.remove('d-none');
+                }
+            }
+
+            // Select style
+            function selectStyle(btn) {
+                document.querySelectorAll('.style-preset-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                document.getElementById('styleName').value = btn.getAttribute('data-style');
+            }
+
+            // Update enhancement strength display
+            document.getElementById('enhancementStrength')?.addEventListener('input', function (e) {
+                document.getElementById('strengthValue').textContent = e.target.value;
+            });
+
+            // Update submit button state
+            function updateSubmitButton() {
+                const btn = document.getElementById('submitBtn');
+                const hasImage = selectedImageId || selectedImageUrl;
+                const hasEditType = selectedEditType;
+
+                btn.disabled = !(hasImage && hasEditType);
+            }
+
+            // Form submission
+            document.getElementById('editForm').addEventListener('submit', function (e) {
+                document.getElementById('processingOverlay').classList.add('active');
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

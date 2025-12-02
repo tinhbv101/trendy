@@ -21,6 +21,7 @@
     <include file="db/changelog/changes/v1.6-update-trend-aspect-ratio.xml"/>
     <include file="db/changelog/changes/v1.7-add-ai-model-to-trends.xml"/>
     <include file="db/changelog/changes/v1.8-create-ad-config-table.xml"/>
+    <include file="db/changelog/changes/v1.9-add-image-analysis.xml"/>
     
     <!-- Initial Data -->
     <include file="db/changelog/data/v1.0-initial-data.xml"/>
