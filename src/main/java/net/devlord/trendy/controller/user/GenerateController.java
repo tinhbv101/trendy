@@ -84,6 +84,24 @@ public class GenerateController {
             
             model.addAttribute("image", image);
             model.addAttribute("pageTitle", "Generation Result");
+            
+            // Extract original image path from aiParameters if this is an edited image
+            if (image.getAiParameters() != null && !image.getAiParameters().isEmpty()) {
+                try {
+                    // Parse JSON to extract originalImage
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode params = mapper.readTree(image.getAiParameters());
+                    
+                    if (params.has("originalImage")) {
+                        String originalImagePath = params.get("originalImage").asText();
+                        model.addAttribute("originalImagePath", originalImagePath);
+                    }
+                } catch (Exception e) {
+                    // If parsing fails, just continue without comparison
+                    // This is not a critical error
+                }
+            }
+            
             return "user/result";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Image not found");

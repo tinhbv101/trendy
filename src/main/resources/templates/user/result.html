@@ -79,7 +79,67 @@
                                 </span>
                             </div>
 
-                            <div class="text-center">
+                            <!-- Check if this is an edited image with original -->
+                            <div th:if="${originalImagePath != null and image.outputImagePath != null}">
+                                <!-- Comparison Toggle Buttons -->
+                                <div class="btn-group w-100 mb-3" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" id="sideBySideViewBtn"
+                                        onclick="switchComparisonView('sideBySide')">
+                                        <i class="bi bi-layout-split"></i> <span th:text="#{result.side_by_side}">Side
+                                            by Side</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="editedOnlyViewBtn"
+                                        onclick="switchComparisonView('editedOnly')">
+                                        <i class="bi bi-image"></i> <span th:text="#{result.edited_image}">Edited
+                                            Image</span>
+                                    </button>
+                                </div>
+
+                                <!-- Side by Side Comparison View -->
+                                <div id="sideBySideComparisonView" class="comparison-container">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header bg-secondary text-white text-center">
+                                                    <strong><i class="bi bi-image"></i> <span
+                                                            th:text="#{result.original_image}">Original
+                                                            Image</span></strong>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    <img th:src="@{/images/{filename}(filename=${originalImagePath})}"
+                                                        class="img-fluid" th:alt="#{result.original_image}"
+                                                        style="width: 100%; display: block;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header bg-primary text-white text-center">
+                                                    <strong><i class="bi bi-magic"></i> <span
+                                                            th:text="#{result.edited_image}">Edited
+                                                            Image</span></strong>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}"
+                                                        class="img-fluid" th:alt="#{result.edited_image}"
+                                                        style="width: 100%; display: block;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edited Only View -->
+                                <div id="editedOnlyView" class="comparison-container text-center"
+                                    style="display: none;">
+                                    <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}"
+                                        class="img-fluid rounded" th:alt="#{result.edited_image}"
+                                        style="max-height: 600px; width: 100%; object-fit: contain;">
+                                </div>
+                            </div>
+
+                            <!-- Regular image display (no comparison) -->
+                            <div th:if="${originalImagePath == null}" class="text-center">
                                 <!-- Display generated image if available -->
                                 <div th:if="${image.outputImagePath != null}">
                                     <img th:src="@{/images/{filename}(filename=${image.outputImagePath})}"
@@ -97,129 +157,128 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="d-grid gap-2 mt-3">
-                                <!-- Download/Share buttons group -->
-                                <div th:if="${image.outputImagePath != null}">
-                                    <!-- iOS-friendly share button (shown on mobile) -->
-                                    <div class="btn-group d-md-none" role="group">
-                                        <button type="button" class="btn btn-primary flex-fill" th:attr="data-image-url=@{/images/{filename}(filename=${image.outputImagePath})},
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <!-- Download/Share buttons group -->
+                            <div th:if="${image.outputImagePath != null}">
+                                <!-- iOS-friendly share button (shown on mobile) -->
+                                <div class="btn-group d-md-none" role="group">
+                                    <button type="button" class="btn btn-primary flex-fill" th:attr="data-image-url=@{/images/{filename}(filename=${image.outputImagePath})},
                                                          data-image-name=${image.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-' + 
                                                            #temporals.format(image.createdAt, 'yyyyMMdd-HHmmss') + 
                                                            (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}"
-                                            onclick="shareOrDownloadImage(this)">
-                                            <i class="bi bi-share"></i> <span id="shareButtonText"
-                                                th:text="#{result.save_share}">Save/Share</span>
-                                        </button>
-                                        <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
-                                            th:href="@{/images/download-inputs/{id}(id=${image.id})}"
-                                            class="btn btn-outline-primary flex-fill"
-                                            th:title="#{result.download_all_inputs}">
-                                            <i class="bi bi-file-zip"></i> <span
-                                                th:text="#{result.inputs}">Inputs</span>
-                                        </a>
-                                    </div>
+                                        onclick="shareOrDownloadImage(this)">
+                                        <i class="bi bi-share"></i> <span id="shareButtonText"
+                                            th:text="#{result.save_share}">Save/Share</span>
+                                    </button>
+                                    <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
+                                        th:href="@{/images/download-inputs/{id}(id=${image.id})}"
+                                        class="btn btn-outline-primary flex-fill"
+                                        th:title="#{result.download_all_inputs}">
+                                        <i class="bi bi-file-zip"></i> <span th:text="#{result.inputs}">Inputs</span>
+                                    </a>
+                                </div>
 
-                                    <!-- Desktop download buttons -->
-                                    <div class="btn-group d-none d-md-flex" role="group">
-                                        <a th:href="@{/images/download/{filename}(
+                                <!-- Desktop download buttons -->
+                                <div class="btn-group d-none d-md-flex" role="group">
+                                    <a th:href="@{/images/download/{filename}(
                                                 filename=${image.outputImagePath},
                                                 name=${image.trend.trendName.replaceAll('[^a-zA-Z0-9-_]', '-').toLowerCase() + '-' + 
                                                       #temporals.format(image.createdAt, 'yyyyMMdd-HHmmss') + 
                                                       (image.outputImagePath.contains('.png') ? '.png' : '.jpg')}
                                             )}" class="btn btn-primary flex-fill">
-                                            <i class="bi bi-download"></i> <span
-                                                th:text="#{result.download_result}">Download Result</span>
-                                        </a>
-                                        <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
-                                            th:href="@{/images/download-inputs/{id}(id=${image.id})}"
-                                            class="btn btn-outline-primary flex-fill"
-                                            th:title="#{result.download_all_inputs}">
-                                            <i class="bi bi-file-zip"></i> <span
-                                                th:text="#{result.download_inputs}">Download Inputs</span>
-                                        </a>
-                                    </div>
+                                        <i class="bi bi-download"></i> <span
+                                            th:text="#{result.download_result}">Download Result</span>
+                                    </a>
+                                    <a th:if="${image.inputImages != null and !image.inputImages.isEmpty()}"
+                                        th:href="@{/images/download-inputs/{id}(id=${image.id})}"
+                                        class="btn btn-outline-primary flex-fill"
+                                        th:title="#{result.download_all_inputs}">
+                                        <i class="bi bi-file-zip"></i> <span
+                                            th:text="#{result.download_inputs}">Download Inputs</span>
+                                    </a>
                                 </div>
-
-                                <!-- Share Button -->
-                                <button type="button" class="btn btn-success" th:attr="data-image-id=${image.id}"
-                                    onclick="shareImage(this)" th:title="#{result.share_publicly_title}">
-                                    <i class="bi bi-share-fill"></i> <span th:text="#{result.share_image}">Share
-                                        Image</span>
-                                </button>
-
-                                <!-- Edit with AI Button -->
-                                <a th:href="@{/user/image-edit/{id}(id=${image.id})}" class="btn btn-primary">
-                                    <i class="bi bi-magic"></i> Edit with AI
-                                </a>
-
-                                <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-repeat"></i> <span
-                                        th:text="#{result.generate_another}">Generate Another</span>
-                                </a>
                             </div>
-                        </div>
 
-                        <div th:if="${image.status.name() == 'FAILED'}">
-                            <div class="alert alert-danger">
-                                <h3 class="h5"><i class="bi bi-exclamation-triangle"></i> <span
-                                        th:text="#{result.generation_failed}">Generation Failed</span></h3>
-                                <p th:text="${image.errorMessage}">An error occurred during generation.</p>
-                            </div>
-                            <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-primary">
-                                <i class="bi bi-arrow-repeat"></i> <span th:text="#{result.try_again}">Try Again</span>
+                            <!-- Share Button -->
+                            <button type="button" class="btn btn-success" th:attr="data-image-id=${image.id}"
+                                onclick="shareImage(this)" th:title="#{result.share_publicly_title}">
+                                <i class="bi bi-share-fill"></i> <span th:text="#{result.share_image}">Share
+                                    Image</span>
+                            </button>
+
+                            <!-- Edit with AI Button -->
+                            <a th:href="@{/user/image-edit/{id}(id=${image.id})}" class="btn btn-primary">
+                                <i class="bi bi-magic"></i> Edit with AI
+                            </a>
+
+                            <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-repeat"></i> <span th:text="#{result.generate_another}">Generate
+                                    Another</span>
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-info-circle"></i> <span
-                                th:text="#{result.generation_info}">Generation Info</span></h2>
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2"><strong><i class="bi bi-palette"></i> <span
-                                        th:text="#{result.trend_label}">Trend</span>:</strong>
-                                <span th:text="${image.trend.trendName}">Trend</span>
-                            </li>
-                            <li class="mb-2"><strong><i class="bi bi-flag"></i> <span
-                                        th:text="#{result.status_label}">Status</span>:</strong>
-                                <span class="badge"
-                                    th:classappend="${image.status.name() == 'COMPLETED'} ? 'bg-success' : (${image.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
-                                    th:text="${image.status}">Status</span>
-                            </li>
-                            <li class="mb-2"><strong><i class="bi bi-calendar"></i> <span
-                                        th:text="#{result.created_label}">Created</span>:</strong>
-                                <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
-                            </li>
-                            <li th:if="${image.generationTimeSeconds != null}" class="mb-2">
-                                <strong><i class="bi bi-clock"></i> <span
-                                        th:text="#{result.generation_time_label}">Generation Time</span>:</strong>
-                                <span th:text="|${image.generationTimeSeconds}s|">0s</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Input Images Preview -->
-                <div th:if="${image.inputImages != null and !image.inputImages.isEmpty()}" class="card">
-                    <div class="card-body">
-                        <h2 class="card-title h5"><i class="bi bi-images"></i> <span
-                                th:text="#{result.input_images}">Input Images</span></h2>
-                        <p class="text-muted small mb-2">
-                            <span th:text="#{result.click_to_download_zip}">Click to download all as ZIP</span>
-                        </p>
-                        <a th:href="@{/images/download-inputs/{id}(id=${image.id})}"
-                            class="btn btn-outline-primary btn-sm w-100">
-                            <i class="bi bi-file-zip"></i> <span th:text="#{result.download_all_inputs_zip}">Download
-                                All Inputs (ZIP)</span>
+                    <div th:if="${image.status.name() == 'FAILED'}">
+                        <div class="alert alert-danger">
+                            <h3 class="h5"><i class="bi bi-exclamation-triangle"></i> <span
+                                    th:text="#{result.generation_failed}">Generation Failed</span></h3>
+                            <p th:text="${image.errorMessage}">An error occurred during generation.</p>
+                        </div>
+                        <a th:href="@{/generate/{id}(id=${image.trend.id})}" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> <span th:text="#{result.try_again}">Try Again</span>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title h5"><i class="bi bi-info-circle"></i> <span
+                            th:text="#{result.generation_info}">Generation Info</span></h2>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><strong><i class="bi bi-palette"></i> <span
+                                    th:text="#{result.trend_label}">Trend</span>:</strong>
+                            <span th:text="${image.trend.trendName}">Trend</span>
+                        </li>
+                        <li class="mb-2"><strong><i class="bi bi-flag"></i> <span
+                                    th:text="#{result.status_label}">Status</span>:</strong>
+                            <span class="badge"
+                                th:classappend="${image.status.name() == 'COMPLETED'} ? 'bg-success' : (${image.status.name() == 'FAILED'} ? 'bg-danger' : 'bg-warning')"
+                                th:text="${image.status}">Status</span>
+                        </li>
+                        <li class="mb-2"><strong><i class="bi bi-calendar"></i> <span
+                                    th:text="#{result.created_label}">Created</span>:</strong>
+                            <span th:text="${#temporals.format(image.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
+                        </li>
+                        <li th:if="${image.generationTimeSeconds != null}" class="mb-2">
+                            <strong><i class="bi bi-clock"></i> <span
+                                    th:text="#{result.generation_time_label}">Generation Time</span>:</strong>
+                            <span th:text="|${image.generationTimeSeconds}s|">0s</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Input Images Preview -->
+            <div th:if="${image.inputImages != null and !image.inputImages.isEmpty()}" class="card">
+                <div class="card-body">
+                    <h2 class="card-title h5"><i class="bi bi-images"></i> <span th:text="#{result.input_images}">Input
+                            Images</span></h2>
+                    <p class="text-muted small mb-2">
+                        <span th:text="#{result.click_to_download_zip}">Click to download all as ZIP</span>
+                    </p>
+                    <a th:href="@{/images/download-inputs/{id}(id=${image.id})}"
+                        class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-file-zip"></i> <span th:text="#{result.download_all_inputs_zip}">Download
+                            All Inputs (ZIP)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 
     <th:block layout:fragment="extra-scripts">
@@ -681,6 +740,30 @@
                 }
 
                 document.body.removeChild(textArea);
+            }
+
+            // Switch between comparison views
+            function switchComparisonView(view) {
+                // Hide all views
+                const sideBySideView = document.getElementById('sideBySideComparisonView');
+                const editedOnlyView = document.getElementById('editedOnlyView');
+
+                if (sideBySideView) sideBySideView.style.display = 'none';
+                if (editedOnlyView) editedOnlyView.style.display = 'none';
+
+                // Remove active class from all buttons
+                document.querySelectorAll('.btn-group button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Show selected view and activate button
+                if (view === 'sideBySide' && sideBySideView) {
+                    sideBySideView.style.display = 'block';
+                    document.getElementById('sideBySideViewBtn').classList.add('active');
+                } else if (view === 'editedOnly' && editedOnlyView) {
+                    editedOnlyView.style.display = 'block';
+                    document.getElementById('editedOnlyViewBtn').classList.add('active');
+                }
             }
         </script>
     </th:block>

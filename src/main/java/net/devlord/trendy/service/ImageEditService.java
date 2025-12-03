@@ -21,6 +21,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -116,6 +117,9 @@ public class ImageEditService {
     private ImageEditResult removeBackground(String sourceImagePath, ImageEditRequest request) {
         log.info("Removing background from image: {}", sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         // Use Gemini AI to remove background
         String prompt = "Remove the background from this image, keeping only the main subject. " +
                        "Make the background transparent or white. Preserve all details of the main subject.";
@@ -127,7 +131,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt, 
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -145,6 +149,9 @@ public class ImageEditService {
     private ImageEditResult transferStyle(String sourceImagePath, ImageEditRequest request) {
         log.info("Transferring style '{}' to image: {}", request.getStyleName(), sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String styleName = request.getStyleName() != null ? request.getStyleName() : "Van Gogh";
         
         String prompt = String.format(
@@ -161,7 +168,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -180,6 +187,9 @@ public class ImageEditService {
         int upscaleFactor = request.getUpscaleFactor() != null ? request.getUpscaleFactor() : 2;
         log.info("Upscaling image {}x: {}", upscaleFactor, sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String prompt = String.format(
                 "Upscale this image to %dx the resolution. " +
                 "Enhance details, sharpen edges, and improve overall quality. " +
@@ -190,7 +200,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -208,13 +218,16 @@ public class ImageEditService {
     private ImageEditResult inpaintImage(String sourceImagePath, ImageEditRequest request) {
         log.info("Inpainting image: {}", sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String prompt = request.getPrompt() != null ? request.getPrompt() : 
                 "Remove unwanted objects from this image and fill in the area naturally.";
         
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -235,6 +248,9 @@ public class ImageEditService {
         
         log.info("Applying color grading '{}' to image: {}", preset, sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         Map<String, String> presetPrompts = Map.of(
                 "warm", "Apply warm color grading with golden and orange tones, like a sunset",
                 "cool", "Apply cool color grading with blue and teal tones, like a winter scene",
@@ -254,7 +270,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -275,6 +291,9 @@ public class ImageEditService {
         
         log.info("Enhancing face with strength {}: {}", strength, sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String prompt = String.format(
                 "Enhance the facial features in this image. " +
                 "Improve skin texture, brighten eyes, enhance facial symmetry, " +
@@ -290,7 +309,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -312,10 +331,13 @@ public class ImageEditService {
             throw new ImageGenerationException("Prompt is required for AI-guided editing");
         }
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String editedImageUrl = geminiService.generateImageWithInput(
                 request.getPrompt(),
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -333,6 +355,9 @@ public class ImageEditService {
     private ImageEditResult restorePhoto(String sourceImagePath, ImageEditRequest request) {
         log.info("Restoring photo: {}", sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String prompt = "Restore this old or damaged photo. " +
                        "Remove scratches, stains, and damage. " +
                        "Enhance clarity, fix faded colors, and improve overall quality. " +
@@ -345,7 +370,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -363,6 +388,9 @@ public class ImageEditService {
     private ImageEditResult applyArtisticFilter(String sourceImagePath, ImageEditRequest request) {
         log.info("Applying artistic filter to image: {}", sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String filterType = request.getStyleName() != null ? request.getStyleName() : "artistic";
         
         String prompt = String.format(
@@ -379,7 +407,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -397,6 +425,9 @@ public class ImageEditService {
     private ImageEditResult smartCrop(String sourceImagePath, ImageEditRequest request) {
         log.info("Smart cropping image: {}", sourceImagePath);
         
+        // Detect aspect ratio from source image
+        AspectRatio aspectRatio = detectAspectRatio(sourceImagePath);
+        
         String prompt = "Intelligently crop and reframe this image. " +
                        "Focus on the main subject, apply rule of thirds, " +
                        "and create a well-balanced composition. " +
@@ -409,7 +440,7 @@ public class ImageEditService {
         String editedImageUrl = geminiService.generateImageWithInput(
                 prompt,
                 "[\"" + sourceImagePath + "\"]",
-                AspectRatio.SQUARE,
+                aspectRatio,
                 AIModel.GEMINI_3_PRO
         );
         
@@ -578,5 +609,57 @@ public class ImageEditService {
                 "warm", "cool", "vibrant", "vintage", "cinematic", "moody",
                 "black_and_white", "sepia", "pastel", "neon"
         );
+    }
+    
+    /**
+     * Detect aspect ratio from source image path
+     * Returns the closest AspectRatio enum value based on image dimensions
+     */
+    private AspectRatio detectAspectRatio(String sourceImagePath) {
+        InputStream inputStream = null;
+        try {
+            // Get image from MinIO
+            inputStream = minioService.getFile(sourceImagePath);
+            
+            // Read image dimensions using ImageIO
+            java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(inputStream);
+            
+            if (image == null) {
+                log.warn("Could not read image dimensions for: {}, using SQUARE as default", sourceImagePath);
+                return AspectRatio.SQUARE;
+            }
+            
+            int width = image.getWidth();
+            int height = image.getHeight();
+            double ratio = (double) width / height;
+            
+            log.info("Detected image dimensions: {}x{}, ratio: {}", width, height, ratio);
+            
+            // Match to closest aspect ratio
+            // SQUARE: 1:1 (ratio = 1.0)
+            // LANDSCAPE: 16:9 (ratio ≈ 1.78)
+            // PORTRAIT: 9:16 (ratio ≈ 0.56)
+            
+            if (Math.abs(ratio - 1.0) < 0.15) {
+                return AspectRatio.SQUARE;  // 1:1
+            } else if (ratio > 1.3) {
+                return AspectRatio.LANDSCAPE;  // 16:9 or wider
+            } else {
+                return AspectRatio.PORTRAIT;  // 9:16 or taller
+            }
+            
+        } catch (Exception e) {
+            log.error("Error detecting aspect ratio for image: {}, using SQUARE as default", sourceImagePath, e);
+            return AspectRatio.SQUARE;
+        } finally {
+            // Close the input stream
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (Exception e) {
+                    log.warn("Failed to close input stream: {}", e.getMessage());
+                }
+            }
+        }
     }
 }
