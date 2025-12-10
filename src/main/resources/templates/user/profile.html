@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:text="#{profile.title}">My Profile</title>
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 15px;
+        }
+
+        .level-badge {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 5px solid white;
+        }
+
+        .xp-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .xp-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .achievement-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .achievement-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .achievement-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .achievement-badge.locked {
+            background: #e0e0e0;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .rank-badge {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .streak-flame {
+            font-size: 3rem;
+            animation: flicker 1.5s infinite;
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 2rem 1rem;
+            }
+
+            .level-badge {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+                border: 3px solid white;
+            }
+
+            .profile-header h4 {
+                font-size: 1.1rem;
+            }
+
+            .rank-badge {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .stat-icon {
+                font-size: 2rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .achievement-badge {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .xp-bar {
+                height: 25px;
+            }
+
+            .xp-text {
+                font-size: 0.85rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .profile-header {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .level-badge {
+                width: 70px;
+                height: 70px;
+                font-size: 1.5rem;
+            }
+
+            .stat-icon {
+                font-size: 1.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
+            .achievement-badge {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+
+            .display-6 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="level-badge mx-auto">
+                                <span th:text="${profile.level}">1</span>
+                            </div>
+                            <h4 class="mt-3 mb-0" th:text="#{profile.level} + ' ' + ${profile.level}">Level 1</h4>
+                        </div>
+                        <div class="col-md-9">
+                            <h2 class="mb-1" th:text="${profile.username}">Username</h2>
+                            <p class="mb-3" th:if="${profile.title}" th:text="${profile.title}">Title</p>
+                            <div class="rank-badge mb-3">
+                                🏆 <span th:text="#{profile.rank} + ' #' + ${profile.rank}">Rank #1</span>
+                            </div>
+
+                            <div class="xp-bar">
+                                <div class="xp-progress" th:style="'width: ' + ${profile.levelProgress} + '%'"></div>
+                                <div class="xp-text">
+                                    <span th:text="${profile.currentXp} + ' / ' + ${profile.xpForNextLevel} + ' XP'">0 /
+                                        100 XP</span>
+                                </div>
+                            </div>
+                            <small class="text-white-50 mt-1 d-block">
+                                <span th:text="#{profile.total_xp}">Total XP</span>: <strong
+                                    th:text="${#numbers.formatInteger(profile.totalXp, 0, 'COMMA')}">0</strong>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">🎨</div>
+                        <div class="stat-value"
+                            th:text="${#numbers.formatInteger(profile.totalGenerations, 0, 'COMMA')}">0</div>
+                        <div class="stat-label" th:text="#{profile.images_generated}">Images Generated</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-value"
+                            th:text="${#numbers.formatInteger(profile.totalLikesReceived, 0, 'COMMA')}">0</div>
+                        <div class="stat-label" th:text="#{profile.likes_received}">Likes Received</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">📤</div>
+                        <div class="stat-value" th:text="${#numbers.formatInteger(profile.totalShares, 0, 'COMMA')}">0
+                        </div>
+                        <div class="stat-label" th:text="#{profile.shares}">Shares</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon streak-flame">🔥</div>
+                        <div class="stat-value" th:text="${profile.currentStreak}">0</div>
+                        <div class="stat-label" th:text="#{profile.day_streak}">Day Streak</div>
+                        <small class="text-muted"><span th:text="#{profile.best_streak}">Best</span>: <span th:text="${profile.longestStreak}">0</span></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-trophy-fill text-warning"></i> <span th:text="#{profile.achievements}">Achievements</span>
+                        </h4>
+                        <span class="badge bg-primary">
+                            <span th:text="${profile.completedAchievements}">0</span> /
+                            <span th:text="${profile.totalAchievements}">40</span>
+                        </span>
+                    </div>
+
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                            th:style="'width: ' + ${profile.completedAchievements * 100.0 / profile.totalAchievements} + '%'"
+                            th:text="${#numbers.formatDecimal(profile.completedAchievements * 100.0 / profile.totalAchievements, 0, 1)} + '%'">
+                            0%
+                        </div>
+                    </div>
+
+                    <div class="achievement-preview" id="achievementPreview">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a th:href="@{/achievements}" class="btn btn-outline-primary" th:text="#{profile.view_all_achievements}">
+                            View All Achievements →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Stats -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-star-fill text-warning"></i> <span th:text="#{profile.favorites}">Favorites</span>
+                            </h5>
+                            <p class="display-6 mb-0" th:text="${profile.totalFavorites}">0</p>
+                            <small class="text-muted" th:text="#{profile.images_saved}">Images saved</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-palette-fill text-info"></i> <span th:text="#{profile.trends_explored}">Trends Explored</span>
+                            </h5>
+                            <p class="display-6 mb-0" th:text="${profile.uniqueTrendsUsed}">0</p>
+                            <small class="text-muted" th:text="#{profile.different_trends_used}">Different trends used</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="extra-scripts" th:inline="javascript">
+        // Load recent achievements
+        fetch('/api/achievements/completed', {
+            credentials: 'include' // Important: include cookies for authentication
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load achievements: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(achievements => {
+                const container = document.getElementById('achievementPreview');
+                const recent = achievements.slice(0, 10);
+
+                recent.forEach(achievement => {
+                    const badge = document.createElement('div');
+                    badge.className = 'achievement-badge';
+                    badge.innerHTML = achievement.icon;
+                    badge.title = achievement.name + ': ' + achievement.description;
+                    container.appendChild(badge);
+                });
+
+                // Add "view more" if there are more achievements
+                if (achievements.length > 10) {
+                    const more = document.createElement('div');
+                    more.className = 'achievement-badge';
+                    more.innerHTML = '+' + (achievements.length - 10);
+                    more.style.background = '#667eea';
+                    more.style.color = 'white';
+                    more.style.fontSize = '1.2rem';
+                    container.appendChild(more);
+                }
+            })
+            .catch(error => console.error('Error loading achievements:', error));
+    </script>
+</body>
+
+</html>

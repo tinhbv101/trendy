@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v2.2-migrate-categories-data" author="trendai">
+        <comment>Migrate existing category data from trends table to categories table and populate trend_categories</comment>
+        
+        <!-- Insert distinct categories from trends table -->
+        <sql>
+            INSERT INTO categories (name, display_name, sort_order)
+            SELECT DISTINCT 
+                category,
+                category,
+                0
+            FROM trends 
+            WHERE category IS NOT NULL 
+            AND category != ''
+            AND NOT EXISTS (
+                SELECT 1 FROM categories c WHERE c.name = trends.category
+            );
+        </sql>
+        
+        <!-- Populate trend_categories join table -->
+        <sql>
+            INSERT INTO trend_categories (trend_id, category_id)
+            SELECT DISTINCT 
+                t.id,
+                c.id
+            FROM trends t
+            INNER JOIN categories c ON t.category = c.name
+            WHERE t.category IS NOT NULL 
+            AND t.category != ''
+            AND NOT EXISTS (
+                SELECT 1 FROM trend_categories tc 
+                WHERE tc.trend_id = t.id AND tc.category_id = c.id
+            );
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM trend_categories;</sql>
+            <sql>DELETE FROM categories;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

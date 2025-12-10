@@ -2,9 +2,11 @@ package net.devlord.trendy.service;
 
 import net.devlord.trendy.exception.TrendNotFoundException;
 import net.devlord.trendy.model.dto.TrendDTO;
+import net.devlord.trendy.model.entity.Category;
 import net.devlord.trendy.model.entity.Trend;
 import net.devlord.trendy.model.entity.TrendExample;
 import net.devlord.trendy.model.enums.TrendStatus;
+import net.devlord.trendy.repository.CategoryRepository;
 import net.devlord.trendy.repository.TrendExampleRepository;
 import net.devlord.trendy.repository.TrendRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,7 @@ public class TrendService {
     
     private final TrendRepository trendRepository;
     private final TrendExampleRepository trendExampleRepository;
+    private final CategoryRepository categoryRepository;
     
     @Transactional(readOnly = true)
     public Page<Trend> getAllActiveTrends(Pageable pageable) {
@@ -39,6 +43,12 @@ public class TrendService {
     @Transactional(readOnly = true)
     public Trend getTrendById(Long id) {
         return trendRepository.findByIdAndDeletedAtIsNull(id)
+            .orElseThrow(() -> new TrendNotFoundException("Trend not found with id: " + id));
+    }
+    
+    @Transactional(readOnly = true)
+    public Trend getTrendByIdWithCategories(Long id) {
+        return trendRepository.findByIdWithCategories(id)
             .orElseThrow(() -> new TrendNotFoundException("Trend not found with id: " + id));
     }
     
@@ -86,7 +96,18 @@ public class TrendService {
         dto.setTrendName(trend.getTrendName());
         dto.setDescription(trend.getDescription());
         dto.setPromptTemplate(trend.getPromptTemplate());
-        dto.setCategory(trend.getCategory());
+        dto.setCategory(trend.getCategory()); // Deprecated, for backward compatibility
+        
+        // Populate new category fields
+        if (trend.getCategories() != null && !trend.getCategories().isEmpty()) {
+            dto.setCategoryIds(trend.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toList()));
+            dto.setCategoryNames(trend.getCategories().stream()
+                .map(Category::getName)
+                .collect(Collectors.toList()));
+        }
+        
         dto.setMaxInputImages(trend.getMaxInputImages());
         dto.setAspectRatio(trend.getAspectRatio());
         dto.setAiModel(trend.getAiModel());
@@ -140,7 +161,14 @@ public class TrendService {
         trend.setTrendName(dto.getTrendName());
         trend.setDescription(dto.getDescription());
         trend.setPromptTemplate(dto.getPromptTemplate());
-        trend.setCategory(dto.getCategory());
+        trend.setCategory(dto.getCategory()); // Deprecated, for backward compatibility
+        
+        // Handle new categories
+        if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
+            List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+            trend.setCategories(categories);
+        }
+        
         trend.setMaxInputImages(dto.getMaxInputImages());
         trend.setAspectRatio(dto.getAspectRatio());
         trend.setAiModel(dto.getAiModel());
@@ -175,7 +203,19 @@ public class TrendService {
         trend.setTrendName(dto.getTrendName());
         trend.setDescription(dto.getDescription());
         trend.setPromptTemplate(dto.getPromptTemplate());
-        trend.setCategory(dto.getCategory());
+        trend.setCategory(dto.getCategory()); // Deprecated, for backward compatibility
+        
+        // Handle new categories
+        if (dto.getCategoryIds() != null) {
+            if (dto.getCategoryIds().isEmpty()) {
+                trend.getCategories().clear();
+            } else {
+                List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+                trend.getCategories().clear();
+                trend.getCategories().addAll(categories);
+            }
+        }
+        
         trend.setMaxInputImages(dto.getMaxInputImages());
         trend.setAspectRatio(dto.getAspectRatio());
         trend.setAiModel(dto.getAiModel());

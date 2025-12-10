@@ -2,6 +2,7 @@ package net.devlord.trendy.config;
 
 import net.devlord.trendy.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     
     private final UserDetailsServiceImpl userDetailsService;
+    
+    @Value("${security.remember-me.key}")
+    private String rememberMeKey;
+    
+    @Value("${security.remember-me.token-validity-seconds}")
+    private int tokenValiditySeconds;
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,11 +51,19 @@ public class SecurityConfig {
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
+            .rememberMe(remember -> remember
+                .key(rememberMeKey) // Secret key from configuration
+                .tokenValiditySeconds(tokenValiditySeconds) // Token validity from configuration
+                .userDetailsService(userDetailsService)
+                .rememberMeParameter("remember-me") // Name of checkbox in form
+                .rememberMeCookieName("trendy-remember-me") // Cookie name
+                .useSecureCookie(false) // Set to true in production with HTTPS
+            )
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
+                .deleteCookies("JSESSIONID", "trendy-remember-me") // Also delete remember-me cookie
                 .permitAll()
             )
             .csrf(csrf -> csrf

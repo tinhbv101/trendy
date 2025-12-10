@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v3.4-auto-unlock-achievements-from-existing-stats" author="trendai">
+        <comment>Auto-unlock achievements based on existing user statistics</comment>
+        
+        <!-- Generation Achievements -->
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'FIRST_GENERATION',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 1
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'GENERATION_10',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 10
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'GENERATION_50',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 50
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'GENERATION_100',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 100
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'GENERATION_500',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 500
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'GENERATION_1000',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_generations >= 1000
+            ON DUPLICATE KEY UPDATE completed = true, completed_at = user_profiles.created_at;
+        </sql>
+        
+        <!-- Likes Achievements -->
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'LIKES_10',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_likes_received >= 10
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'LIKES_50',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_likes_received >= 50
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'LIKES_100',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_likes_received >= 100
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <!-- Share Achievements -->
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'FIRST_SHARE',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_shares >= 1
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'SHARE_10',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_shares >= 10
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <!-- Favorite Achievements -->
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'FIRST_FAVORITE',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_favorites >= 1
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'FAVORITE_50',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE total_favorites >= 50
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <!-- Trend Achievements -->
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'TREND_EXPLORER',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE unique_trends_used >= 5
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+        
+        <sql>
+            INSERT INTO user_achievements (user_id, achievement_type, progress, completed, completed_at, notified, created_at)
+            SELECT 
+                user_id,
+                'TREND_MASTER',
+                100,
+                true,
+                created_at,
+                false,
+                NOW()
+            FROM user_profiles
+            WHERE unique_trends_used >= 20
+            ON DUPLICATE KEY UPDATE completed = true;
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM user_achievements WHERE notified = false;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

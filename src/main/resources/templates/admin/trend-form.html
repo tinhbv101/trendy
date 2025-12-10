@@ -1,17 +1,97 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/main}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
 <head>
-    <title th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}" 
-           th:text="${isEdit ? editTitle : createTitle}">Trend Form</title>
+    <title th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}"
+        th:text="${isEdit ? editTitle : createTitle}">Trend Form</title>
+
+    <style>
+        /* Category Selection Styles */
+        .category-checkbox-card {
+            position: relative;
+        }
+
+        .category-label {
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            background: white;
+        }
+
+        .category-label:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        .category-name {
+            font-weight: 500;
+        }
+
+        .category-check {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: #198754;
+        }
+
+        .category-checkbox:checked+.category-label {
+            background-color: #e7f3ff;
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+
+        .category-checkbox:checked+.category-label .category-check {
+            opacity: 1;
+        }
+
+        .selected-category-badge {
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .selected-category-badge .badge-icon {
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
+
 <body>
-    <div layout:fragment="content" th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}, editBreadcrumb=#{admin.trend.form.breadcrumb_edit}, createBreadcrumb=#{admin.trend.form.breadcrumb_create}, updateText=#{admin.trend.form.update}, createText=#{admin.trend.form.create}">
+    <div layout:fragment="content"
+        th:with="editTitle=#{admin.trends.edit}, createTitle=#{admin.trends.create}, editBreadcrumb=#{admin.trend.form.breadcrumb_edit}, createBreadcrumb=#{admin.trend.form.breadcrumb_create}, updateText=#{admin.trend.form.update}, createText=#{admin.trend.form.create}">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" th:text="#{admin.trend.form.breadcrumb_admin}">Admin</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/admin/trends}" th:text="#{admin.trend.form.breadcrumb_trends}">Trends</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}"
+                        th:text="#{admin.trend.form.breadcrumb_admin}">Admin</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/trends}"
+                        th:text="#{admin.trend.form.breadcrumb_trends}">Trends</a></li>
                 <li class="breadcrumb-item active" th:text="${isEdit ? editBreadcrumb : createBreadcrumb}">Form</li>
             </ol>
         </nav>
@@ -20,68 +100,115 @@
 
         <div class="card">
             <div class="card-body">
-                <form th:action="${isEdit ? '/admin/trends/' + trend.id : '/admin/trends'}" 
-                      th:object="${trend}" method="post" enctype="multipart/form-data">
-                    
+                <form th:action="${isEdit ? '/admin/trends/' + trend.id : '/admin/trends'}" th:object="${trend}"
+                    method="post" enctype="multipart/form-data">
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="trendName" class="form-label" th:text="|#{admin.trend.form.trend_name}#{admin.trend.form.required_asterisk}|">Trend Name *</label>
-                                <input type="text" class="form-control" th:field="*{trendName}" 
-                                       id="trendName" required>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('trendName')}" 
-                                     th:errors="*{trendName}">Error</div>
+                                <label for="trendName" class="form-label"
+                                    th:text="|#{admin.trend.form.trend_name}#{admin.trend.form.required_asterisk}|">Trend
+                                    Name *</label>
+                                <input type="text" class="form-control" th:field="*{trendName}" id="trendName" required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('trendName')}"
+                                    th:errors="*{trendName}">Error</div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="category" class="form-label" th:text="#{admin.trend.form.category}">Category</label>
-                                <input type="text" class="form-control" th:field="*{category}" 
-                                       id="category" th:placeholder="#{admin.trend.form.category_placeholder}">
+                        <!-- Categories Section -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-tags-fill"></i> Categories
+                                <span class="text-muted small">(Select one or more)</span>
+                            </label>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row g-3" id="categoriesContainer">
+                                        <div th:each="cat : ${categories}" class="col-md-4 col-sm-6">
+                                            <div class="category-checkbox-card">
+                                                <input type="checkbox" class="btn-check category-checkbox"
+                                                    th:id="${'category-' + cat.id}" name="categoryIds"
+                                                    th:value="${cat.id}"
+                                                    th:checked="${trend.categoryIds != null && trend.categoryIds.contains(cat.id)}">
+                                                <label class="btn btn-outline-primary w-100 text-start category-label"
+                                                    th:for="${'category-' + cat.id}">
+                                                    <span class="category-icon" th:text="${cat.icon}">🎨</span>
+                                                    <span class="category-name"
+                                                        th:text="${cat.displayName}">Category</span>
+                                                    <i class="bi bi-check-circle-fill float-end category-check"></i>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2">
+                                        <i class="bi bi-info-circle"></i>
+                                        Select all categories that apply to this trend. Multiple selections help users
+                                        find your trend more easily.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selected Categories Display -->
+                            <div id="selectedCategoriesDisplay" class="mt-3" style="display: none;">
+                                <div class="d-flex align-items-center mb-2">
+                                    <small class="text-muted">Selected categories:</small>
+                                </div>
+                                <div id="selectedCategoriesBadges" class="d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
+
+                        <!-- Old Category Field (Hidden, for backward compatibility) -->
+                        <input type="hidden" th:field="*{category}">
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label" th:text="#{admin.trend.form.description}">Description</label>
-                        <textarea class="form-control" th:field="*{description}" 
-                                  id="description" rows="3"></textarea>
+                        <label for="description" class="form-label"
+                            th:text="#{admin.trend.form.description}">Description</label>
+                        <textarea class="form-control" th:field="*{description}" id="description" rows="3"></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="thumbnailFile" class="form-label" th:text="#{admin.trend.form.thumbnail}">Thumbnail Image</label>
-                        <input class="form-control" type="file" id="thumbnailFile" name="thumbnailFile" 
-                               accept="image/*">
-                        <div class="form-text" th:text="#{admin.trend.form.thumbnail_help}">Upload a thumbnail image for this trend (recommended: 400x300px)</div>
+                        <label for="thumbnailFile" class="form-label" th:text="#{admin.trend.form.thumbnail}">Thumbnail
+                            Image</label>
+                        <input class="form-control" type="file" id="thumbnailFile" name="thumbnailFile"
+                            accept="image/*">
+                        <div class="form-text" th:text="#{admin.trend.form.thumbnail_help}">Upload a thumbnail image for
+                            this trend (recommended: 400x300px)</div>
                         <div th:if="${isEdit and trend.thumbnailPath != null}" class="mt-2">
-                            <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}" 
-                                 th:alt="#{admin.trend.form.current_thumbnail_alt}"
-                                 style="max-width: 200px; max-height: 150px; object-fit: cover;"
-                                 class="border rounded">
-                            <p class="text-muted small mt-1" th:text="#{admin.trend.form.current_thumbnail}">Current thumbnail (upload new file to replace)</p>
+                            <img th:src="@{/images/{filename}(filename=${trend.thumbnailPath})}"
+                                th:alt="#{admin.trend.form.current_thumbnail_alt}"
+                                style="max-width: 200px; max-height: 150px; object-fit: cover;" class="border rounded">
+                            <p class="text-muted small mt-1" th:text="#{admin.trend.form.current_thumbnail}">Current
+                                thumbnail (upload new file to replace)</p>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="promptTemplate" class="form-label" th:text="|#{admin.trend.form.prompt_template}#{admin.trend.form.required_asterisk}|">Prompt Template *</label>
-                        <textarea class="form-control" th:field="*{promptTemplate}" 
-                                  id="promptTemplate" rows="4" required></textarea>
-                        <div class="form-text" th:text="#{admin.trend.form.prompt_template_help}">Enter the AI prompt template for this trend</div>
+                        <label for="promptTemplate" class="form-label"
+                            th:text="|#{admin.trend.form.prompt_template}#{admin.trend.form.required_asterisk}|">Prompt
+                            Template *</label>
+                        <textarea class="form-control" th:field="*{promptTemplate}" id="promptTemplate" rows="4"
+                            required></textarea>
+                        <div class="form-text" th:text="#{admin.trend.form.prompt_template_help}">Enter the AI prompt
+                            template for this trend</div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="maxInputImages" class="form-label" th:text="|#{admin.trend.form.max_input_images}#{admin.trend.form.required_asterisk}|">Max Input Images *</label>
-                                <input type="number" class="form-control" th:field="*{maxInputImages}" 
-                                       id="maxInputImages" min="1" max="5" required>
+                                <label for="maxInputImages" class="form-label"
+                                    th:text="|#{admin.trend.form.max_input_images}#{admin.trend.form.required_asterisk}|">Max
+                                    Input Images *</label>
+                                <input type="number" class="form-control" th:field="*{maxInputImages}"
+                                    id="maxInputImages" min="1" max="5" required>
                             </div>
                         </div>
 
                         <div class="col-md-8">
                             <div class="mb-3">
-                                <label for="aspectRatio" class="form-label" th:text="|Aspect Ratio#{admin.trend.form.required_asterisk}|">Aspect Ratio *</label>
+                                <label for="aspectRatio" class="form-label"
+                                    th:text="|Aspect Ratio#{admin.trend.form.required_asterisk}|">Aspect Ratio *</label>
                                 <select class="form-select" th:field="*{aspectRatio}" id="aspectRatio" required>
                                     <option value="SQUARE">Square (1:1) - 1024x1024</option>
                                     <option value="PORTRAIT">Portrait (9:16) - 576x1024</option>
@@ -95,35 +222,43 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="aiModel" class="form-label" th:text="|#{admin.trend.form.ai_model}#{admin.trend.form.required_asterisk}|">AI Model *</label>
+                        <label for="aiModel" class="form-label"
+                            th:text="|#{admin.trend.form.ai_model}#{admin.trend.form.required_asterisk}|">AI Model
+                            *</label>
                         <select class="form-select" th:field="*{aiModel}" id="aiModel" required>
                             <option value="GEMINI_2_5_FLASH">Google Gemini 2.5 Flash Image</option>
                             <option value="GEMINI_3_PRO">Gemini 3 Pro Image</option>
                         </select>
-                        <div class="form-text" th:text="#{admin.trend.form.ai_model_help}">Choose the AI model for image generation</div>
+                        <div class="form-text" th:text="#{admin.trend.form.ai_model_help}">Choose the AI model for image
+                            generation</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="status" class="form-label" th:text="|#{admin.trend.form.status}#{admin.trend.form.required_asterisk}|">Status *</label>
+                        <label for="status" class="form-label"
+                            th:text="|#{admin.trend.form.status}#{admin.trend.form.required_asterisk}|">Status *</label>
                         <select class="form-select" th:field="*{status}" id="status" required>
                             <option value="TESTING" th:text="#{admin.trend.form.status_testing}">Testing</option>
                             <option value="ACTIVE" th:text="#{admin.trend.form.status_active}">Active</option>
                             <option value="INACTIVE" th:text="#{admin.trend.form.status_inactive}">Inactive</option>
                         </select>
                         <div class="form-text">
-                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.trend.form.model_info}">Select AI model for image generation</span>
+                            <i class="bi bi-info-circle"></i> <span th:text="#{admin.trend.form.model_info}">Select AI
+                                model for image generation</span>
                         </div>
                     </div>
 
                     <div class="mb-3" th:if="!${isEdit}">
-                        <label for="exampleFiles" class="form-label" th:text="#{admin.trend.form.example_images}">Example Images</label>
-                        <input class="form-control" type="file" id="exampleFiles" name="exampleFiles" 
-                               multiple accept="image/*">
-                        <div class="form-text" th:text="#{admin.trend.form.example_images_help}">Upload example images to showcase this trend</div>
+                        <label for="exampleFiles" class="form-label"
+                            th:text="#{admin.trend.form.example_images}">Example Images</label>
+                        <input class="form-control" type="file" id="exampleFiles" name="exampleFiles" multiple
+                            accept="image/*">
+                        <div class="form-text" th:text="#{admin.trend.form.example_images_help}">Upload example images
+                            to showcase this trend</div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a th:href="@{/admin/trends}" class="btn btn-secondary" th:text="#{admin.trend.form.cancel}">Cancel</a>
+                        <a th:href="@{/admin/trends}" class="btn btn-secondary"
+                            th:text="#{admin.trend.form.cancel}">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> <span th:text="${isEdit ? updateText : createText}">Save</span>
                         </button>
@@ -132,6 +267,55 @@
             </div>
         </div>
     </div>
-</body>
-</html>
 
+    <script th:inline="javascript">
+        // Category Selection Handler
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+            const selectedDisplay = document.getElementById('selectedCategoriesDisplay');
+            const badgesContainer = document.getElementById('selectedCategoriesBadges');
+
+            // Category data from Thymeleaf
+            const categories = /*[[${categories}]]*/[];
+            const categoryMap = new Map();
+            categories.forEach(cat => {
+                categoryMap.set(cat.id, cat);
+            });
+
+            function updateSelectedDisplay() {
+                const selectedCategories = [];
+                categoryCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const catId = parseInt(checkbox.value);
+                        const cat = categoryMap.get(catId);
+                        if (cat) {
+                            selectedCategories.push(cat);
+                        }
+                    }
+                });
+
+                if (selectedCategories.length > 0) {
+                    selectedDisplay.style.display = 'block';
+                    badgesContainer.innerHTML = selectedCategories.map(cat =>
+                        `<span class="selected-category-badge">
+                            <span class="badge-icon">${cat.icon}</span>
+                            <span>${cat.displayName}</span>
+                        </span>`
+                    ).join('');
+                } else {
+                    selectedDisplay.style.display = 'none';
+                }
+            }
+
+            // Add event listeners
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedDisplay);
+            });
+
+            // Initial update
+            updateSelectedDisplay();
+        });
+    </script>
+</body>
+
+</html>

@@ -34,6 +34,10 @@ public interface TrendRepository extends JpaRepository<Trend, Long> {
     // Tìm trend theo id và chưa bị xóa
     Optional<Trend> findByIdAndDeletedAtIsNull(Long id);
     
+    // Tìm trend theo id với categories (eager fetch để tránh LazyInitializationException)
+    @Query("SELECT t FROM Trend t LEFT JOIN FETCH t.categories WHERE t.id = :id AND t.deletedAt IS NULL")
+    Optional<Trend> findByIdWithCategories(@Param("id") Long id);
+    
     // Top trends phổ biến nhất (với Pageable, loại trừ AI Image Editing)
     @Query("SELECT t FROM Trend t WHERE t.status = :status AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing' ORDER BY t.usageCount DESC")
     List<Trend> findTopTrendsByUsage(@Param("status") TrendStatus status, Pageable pageable);
@@ -68,5 +72,27 @@ public interface TrendRepository extends JpaRepository<Trend, Long> {
     @Query("SELECT t FROM Trend t WHERE t.status = :status AND t.category = :category AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing'")
     Page<Trend> findByStatusAndCategoryAndDeletedAtIsNull(
         @Param("status") TrendStatus status, @Param("category") String category, Pageable pageable);
+    
+    // New methods using many-to-many relationship
+    
+    // Find trends by category name (using new categories table)
+    @Query("SELECT DISTINCT t FROM Trend t JOIN t.categories c WHERE t.status = :status AND c.name = :categoryName AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing'")
+    List<Trend> findByStatusAndCategoryNameAndDeletedAtIsNull(
+        @Param("status") TrendStatus status, @Param("categoryName") String categoryName);
+    
+    // Find trends by category name with pagination (using new categories table)
+    @Query("SELECT DISTINCT t FROM Trend t JOIN t.categories c WHERE t.status = :status AND c.name = :categoryName AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing'")
+    Page<Trend> findByStatusAndCategoryNameAndDeletedAtIsNull(
+        @Param("status") TrendStatus status, @Param("categoryName") String categoryName, Pageable pageable);
+    
+    // Find trends by category ID
+    @Query("SELECT DISTINCT t FROM Trend t JOIN t.categories c WHERE t.status = :status AND c.id = :categoryId AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing'")
+    List<Trend> findByStatusAndCategoryIdAndDeletedAtIsNull(
+        @Param("status") TrendStatus status, @Param("categoryId") Long categoryId);
+    
+    // Find trends by category ID with pagination
+    @Query("SELECT DISTINCT t FROM Trend t JOIN t.categories c WHERE t.status = :status AND c.id = :categoryId AND t.deletedAt IS NULL AND t.trendName != 'AI Image Editing'")
+    Page<Trend> findByStatusAndCategoryIdAndDeletedAtIsNull(
+        @Param("status") TrendStatus status, @Param("categoryId") Long categoryId, Pageable pageable);
 }
 

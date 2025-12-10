@@ -22,9 +22,18 @@
     <include file="db/changelog/changes/v1.7-add-ai-model-to-trends.xml"/>
     <include file="db/changelog/changes/v1.8-create-ad-config-table.xml"/>
     <include file="db/changelog/changes/v1.9-add-image-analysis.xml"/>
+    <include file="db/changelog/changes/v2.0-create-categories-table.xml"/>
+    <include file="db/changelog/changes/v2.1-create-trend-categories-table.xml"/>
+    <include file="db/changelog/changes/v2.2-migrate-categories-data.xml"/>
+    <include file="db/changelog/changes/v3.0-create-user-profiles-table.xml"/>
+    <include file="db/changelog/changes/v3.1-create-user-achievements-table.xml"/>
     
     <!-- Initial Data -->
     <include file="db/changelog/data/v1.0-initial-data.xml"/>
+    <include file="db/changelog/data/v2.3-insert-initial-categories.xml"/>
+    <include file="db/changelog/data/v3.2-create-user-profiles-for-existing-users.xml"/>
+    <include file="db/changelog/data/v3.3-backfill-user-stats-from-existing-data.xml"/>
+    <include file="db/changelog/data/v3.4-auto-unlock-achievements-from-existing-stats.xml"/>
 
 </databaseChangeLog>
 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v3.2-create-user-profiles-for-existing-users" author="trendai">
+        <comment>Create user profiles for all existing users</comment>
+        
+        <sql>
+            INSERT INTO user_profiles (user_id, level, current_xp, total_xp, total_generations, total_likes_received, total_shares, total_favorites, current_streak, longest_streak, unique_trends_used, unique_models_used)
+            SELECT 
+                u.id,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            FROM users u
+            WHERE NOT EXISTS (
+                SELECT 1 FROM user_profiles up WHERE up.user_id = u.id
+            );
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM user_profiles WHERE total_xp = 0 AND total_generations = 0;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

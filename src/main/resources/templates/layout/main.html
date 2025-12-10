@@ -289,6 +289,18 @@
                                 <i class="bi bi-person-circle"></i> <span sec:authentication="name">User</span>
                             </a>
                             <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person-badge"></i>
+                                        <span th:text="#{nav.my_profile}">My
+                                            Profile</span></a></li>
+                                <li><a class="dropdown-item" th:href="@{/achievements}"><i
+                                            class="bi bi-trophy-fill text-warning"></i> <span
+                                            th:text="#{nav.achievements}">Achievements</span></a></li>
+                                <li><a class="dropdown-item" th:href="@{/leaderboard}"><i
+                                            class="bi bi-bar-chart-fill text-info"></i> <span
+                                            th:text="#{nav.leaderboard}">Leaderboard</span></a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li><a class="dropdown-item" th:href="@{/gallery}"><i class="bi bi-images"></i> <span
                                             th:text="#{nav.gallery}">My Gallery</span></a></li>
                                 <li><a class="dropdown-item" th:href="@{/favorites}"><i

@@ -121,3 +121,9 @@ management:
     defaults:
       enabled: true
 
+# Security Configuration
+security:
+  remember-me:
+    key: ${REMEMBER_ME_KEY:changeMeInProductionToAVerySecureRandomStringKey123456}
+    token-validity-seconds: 1209600  # 14 days
+

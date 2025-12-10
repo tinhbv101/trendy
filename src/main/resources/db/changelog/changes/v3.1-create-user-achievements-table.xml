@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v3.1-create-user-achievements-table" author="trendai">
+        <comment>Create user_achievements table for achievements/badges system</comment>
+        
+        <createTable tableName="user_achievements">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="achievement_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="progress" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed_at" type="TIMESTAMP"/>
+            <column name="notified" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+            tableName="user_achievements"
+            columnNames="user_id, achievement_type"
+            constraintName="uk_user_achievement"/>
+
+        <addForeignKeyConstraint
+            constraintName="fk_user_achievements_user"
+            baseTableName="user_achievements"
+            baseColumnNames="user_id"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_user_achievements_user_id" tableName="user_achievements">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_user_achievements_completed" tableName="user_achievements">
+            <column name="completed"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_user_achievements_type" tableName="user_achievements">
+            <column name="achievement_type"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="user_achievements"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

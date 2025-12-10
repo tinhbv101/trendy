@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v2.1-create-trend-categories-table" author="trendai">
+        <comment>Create trend_categories join table for many-to-many relationship</comment>
+        
+        <createTable tableName="trend_categories">
+            <column name="trend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey 
+            tableName="trend_categories" 
+            columnNames="trend_id, category_id" 
+            constraintName="pk_trend_categories"/>
+
+        <addForeignKeyConstraint
+            constraintName="fk_trend_categories_trend"
+            baseTableName="trend_categories"
+            baseColumnNames="trend_id"
+            referencedTableName="trends"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+            constraintName="fk_trend_categories_category"
+            baseTableName="trend_categories"
+            baseColumnNames="category_id"
+            referencedTableName="categories"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_trend_categories_trend" tableName="trend_categories">
+            <column name="trend_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_trend_categories_category" tableName="trend_categories">
+            <column name="category_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="trend_categories"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

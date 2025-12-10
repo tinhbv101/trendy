@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:text="#{leaderboard.title}">Leaderboard</title>
+    <style>
+        .leaderboard-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .leaderboard-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .rank-cell {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+            color: white;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            color: white;
+        }
+
+        .user-row {
+            transition: all 0.3s ease;
+        }
+
+        .user-row:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.02);
+        }
+
+        .user-row.current-user {
+            background-color: #e7f3ff;
+            border-left: 5px solid #667eea;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .xp-badge {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .trophy-icon {
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .stats-mini {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .pagination-custom {
+            margin-top: 2rem;
+        }
+
+        .pagination-custom .page-link {
+            border-radius: 10px;
+            margin: 0 3px;
+            border: none;
+            background: #f8f9fa;
+        }
+
+        .pagination-custom .page-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .leaderboard-header {
+                padding: 2rem 1rem;
+            }
+
+            .leaderboard-header .display-4 {
+                font-size: 2.5rem;
+            }
+
+            .rank-cell {
+                width: 60px;
+                font-size: 1.2rem;
+            }
+
+            .trophy-icon {
+                font-size: 1.8rem;
+            }
+
+            .stats-mini {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-header {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .leaderboard-header .display-4 {
+                font-size: 2rem;
+            }
+
+            .leaderboard-header h5 {
+                font-size: 1rem;
+            }
+
+            .trophy-icon {
+                font-size: 1.5rem;
+            }
+
+            .rank-cell {
+                width: 50px;
+                font-size: 1rem;
+                padding: 0.5rem 0.3rem;
+            }
+
+            .level-badge,
+            .xp-badge {
+                padding: 0.2rem 0.6rem;
+                font-size: 0.85rem;
+                min-width: 50px;
+            }
+
+            .stats-mini {
+                font-size: 0.75rem;
+                display: block;
+                margin-top: 0.25rem;
+            }
+
+            /* Make table scrollable on mobile */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .leaderboard-table table {
+                min-width: 600px;
+            }
+
+            .user-row {
+                font-size: 0.9rem;
+            }
+
+            .user-row td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .user-row th {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .leaderboard-header {
+                padding: 1rem 0.5rem;
+            }
+
+            .leaderboard-header .display-4 {
+                font-size: 1.5rem;
+            }
+
+            .leaderboard-header h5 {
+                font-size: 0.9rem;
+            }
+
+            .trophy-icon {
+                font-size: 1.3rem;
+            }
+
+            .rank-cell {
+                width: 40px;
+                font-size: 0.9rem;
+            }
+
+            .level-badge,
+            .xp-badge {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.8rem;
+                min-width: 45px;
+            }
+
+            .user-row {
+                font-size: 0.85rem;
+            }
+
+            .user-row td,
+            .user-row th {
+                padding: 0.5rem 0.3rem;
+            }
+
+            /* Hide less important columns on very small screens */
+            .hide-on-mobile {
+                display: none;
+            }
+
+            .pagination-custom .page-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <!-- Header -->
+            <div class="leaderboard-header">
+                <div class="trophy-icon">🏆</div>
+                <h1 class="display-4 mb-2" th:text="#{leaderboard.title}">Leaderboard</h1>
+                <p class="lead" th:text="#{leaderboard.top_creators}">Top creators ranked by total XP</p>
+            </div>
+
+            <!-- Leaderboard Table -->
+            <div class="leaderboard-table">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="rank-cell" th:text="#{leaderboard.rank}">Rank</th>
+                            <th th:text="#{leaderboard.user}">User</th>
+                            <th class="text-center" th:text="#{leaderboard.level}">Level</th>
+                            <th class="text-center" th:text="#{leaderboard.total_xp}">Total XP</th>
+                            <th class="text-center hide-on-mobile" th:text="#{leaderboard.generations}">Generations</th>
+                            <th class="text-center hide-on-mobile" th:text="#{leaderboard.achievements}">Achievements</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr id="loadingRow">
+                            <td colspan="6" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2" th:text="#{leaderboard.loading}">Loading leaderboard...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav class="pagination-custom">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Will be populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <script layout:fragment="extra-scripts" th:inline="javascript">
+        let currentPage = 0;
+        let totalPages = 0;
+        const currentUsername = /*[[${#authentication.name}]]*/ 'guest';
+        
+        // i18n messages
+        const i18n = {
+            failedToLoad: /*[[#{leaderboard.failed_to_load}]]*/ 'Failed to load leaderboard',
+            retry: /*[[#{leaderboard.retry}]]*/ 'Retry',
+            noUsersFound: /*[[#{leaderboard.no_users_found}]]*/ 'No users found',
+            beFirst: /*[[#{leaderboard.be_first}]]*/ 'Be the first to generate images and earn XP!'
+        };
+
+        function loadLeaderboard(page = 0) {
+            console.log('Loading leaderboard page:', page);
+            fetch(`/api/profile/leaderboard?page=${page}&size=50`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Leaderboard data:', data);
+                    currentPage = data.number;
+                    totalPages = data.totalPages;
+                    renderLeaderboard(data.content);
+                    renderPagination();
+                })
+                .catch(error => {
+                    console.error('Error loading leaderboard:', error);
+                    const tbody = document.getElementById('leaderboardBody');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                                <p class="mt-2">${i18n.failedToLoad}</p>
+                                <p class="text-muted">${error.message}</p>
+                                <button class="btn btn-primary" onclick="loadLeaderboard()">${i18n.retry}</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function renderLeaderboard(users) {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-people" style="font-size: 3rem; color: #ccc;"></i>
+                            <p class="mt-2">${i18n.noUsersFound}</p>
+                            <p class="text-muted">${i18n.beFirst}</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            users.forEach((user, index) => {
+                const rank = currentPage * 50 + index + 1;
+                const tr = document.createElement('tr');
+                tr.className = 'user-row';
+
+                if (user.username === currentUsername) {
+                    tr.classList.add('current-user');
+                }
+
+                // Rank cell
+                const rankCell = document.createElement('td');
+                rankCell.className = 'rank-cell';
+                if (rank === 1) {
+                    rankCell.classList.add('rank-1');
+                    rankCell.innerHTML = '🥇';
+                } else if (rank === 2) {
+                    rankCell.classList.add('rank-2');
+                    rankCell.innerHTML = '🥈';
+                } else if (rank === 3) {
+                    rankCell.classList.add('rank-3');
+                    rankCell.innerHTML = '🥉';
+                } else {
+                    rankCell.textContent = rank;
+                }
+                tr.appendChild(rankCell);
+
+                // User cell
+                const userCell = document.createElement('td');
+                const userName = document.createElement('div');
+                userName.style.fontWeight = 'bold';
+                userName.textContent = user.username;
+                userCell.appendChild(userName);
+
+                if (user.title) {
+                    const title = document.createElement('small');
+                    title.className = 'text-muted';
+                    title.textContent = user.title;
+                    userCell.appendChild(title);
+                }
+                tr.appendChild(userCell);
+
+                // Level cell
+                const levelCell = document.createElement('td');
+                levelCell.className = 'text-center';
+                const levelBadge = document.createElement('span');
+                levelBadge.className = 'level-badge';
+                levelBadge.textContent = 'Lv ' + user.level;
+                levelCell.appendChild(levelBadge);
+                tr.appendChild(levelCell);
+
+                // XP cell
+                const xpCell = document.createElement('td');
+                xpCell.className = 'text-center';
+                const xpBadge = document.createElement('span');
+                xpBadge.className = 'xp-badge';
+                xpBadge.textContent = user.totalXp.toLocaleString() + ' XP';
+                xpCell.appendChild(xpBadge);
+                tr.appendChild(xpCell);
+
+                // Generations cell
+                const genCell = document.createElement('td');
+                genCell.className = 'text-center hide-on-mobile';
+                genCell.innerHTML = `<strong>${user.totalGenerations.toLocaleString()}</strong>`;
+                tr.appendChild(genCell);
+
+                // Achievements cell
+                const achCell = document.createElement('td');
+                achCell.className = 'text-center hide-on-mobile';
+                achCell.innerHTML = `<strong>${user.completedAchievements}</strong> / ${user.totalAchievements}`;
+                tr.appendChild(achCell);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = 'page-item' + (currentPage === 0 ? ' disabled' : '');
+            const prevLink = document.createElement('a');
+            prevLink.className = 'page-link';
+            prevLink.href = '#';
+            prevLink.textContent = '«';
+            prevLink.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage > 0) loadLeaderboard(currentPage - 1);
+            };
+            prevLi.appendChild(prevLink);
+            pagination.appendChild(prevLi);
+
+            // Page numbers
+            const startPage = Math.max(0, currentPage - 2);
+            const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                const link = document.createElement('a');
+                link.className = 'page-link' + (i === currentPage ? ' active' : '');
+                link.href = '#';
+                link.textContent = i + 1;
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    loadLeaderboard(i);
+                };
+                li.appendChild(link);
+                pagination.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = 'page-item' + (currentPage === totalPages - 1 ? ' disabled' : '');
+            const nextLink = document.createElement('a');
+            nextLink.className = 'page-link';
+            nextLink.href = '#';
+            nextLink.textContent = '»';
+            nextLink.onclick = (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages - 1) loadLeaderboard(currentPage + 1);
+            };
+            nextLi.appendChild(nextLink);
+            pagination.appendChild(nextLi);
+        }
+
+        // Initial load
+        loadLeaderboard();
+    </script>
+</body>
+
+</html>

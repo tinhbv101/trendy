@@ -1,7 +1,9 @@
 package net.devlord.trendy.controller.admin;
 
 import net.devlord.trendy.model.dto.TrendDTO;
+import net.devlord.trendy.model.entity.Category;
 import net.devlord.trendy.model.entity.Trend;
+import net.devlord.trendy.service.CategoryService;
 import net.devlord.trendy.service.FileStorageService;
 import net.devlord.trendy.service.TrendService;
 import jakarta.validation.Valid;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/admin/trends")
 @PreAuthorize("hasRole('ADMIN')")
@@ -25,6 +30,7 @@ public class AdminTrendController {
     
     private final TrendService trendService;
     private final FileStorageService fileStorageService;
+    private final CategoryService categoryService;
     
     @GetMapping
     public String listTrends(
@@ -39,7 +45,9 @@ public class AdminTrendController {
     
     @GetMapping("/new")
     public String newTrendForm(Model model) {
+        List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("trend", new TrendDTO());
+        model.addAttribute("categories", categories);
         model.addAttribute("pageTitle", "Create New Trend");
         model.addAttribute("isEdit", false);
         return "admin/trend-form";
@@ -82,7 +90,9 @@ public class AdminTrendController {
     
     @GetMapping("/{id}/edit")
     public String editTrendForm(@PathVariable Long id, Model model) {
-        Trend trend = trendService.getTrendById(id);
+        // Use method that eagerly fetches categories to avoid LazyInitializationException
+        Trend trend = trendService.getTrendByIdWithCategories(id);
+        List<Category> categories = categoryService.getAllCategories();
         
         TrendDTO trendDTO = new TrendDTO();
         trendDTO.setId(trend.getId());
@@ -90,6 +100,15 @@ public class AdminTrendController {
         trendDTO.setDescription(trend.getDescription());
         trendDTO.setPromptTemplate(trend.getPromptTemplate());
         trendDTO.setCategory(trend.getCategory());
+        
+        // Populate category IDs for multi-select
+        if (trend.getCategories() != null && !trend.getCategories().isEmpty()) {
+            List<Long> categoryIds = trend.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toList());
+            trendDTO.setCategoryIds(categoryIds);
+        }
+        
         trendDTO.setMaxInputImages(trend.getMaxInputImages());
         trendDTO.setAspectRatio(trend.getAspectRatio());
         trendDTO.setAiModel(trend.getAiModel());
@@ -97,6 +116,7 @@ public class AdminTrendController {
         trendDTO.setStatus(trend.getStatus());
         
         model.addAttribute("trend", trendDTO);
+        model.addAttribute("categories", categories);
         model.addAttribute("pageTitle", "Edit Trend");
         model.addAttribute("isEdit", true);
         return "admin/trend-form";

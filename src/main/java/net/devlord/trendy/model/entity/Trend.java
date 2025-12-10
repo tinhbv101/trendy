@@ -37,7 +37,16 @@ public class Trend {
     private String promptTemplate;
     
     @Column(length = 50)
+    @Deprecated // Will be removed after migration to categories table
     private String category;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "trend_categories",
+        joinColumns = @JoinColumn(name = "trend_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categories = new ArrayList<>();
     
     @Column(name = "max_input_images")
     private Integer maxInputImages = 1;

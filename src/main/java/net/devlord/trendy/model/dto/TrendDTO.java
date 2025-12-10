@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -30,7 +32,12 @@ public class TrendDTO {
     private String promptTemplate;
     
     @Size(max = 50, message = "Category must not exceed 50 characters")
+    @Deprecated // For backward compatibility, will be removed
     private String category;
+    
+    private List<Long> categoryIds = new ArrayList<>();
+    
+    private List<String> categoryNames = new ArrayList<>();
     
     @NotNull(message = "Max input images is required")
     private Integer maxInputImages = 1;

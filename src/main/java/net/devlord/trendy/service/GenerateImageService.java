@@ -33,6 +33,7 @@ public class GenerateImageService {
     private final FileStorageService fileStorageService;
     private final AIService aiService;
     private final ObjectMapper objectMapper;
+    private final UserProfileService userProfileService;
     
     @Transactional
     public GeneratedImage generateImage(Long trendId, MultipartFile[] files, String username, 
@@ -108,6 +109,14 @@ public class GenerateImageService {
             generatedImage.setGenerationTimeSeconds(generationTime);
             generatedImage.setStatus(GenerationStatus.COMPLETED);
             generatedImageRepository.save(generatedImage);
+            
+            // Award XP and update profile statistics
+            try {
+                userProfileService.addXp(generatedImage.getUser().getId(), 10, "Image generation");
+                userProfileService.incrementGenerations(generatedImage.getUser().getId());
+            } catch (Exception e) {
+                log.warn("Failed to update user profile for generation: {}", generatedImage.getId(), e);
+            }
             
             log.info("Image generation completed: {}", generatedImage.getId());
             

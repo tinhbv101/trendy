@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v3.3-backfill-user-stats-from-existing-data" author="trendai">
+        <comment>Backfill user profiles with statistics from existing generated images</comment>
+        
+        <sql>
+            -- Update total_generations and calculate XP from existing generated_images
+            UPDATE user_profiles up
+            INNER JOIN (
+                SELECT 
+                    user_id,
+                    COUNT(*) as total_gens
+                FROM generated_images
+                WHERE status = 'COMPLETED'
+                GROUP BY user_id
+            ) gi ON up.user_id = gi.user_id
+            SET 
+                up.total_generations = gi.total_gens,
+                up.total_xp = gi.total_gens * 10,
+                up.current_xp = (gi.total_gens * 10) % GREATEST(1, up.level * up.level * 100),
+                up.level = LEAST(100, GREATEST(1, FLOOR(SQRT(gi.total_gens * 10 / 100)) + 1));
+        </sql>
+        
+        <sql>
+            -- Update total_favorites from favorite_images
+            UPDATE user_profiles up
+            INNER JOIN (
+                SELECT 
+                    user_id,
+                    COUNT(*) as total_favs
+                FROM favorite_images
+                GROUP BY user_id
+            ) fi ON up.user_id = fi.user_id
+            SET up.total_favorites = fi.total_favs;
+        </sql>
+        
+        <sql>
+            -- Update unique_trends_used
+            UPDATE user_profiles up
+            INNER JOIN (
+                SELECT 
+                    user_id,
+                    COUNT(DISTINCT trend_id) as unique_trends
+                FROM generated_images
+                WHERE status = 'COMPLETED'
+                GROUP BY user_id
+            ) trends ON up.user_id = trends.user_id
+            SET up.unique_trends_used = trends.unique_trends;
+        </sql>
+
+        <rollback>
+            <sql>
+                UPDATE user_profiles 
+                SET total_generations = 0, 
+                    total_xp = 0, 
+                    current_xp = 0, 
+                    level = 1,
+                    total_favorites = 0,
+                    unique_trends_used = 0;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

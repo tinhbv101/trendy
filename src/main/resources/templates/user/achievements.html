@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<head>
+    <title th:text="#{achievements.title}">Achievements</title>
+    <style>
+        .achievement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card.completed {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.6;
+            filter: grayscale(50%);
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .achievement-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .achievement-icon.locked {
+            filter: grayscale(100%);
+        }
+
+        .achievement-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .achievement-xp {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .achievement-progress {
+            margin-top: 1rem;
+        }
+
+        .completed-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .filter-tabs {
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 25px;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .stats-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .category-section {
+            margin-bottom: 3rem;
+        }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stats-header {
+                padding: 1.5rem;
+            }
+
+            .stats-header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-header .display-4 {
+                font-size: 2.5rem;
+            }
+
+            .achievement-card {
+                padding: 1rem;
+            }
+
+            .achievement-icon {
+                font-size: 3rem;
+            }
+
+            .achievement-name {
+                font-size: 1rem;
+            }
+
+            .achievement-description {
+                font-size: 0.85rem;
+            }
+
+            .filter-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .category-title {
+                font-size: 1.3rem;
+            }
+
+            .completed-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-header {
+                padding: 1rem;
+            }
+
+            .stats-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats-header .display-4 {
+                font-size: 2rem;
+            }
+
+            .stats-header p {
+                font-size: 0.9rem;
+            }
+
+            .achievement-icon {
+                font-size: 2.5rem;
+            }
+
+            .achievement-name {
+                font-size: 0.95rem;
+            }
+
+            .achievement-xp {
+                font-size: 0.8rem;
+                padding: 0.25rem 0.6rem;
+            }
+
+            .filter-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                margin-right: 0.3rem;
+            }
+
+            .category-title {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <!-- Stats Header -->
+            <div class="stats-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-2">🏆 <span th:text="#{achievements.title}">Achievements</span></h1>
+                        <p class="mb-0" th:text="#{achievements.unlock_badges}">Unlock badges by completing challenges and milestones!</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="display-4" id="completedCount">0</div>
+                        <div th:text="#{achievements.completed}">Completed</div>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 25px;">
+                    <div class="progress-bar bg-warning" id="progressBar" role="progressbar" style="width: 0%">
+                        <span id="progressText">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs text-center">
+                <button class="filter-btn active" data-filter="all" th:text="#{achievements.all}">All</button>
+                <button class="filter-btn" data-filter="completed" th:text="#{achievements.completed}">Completed</button>
+                <button class="filter-btn" data-filter="locked" th:text="#{achievements.locked}">Locked</button>
+            </div>
+
+            <!-- Achievements by Category -->
+            <div id="achievementsContainer">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="extra-scripts" th:inline="javascript">
+        let allAchievements = [];
+        let currentFilter = 'all';
+        
+        // i18n messages
+        const i18n = {
+            unlocked: /*[[#{achievements.unlocked}]]*/ '✓ Unlocked',
+            unlockedDate: /*[[#{achievements.unlocked_date}]]*/ 'Unlocked',
+            xpReward: /*[[#{achievements.xp_reward}]]*/ 'XP',
+            noAchievementsFound: /*[[#{achievements.no_achievements_found}]]*/ 'No achievements found',
+            failedToLoad: /*[[#{achievements.failed_to_load}]]*/ 'Failed to load achievements. Please refresh the page.'
+        };
+
+        // Load achievements
+        fetch('/api/achievements', {
+            credentials: 'include' // Important: include cookies for authentication
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load achievements: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(achievements => {
+                console.log('Loaded achievements:', achievements);
+                allAchievements = achievements;
+                updateStats();
+                renderAchievements();
+            })
+            .catch(error => {
+                console.error('Error loading achievements:', error);
+                // Show error to user
+                document.getElementById('achievementsContainer').innerHTML = 
+                    '<div class="alert alert-danger">' + i18n.failedToLoad + '</div>';
+            });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderAchievements();
+            });
+        });
+
+        function updateStats() {
+            const completed = allAchievements.filter(a => a.completed).length;
+            const total = allAchievements.length;
+            const percentage = (completed / total * 100).toFixed(1);
+
+            document.getElementById('completedCount').textContent = completed + ' / ' + total;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '%';
+        }
+
+        function renderAchievements() {
+            const container = document.getElementById('achievementsContainer');
+            container.innerHTML = '';
+
+            console.log('Rendering achievements, total:', allAchievements.length);
+            console.log('First achievement sample:', allAchievements[0]);
+            
+            // Show all achievements if we have any
+            if (allAchievements.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">' + i18n.noAchievementsFound + '</div>';
+                return;
+            }
+
+            // Apply global filter first
+            let filteredAchievements = allAchievements;
+            if (currentFilter === 'completed') {
+                filteredAchievements = allAchievements.filter(a => a.completed);
+            } else if (currentFilter === 'locked') {
+                filteredAchievements = allAchievements.filter(a => !a.completed);
+            }
+            
+            console.log('Filtered achievements:', filteredAchievements.length);
+
+            if (filteredAchievements.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">' + i18n.noAchievementsFound + '</div>';
+                return;
+            }
+
+            // Create a simple grid without categorization for now
+            const grid = document.createElement('div');
+            grid.className = 'row g-4';
+
+            filteredAchievements.forEach(achievement => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 col-sm-6';
+
+                const card = document.createElement('div');
+                card.className = 'achievement-card ' + (achievement.completed ? 'completed' : 'locked');
+
+                if (achievement.completed) {
+                    const badge = document.createElement('div');
+                    badge.className = 'completed-badge';
+                    badge.innerHTML = i18n.unlocked;
+                    card.appendChild(badge);
+                }
+
+                const icon = document.createElement('div');
+                icon.className = 'achievement-icon ' + (achievement.completed ? '' : 'locked');
+                icon.textContent = achievement.icon || '🏆';
+                card.appendChild(icon);
+
+                const name = document.createElement('div');
+                name.className = 'achievement-name';
+                name.textContent = achievement.name || 'Unknown';
+                card.appendChild(name);
+
+                const description = document.createElement('div');
+                description.className = 'achievement-description';
+                description.textContent = achievement.description || 'No description';
+                card.appendChild(description);
+
+                const xp = document.createElement('div');
+                xp.className = 'achievement-xp';
+                xp.innerHTML = '⭐ ' + (achievement.xpReward || 0) + ' ' + i18n.xpReward;
+                card.appendChild(xp);
+
+                if (achievement.completed && achievement.completedAt) {
+                    const date = document.createElement('small');
+                    date.className = 'text-muted d-block mt-2';
+                    date.textContent = i18n.unlockedDate + ': ' + new Date(achievement.completedAt).toLocaleDateString();
+                    card.appendChild(date);
+                }
+
+                col.appendChild(card);
+                grid.appendChild(col);
+            });
+
+            container.appendChild(grid);
+            console.log('Rendered', filteredAchievements.length, 'achievement cards');
+        }
+    </script>
+</body>
+
+</html>

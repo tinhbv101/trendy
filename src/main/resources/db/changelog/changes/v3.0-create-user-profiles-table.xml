@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v3.0-create-user-profiles-table" author="trendai">
+        <comment>Create user_profiles table for XP and levels system</comment>
+        
+        <createTable tableName="user_profiles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="level" type="INT" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_xp" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_xp" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_generations" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_likes_received" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_shares" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_favorites" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_streak" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="longest_streak" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_activity_date" type="TIMESTAMP"/>
+            <column name="unique_trends_used" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unique_models_used" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="profile_picture" type="VARCHAR(255)"/>
+            <column name="bio" type="VARCHAR(500)"/>
+            <column name="title" type="VARCHAR(100)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="fk_user_profiles_user"
+            baseTableName="user_profiles"
+            baseColumnNames="user_id"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_user_profiles_user_id" tableName="user_profiles">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_user_profiles_level" tableName="user_profiles">
+            <column name="level"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_user_profiles_total_xp" tableName="user_profiles">
+            <column name="total_xp"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="user_profiles"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

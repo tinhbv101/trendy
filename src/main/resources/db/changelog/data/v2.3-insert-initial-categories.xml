@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v2.3-insert-initial-categories" author="trendai">
+        <comment>Insert initial categories</comment>
+        
+        <insert tableName="categories">
+            <column name="name" value="art-design"/>
+            <column name="display_name" value="Art &amp; Design"/>
+            <column name="description" value="Artistic and design-focused trends"/>
+            <column name="icon" value="🎨"/>
+            <column name="sort_order" valueNumeric="1"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="photography"/>
+            <column name="display_name" value="Photography"/>
+            <column name="description" value="Photography and photo editing trends"/>
+            <column name="icon" value="📷"/>
+            <column name="sort_order" valueNumeric="2"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="fashion"/>
+            <column name="display_name" value="Fashion"/>
+            <column name="description" value="Fashion and style trends"/>
+            <column name="icon" value="👗"/>
+            <column name="sort_order" valueNumeric="3"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="nature"/>
+            <column name="display_name" value="Nature"/>
+            <column name="description" value="Nature and landscape trends"/>
+            <column name="icon" value="🌿"/>
+            <column name="sort_order" valueNumeric="4"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="portrait"/>
+            <column name="display_name" value="Portrait"/>
+            <column name="description" value="Portrait and people photography"/>
+            <column name="icon" value="👤"/>
+            <column name="sort_order" valueNumeric="5"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="abstract"/>
+            <column name="display_name" value="Abstract"/>
+            <column name="description" value="Abstract and artistic expressions"/>
+            <column name="icon" value="🎭"/>
+            <column name="sort_order" valueNumeric="6"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="ai-tools"/>
+            <column name="display_name" value="AI Tools"/>
+            <column name="description" value="AI-powered editing and generation tools"/>
+            <column name="icon" value="🤖"/>
+            <column name="sort_order" valueNumeric="7"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="effects"/>
+            <column name="display_name" value="Effects"/>
+            <column name="description" value="Special effects and filters"/>
+            <column name="icon" value="✨"/>
+            <column name="sort_order" valueNumeric="8"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="vintage"/>
+            <column name="display_name" value="Vintage"/>
+            <column name="description" value="Retro and vintage styles"/>
+            <column name="icon" value="📻"/>
+            <column name="sort_order" valueNumeric="9"/>
+        </insert>
+        
+        <insert tableName="categories">
+            <column name="name" value="modern"/>
+            <column name="display_name" value="Modern"/>
+            <column name="description" value="Modern and contemporary styles"/>
+            <column name="icon" value="🔮"/>
+            <column name="sort_order" valueNumeric="10"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="categories">
+                <where>name IN ('art-design', 'photography', 'fashion', 'nature', 'portrait', 'abstract', 'ai-tools', 'effects', 'vintage', 'modern')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
